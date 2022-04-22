@@ -84,6 +84,18 @@ class Puzzle {
         this.blank_row++;
     }
 
+    isInGoalState(goal_matrix) {
+        for (let row = 0; row < goal_matrix.length; row++) {
+            for (let col = 0; col < goal_matrix[row].length; col++) {
+                if (goal_matrix[row][col] != this.matrix[row][col].value) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     // TODO: Add unit tests!  Does this work for an odd N?  Does this work for NxM?
     /**
      * Takes a 1D array and counts the inversions, returns false if inversions is odd and true if even.
