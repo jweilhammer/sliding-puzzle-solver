@@ -25,9 +25,10 @@ class Puzzle {
 
         // Turn 1D array into our Puzzle Matrix from last to first to use arr.pop()
         let puzzle_matrix = [[,,,], [,,,], [,,,]];
-        for (let row = puzzle_matrix.length - 1; row >= 0; row--) {
-            for (let col = puzzle_matrix[0].length - 1; col >= 0; col--) {
-                const value = puzzle_arr.pop();
+        for (let row = 0; row < puzzle_matrix.length; row++) {
+            console.log(puzzle_matrix[row].length)
+            for (let col = 0; col < puzzle_matrix[row].length; col++) {
+                const value = puzzle_arr.shift();
                 if (!value) {
                     this.blank_row = row;
                     this.blank_col = col;
