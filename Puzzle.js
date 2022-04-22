@@ -9,9 +9,10 @@ class Tile {
 class Puzzle {
     constructor(size) {
         this.size = size;
-        this.puzzle = this.generateRandomPuzzle();
+        this.matrix = this.generateRandomPuzzle();
+        this.blank_row;
+        this.blank_col;
     }
-
 
     // Gives me a random, solveable puzzle
     generateRandomPuzzle() {
@@ -24,12 +25,63 @@ class Puzzle {
 
         // Turn 1D array into our Puzzle Matrix from last to first to use arr.pop()
         let puzzle_matrix = [[,,,], [,,,], [,,,]];
-        for (let i = puzzle_matrix.length - 1; i >= 0; i--) {
-            for (let j = puzzle_matrix[0].length - 1; j >= 0; j--) {
-                puzzle_matrix[i][j] = new Tile(puzzle_arr.pop(), i, j);
+        for (let row = puzzle_matrix.length - 1; row >= 0; row--) {
+            for (let col = puzzle_matrix[0].length - 1; col >= 0; col--) {
+                const value = puzzle_arr.pop();
+                if (!value) {
+                    this.blank_row = row;
+                    this.blank_col = col;
+                }
+                puzzle_matrix[row][col] = new Tile(value, row, col);
             }
         }
         return puzzle_matrix;
+    }
+
+
+    slideLeft() {
+        // Edge guarding on left side
+        if (this.blank_col <= 0) {
+            return false;
+        }
+
+        this.matrix[this.blank_row][this.blank_col].value = this.matrix[this.blank_row][this.blank_col - 1].value;
+        this.matrix[this.blank_row][this.blank_col - 1].value = 0;
+    }
+
+
+    slideRight() {
+        // Edge guarding on current row
+        if (this.blank_col >= this.matrix[this.blank_row].length - 1) {
+            return false;
+        }
+
+        this.matrix[this.blank_row][this.blank_col].value = this.matrix[this.blank_row][this.blank_col + 1].value;
+        this.matrix[this.blank_row][this.blank_col + 1].value = 0;
+        this.blank_col++;
+    }
+
+
+    slideUp() {
+        // Edge guarding on left side
+        if (this.blank_row <= 0) {
+            return false;
+        }
+
+        this.matrix[this.blank_row][this.blank_col].value = this.matrix[this.blank_row - 1][this.blank_col].value;
+        this.matrix[this.blank_row - 1][this.blank_col].value = 0;
+        this.blank_row--;
+    }
+
+    slideDown() {
+        // Edge guarding on left side
+        if (this.blank_row >= this.matrix.length + 1) {
+            return false;
+        }
+
+        this.matrix[this.blank_row][this.blank_col].value = this.matrix[this.blank_row + 1][this.blank_col].value;
+        this.matrix[this.blank_row + 1][this.blank_col].value = 0;
+        this.blank_row++;
     }
 
     // TODO: Add unit tests!  Does this work for an odd N?  Does this work for NxM?
@@ -69,14 +121,14 @@ class Puzzle {
     }
 
     printPuzzle() {
-        for (const row of this.puzzle) {
+        for (const row of this.matrix) {
             for (const tile of row) {
                 process.stdout.write(tile.value + " ");
             }
             process.stdout.write("\n");
         }
+        process.stdout.write("\n");
     }
 }
 
-puzzle = new Puzzle(3);
-puzzle.printPuzzle();
+module.exports = Puzzle;
