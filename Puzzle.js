@@ -6,6 +6,15 @@ class Tile {
     }
 }
 
+// TODO: Static variable somehow
+const slideDirections = {
+    "INITIAL": 0,
+    "UP": 1,
+    "DOWN": 2,
+    "LEFT": 3,
+    "RIGHT": 4,
+}
+
 class Puzzle {
     constructor(genRandomPuzzle=true) {
         if (genRandomPuzzle) this.matrix = this.generateRandomPuzzle();
@@ -146,11 +155,45 @@ class Puzzle {
         this.blank_row++;
     }
 
+    generateNeighbors() {
+        const neighboringPuzzleStates = [];
+        if (this.canSlideUp() && this.lastSlideDirection != slideDirections["UP"]) {
+            let newPuzzle = Puzzle.fromPuzzle(this);
+            newPuzzle.slideUp();
+            newPuzzle.lastSlideDirection = slideDirections["UP"];
+            neighboringPuzzleStates.push(newPuzzle);
+        }
+
+        if (this.canSlideDown() && this.lastSlideDirection != slideDirections["DOWN"]) {
+            let newPuzzle = Puzzle.fromPuzzle(this);
+            newPuzzle.slideDown();
+            newPuzzle.lastSlideDirection = slideDirections["DOWN"];
+            neighboringPuzzleStates.push(newPuzzle);
+    
+        }
+
+        if (this.canSlideLeft() && this.lastSlideDirection != slideDirections["LEFT"]) {
+            let newPuzzle = Puzzle.fromPuzzle(this);
+            newPuzzle.slideLeft();
+            newPuzzle.lastSlideDirection = slideDirections["LEFT"];
+            neighboringPuzzleStates.push(newPuzzle);
+   
+        }
+
+        if (this.canSlideRight() && this.lastSlideDirection != slideDirections["RIGHT"]) {
+            let newPuzzle = Puzzle.fromPuzzle(this);
+            newPuzzle.slideRight();
+            newPuzzle.lastSlideDirection = slideDirections["RIGHT"];
+            neighboringPuzzleStates.push(newPuzzle);
+        }
+
+        return neighboringPuzzleStates;
+    }
+
     isInGoalState(goal_matrix) {
         for (let row = 0; row < goal_matrix.length; row++) {
             for (let col = 0; col < goal_matrix[row].length; col++) {
                 if (goal_matrix[row][col] !== this.matrix[row][col].value) {
-                    console.log(goal_matrix[row][col], "!==", this.matrix[row][col].value);
                     return false;
                 }
             }

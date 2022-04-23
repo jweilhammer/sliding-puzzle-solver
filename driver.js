@@ -10,54 +10,21 @@ const slideDirections = {
 }
 
 const solvePuzzle = (puzzle) => {
-    const queue = [];
+    const openList = [];   // Un-explored states
     const closedList = []; // Previously visited states
     let curPuzzle = puzzle;
     while (!curPuzzle.isInGoalState(goal_state)) {
-
-        // curPuzzle.printPuzzle();
-        
-        // Gen all possible states from current puzzle state
-        if (curPuzzle.canSlideUp() && curPuzzle.lastSlideDirection != slideDirections["UP"]) {
-            let newPuzzle = Puzzle.fromPuzzle(curPuzzle);
-            newPuzzle.slideUp();
-            newPuzzle.lastSlideDirection = slideDirections["UP"];
-            if (!closedList.find(puzzle => puzzle.isEqualToPuzzle(newPuzzle))) {
-                queue.push(newPuzzle);            
+        neighboringPuzzleStates = curPuzzle.generateNeighbors();
+        for(neighbor of neighboringPuzzleStates) {
+            // Only explore new states, if we've already explored then don't add to open list
+            if (!closedList.find(puzzle => puzzle.isEqualToPuzzle(neighbor))) {
+                openList.push(neighbor);            
             }
         }
 
-        if (curPuzzle.canSlideDown() && curPuzzle.lastSlideDirection != slideDirections["DOWN"]) {
-            let newPuzzle = Puzzle.fromPuzzle(curPuzzle);
-            newPuzzle.slideDown();
-            newPuzzle.lastSlideDirection = slideDirections["DOWN"];
-            if (!closedList.find(puzzle => puzzle.isEqualToPuzzle(newPuzzle))) {
-                queue.push(newPuzzle);            
-            }          
-        }
-
-        if (curPuzzle.canSlideLeft() && curPuzzle.lastSlideDirection != slideDirections["LEFT"]) {
-            let newPuzzle = Puzzle.fromPuzzle(curPuzzle);
-            newPuzzle.slideLeft();
-            newPuzzle.lastSlideDirection = slideDirections["LEFT"];
-            if (!closedList.find(puzzle => puzzle.isEqualToPuzzle(newPuzzle))) {
-                queue.push(newPuzzle);            
-            }         
-        }
-
-        if (curPuzzle.canSlideRight() && curPuzzle.lastSlideDirection != slideDirections["RIGHT"]) {
-            let newPuzzle = Puzzle.fromPuzzle(curPuzzle);
-            newPuzzle.slideRight();
-            newPuzzle.lastSlideDirection = slideDirections["RIGHT"];
-            if (!closedList.find(puzzle => puzzle.isEqualToPuzzle(newPuzzle))) {
-                queue.push(newPuzzle);            
-            } 
-        }
-
-        
         closedList.push(curPuzzle);
-        curPuzzle = queue.shift();
-        console.log("QUEUE:", queue.length, " CLOSED_LIST:", closedList.length);
+        curPuzzle = openList.shift();
+        console.log("QUEUE:", openList.length, " CLOSED_LIST:", closedList.length);
     }
 
     curPuzzle.printPuzzle();
@@ -110,10 +77,19 @@ console.log(puzzle.isEqualToPuzzle(puzzle2))
 console.log(!closed_list.find(puzzle => puzzle.isEqualToPuzzle(puzzle2)))
 
 
+// Make a reasonably solvable puzzle
 puzzle = Puzzle.fromMatrix(goal_state);
 puzzle.slideUp();
 puzzle.slideUp();
 puzzle.slideLeft();
+puzzle.slideLeft();
+puzzle.slideDown();
+puzzle.slideRight();
+puzzle.slideDown();
+puzzle.slideLeft();
+puzzle.slideUp();
+puzzle.slideRight();
+puzzle.slideUp();
 puzzle.slideLeft();
 puzzle.slideDown();
 puzzle.printPuzzle();
