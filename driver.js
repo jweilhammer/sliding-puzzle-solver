@@ -39,7 +39,8 @@ const solvePuzzleAStar = (puzzle, goal_state) => {
     const closedList = []; // Previously visited states
     const goal_mapping = Puzzle.getGoalMapping(goal_state); // Mapping of goal tiles' (row,col) to quickly find heuristic distance
     let curPuzzle = puzzle;
-    while (!curPuzzle.isInGoalState(goal_state)) {
+    curPuzzle.updateManhattanSum(goal_mapping);
+    while (curPuzzle.manhattanSum !== 0) {
         neighboringPuzzleStates = curPuzzle.generateNeighbors(goal_mapping);
         for(neighbor of neighboringPuzzleStates) {
             // Only explore new states, if we've already explored then don't add to open list
@@ -56,6 +57,51 @@ const solvePuzzleAStar = (puzzle, goal_state) => {
     curPuzzle.printPuzzle();
 }
 
+const SOLVED = 0;
+const NOT_SOLVED = -1;
+
+// https://en.wikipedia.org/wiki/Iterative_deepening_A*#Pseudocode
+const solvePuzzleIDAStar = (puzzle, goal_state) => {
+    const goal_mapping = Puzzle.getGoalMapping(goal_state); // Mapping of goal tiles' (row,col) to quickly find heuristic distance
+    let curPuzzle = puzzle;
+    curPuzzle.updateManhattanSum(goal_mapping);
+    let threshold = curPuzzle.manhattanSum;
+    const solutionPath = [curPuzzle] // Stack of Puzzles up to our current state
+    while (curPuzzle.manhattanSum !== 0) {
+        newThreshold = iterativeDeepeningSearch(solutionPath, 0, threshold, goal_mapping);
+        threshold = newThreshold;
+        curPuzzle = solutionPath[solutionPath.length-1]; // Get top of stack
+    }
+
+    curPuzzle.printPuzzle()
+}
+
+const iterativeDeepeningSearch = (solutionPath, costToCurPuzzle, boundingThreshold, goal_mapping) => {
+    curPuzzle = solutionPath[solutionPath.length-1]; // Get top of stack
+    costToSolution = costToCurPuzzle + curPuzzle.manhattanSum
+    if (costToSolution > boundingThreshold) {
+        return costToSolution;
+    }
+
+    if (curPuzzle.manhattanSum === 0) {
+        return SOLVED;
+    }
+
+    minThreshold = Infinity;
+    for (neighbor of curPuzzle.generateNeighbors(goal_mapping)) {
+        // Only explore new states, if we've already explored then don't add to our solution path again
+        if (!solutionPath.find(puzzle => puzzle.isEqualToPuzzle(neighbor))) {
+            solutionPath.push(neighbor);
+            console.log("SOLUTION_PATH:", solutionPath.length);
+            threshold = iterativeDeepeningSearch(solutionPath, costToCurPuzzle + 1, boundingThreshold, goal_mapping);
+            if (threshold == SOLVED) return threshold;
+            if (threshold < minThreshold) minThreshold = threshold;
+            solutionPath.pop();
+        }
+    }
+
+    return minThreshold;
+}
 
 const goal_state = [ [1, 2, 3], 
                     [4, 5, 6],
@@ -124,3 +170,4 @@ console.log(puzzle.isInGoalState(goal_state))
 // puzzle = new Puzzle(); // Does not work with BFS as search space gets too large
 solvePuzzleBFS(puzzle, goal_state);
 solvePuzzleAStar(puzzle, goal_state);
+solvePuzzleIDAStar(puzzle, goal_state);
