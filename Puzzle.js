@@ -1,8 +1,8 @@
 class Tile {
-    constructor(value, row, column) {
+    constructor(value, row, col) {
       this.value = value;
       this.row = row;
-      this.column = column;
+      this.col = col;
     }
 }
 
@@ -19,6 +19,7 @@ class Puzzle {
     constructor(genRandomPuzzle=true) {
         if (genRandomPuzzle) this.matrix = this.generateRandomPuzzle();
         this.lastSlideDirection = 0;
+        this.manhattanSum = 0; // No need to calculate manhatten sum on initial puzzle state
     }
 
     // Create deep copy of another puzzle
@@ -27,6 +28,7 @@ class Puzzle {
         copy.matrix = JSON.parse(JSON.stringify(puzzle.matrix));  //  TODO: is something better here needed?  Lodash deepclone faster?
         copy.blank_row = puzzle.blank_row;
         copy.blank_col = puzzle.blank_col;
+        copy.manhattanSum = puzzle.manhattanSum;
         return copy;
     }
 
@@ -155,7 +157,38 @@ class Puzzle {
         this.blank_row++;
     }
 
-    generateNeighbors() {
+    // Updates manhattan sum for this puzzle state.  Takes a goal mapping from Puzzle's goal mapping static method
+    updateManhattanSum(goal_mapping) {
+        let manhattanSum = 0;
+        for(let row of this.matrix) {
+            for(let tile of row) {
+                if (tile.value) {
+                    manhattanSum += ( Math.abs(tile.row - goal_mapping[tile.value.toString()].row) + Math.abs(tile.col - goal_mapping[tile.value.toString()].col) );    
+                }
+            }
+        }
+
+        this.manhattanSum = manhattanSum;
+    }
+
+    // Map our goal state's (row, col) for each tile value to quickly find distance in manhattan method without recalcuating the mapping for each state
+    // Allows us to not assume a sqaure matrix (NxN) by accounting for NxP goal states
+    // {1: {row: 0, col: 0}, ...}
+    // TODO: Make goal mapping static on Puzzle
+    static getGoalMapping(goal_state) {
+        const map = {};
+        for (let row = 0; row < goal_state.length; row++) {
+            for (let col = 0; col < goal_state[row].length; col++) {
+                map[goal_state[row][col]] = {row, col};
+            }
+        }
+
+        return map;
+    }
+
+
+
+    generateNeighbors(goal_mapping=null) {
         const neighboringPuzzleStates = [];
         if (this.canSlideUp() && this.lastSlideDirection != slideDirections["UP"]) {
             let newPuzzle = Puzzle.fromPuzzle(this);
@@ -185,6 +218,12 @@ class Puzzle {
             newPuzzle.slideRight();
             newPuzzle.lastSlideDirection = slideDirections["RIGHT"];
             neighboringPuzzleStates.push(newPuzzle);
+        }
+
+        if (goal_mapping) {
+            for (let puzzle of neighboringPuzzleStates) {
+                puzzle.updateManhattanSum(goal_mapping)
+            }
         }
 
         return neighboringPuzzleStates;
@@ -228,8 +267,8 @@ class Puzzle {
         let inversions = 0;
         for (let i = 0; i < arr.length; i++) {
             for (let j = i + 1; j < arr.length; j++) {
-                // Not the blank space (0), and greater than next value
-                if (arr[i] && arr[i] > arr[j]) {
+                // Not comparing either side with the blank space (0), and greater than next value
+                if (arr[i] && arr[j] && arr[i] > arr[j]) {
                     inversions++;
                 }
             }
