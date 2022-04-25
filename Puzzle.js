@@ -20,6 +20,8 @@ class Puzzle {
         if (genRandomPuzzle) this.matrix = this.generateRandomPuzzle();
         this.lastSlideDirection = 0;
         this.manhattanSum = 0; // No need to calculate manhatten sum on initial puzzle state
+        this.cameFrom = null; // Last puzzle state
+        this.costFromStart = 0;
     }
 
     // Create deep copy of another puzzle
@@ -29,6 +31,7 @@ class Puzzle {
         copy.blank_row = puzzle.blank_row;
         copy.blank_col = puzzle.blank_col;
         copy.manhattanSum = puzzle.manhattanSum;
+        copy.costFromStart = puzzle.costFromStart;
         return copy;
     }
 
@@ -223,6 +226,7 @@ class Puzzle {
         if (goal_mapping) {
             for (let puzzle of neighboringPuzzleStates) {
                 puzzle.updateManhattanSum(goal_mapping)
+                puzzle.costFromStart += 1;
             }
         }
 

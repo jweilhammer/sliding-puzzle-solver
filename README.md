@@ -30,6 +30,3 @@ Different rules must be followed for square vs non-square puzzles [3x3] vs [2x3]
 
 https://www.cs.mcgill.ca/~newborn/nxp_puzzleOct9.htm
 > An NxP-puzzle with an odd number of columns can be solved only if NI is an even number.  An NxP-puzzle with an even number of columns and an even number of rows can be solved only if (NI + Row of the blank) is an even number. An NxP-puzzle with an even number of columns and an odd number of rows can be solved only if (NI + Row of the blank) is an odd number.
-
-
-
