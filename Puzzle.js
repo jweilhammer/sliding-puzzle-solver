@@ -193,14 +193,14 @@ class Puzzle {
 
     generateNeighbors(goal_mapping=null) {
         const neighboringPuzzleStates = [];
-        if (this.canSlideUp() && this.lastSlideDirection != slideDirections["UP"]) {
+        if (this.canSlideUp() && this.lastSlideDirection != slideDirections["DOWN"]) {
             let newPuzzle = Puzzle.fromPuzzle(this);
             newPuzzle.slideUp();
             newPuzzle.lastSlideDirection = slideDirections["UP"];
             neighboringPuzzleStates.push(newPuzzle);
         }
 
-        if (this.canSlideDown() && this.lastSlideDirection != slideDirections["DOWN"]) {
+        if (this.canSlideDown() && this.lastSlideDirection != slideDirections["UP"]) {
             let newPuzzle = Puzzle.fromPuzzle(this);
             newPuzzle.slideDown();
             newPuzzle.lastSlideDirection = slideDirections["DOWN"];
@@ -208,7 +208,7 @@ class Puzzle {
     
         }
 
-        if (this.canSlideLeft() && this.lastSlideDirection != slideDirections["LEFT"]) {
+        if (this.canSlideLeft() && this.lastSlideDirection != slideDirections["RIGHT"]) {
             let newPuzzle = Puzzle.fromPuzzle(this);
             newPuzzle.slideLeft();
             newPuzzle.lastSlideDirection = slideDirections["LEFT"];
@@ -216,7 +216,7 @@ class Puzzle {
    
         }
 
-        if (this.canSlideRight() && this.lastSlideDirection != slideDirections["RIGHT"]) {
+        if (this.canSlideRight() && this.lastSlideDirection != slideDirections["LEFT"]) {
             let newPuzzle = Puzzle.fromPuzzle(this);
             newPuzzle.slideRight();
             newPuzzle.lastSlideDirection = slideDirections["RIGHT"];
