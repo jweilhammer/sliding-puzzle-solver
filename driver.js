@@ -56,17 +56,18 @@ const solvePuzzleAStar = (puzzle, goal_state) => {
         const neighboringPuzzleStates = curPuzzle.generateNeighbors(goal_mapping);
         const costToNeighbor = curPuzzle.costFromStart + 1;
         for(neighbor of neighboringPuzzleStates) {
-            const closeNeighborIndex = closedList.findIndex(puzzle => puzzle.isEqualToPuzzle(neighbor));
-            // If on the closed list, check if we found a better way
-            if (closeNeighborIndex !== -1) {
-                const closedPuzzle = closedList[closeNeighborIndex];
-                if (closedPuzzle.costFromStart > costToNeighbor) {
-                    closedList.splice(closeNeighborIndex, 1);
-                    closedPuzzle.cameFrom = curPuzzle;
-                    closedPuzzle.costFromStart = costToNeighbor;
-                    openList.enqueue(closedPuzzle, closedPuzzle.manhattanSum + closedPuzzle.costFromStart)
-                }
-            }
+            // const closeNeighborIndex = closedList.findIndex(puzzle => puzzle.isEqualToPuzzle(neighbor));
+            // // If on the closed list, check if we found a better way
+            // if (closeNeighborIndex !== -1) {
+            //     const closedPuzzle = closedList[closeNeighborIndex];
+            //     if (closedPuzzle.costFromStart > costToNeighbor) {
+            //         console.log("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+            //         closedList.splice(closeNeighborIndex, 1);
+            //         closedPuzzle.cameFrom = curPuzzle;
+            //         closedPuzzle.costFromStart = costToNeighbor;
+            //         openList.enqueue(closedPuzzle, closedPuzzle.manhattanSum + closedPuzzle.costFromStart)
+            //     }
+            // }
 
             // If on the open list, check if we found a better way
             const openNeighorIndex = openList.items.findIndex(puzzle => puzzle.element.isEqualToPuzzle(neighbor));
@@ -142,14 +143,13 @@ const solvePuzzleIDAStar = (puzzle, goal_state) => {
         curPuzzle = solutionPath[solutionPath.length-1]; // Get top of stack
     }
 
-    // curPuzzle.printPuzzle()
+    curPuzzle.printPuzzle()
     return curPuzzle;
 }
 
 const iterativeDeepeningSearch = (solutionPath, costToCurPuzzle, boundingThreshold, goal_mapping) => {
-    curPuzzle = solutionPath[solutionPath.length-1]; // Get top of stack
-    costToSolution = costToCurPuzzle + curPuzzle.manhattanSum
-    // console.log("COST_TO_CUR_PUZZLE", costToCurPuzzle, " BOUNDING_THRESHOLD:", boundingThreshold);
+    let curPuzzle = solutionPath[solutionPath.length-1]; // Get top of stack
+    let costToSolution = costToCurPuzzle + curPuzzle.manhattanSum
 
     if (costToSolution > boundingThreshold) {
         return costToSolution;
@@ -164,14 +164,12 @@ const iterativeDeepeningSearch = (solutionPath, costToCurPuzzle, boundingThresho
     for (neighbor of curPuzzle.generateNeighbors(goal_mapping)) {
         neighbor.cameFrom = curPuzzle;
         solutionPath.push(neighbor);
-        // console.log("SOLUTION_PATH:", solutionPath.length);
-        threshold = iterativeDeepeningSearch(solutionPath, costToCurPuzzle + 1, boundingThreshold, goal_mapping);
+        threshold = iterativeDeepeningSearch(solutionPath, costToCurPuzzle + 1 + neighbor.manhattanSum, boundingThreshold, goal_mapping);
         if (threshold == SOLVED) return threshold;
         if (threshold < minThreshold) minThreshold = threshold;
         solutionPath.pop();
     }
 
-    // console.log("NEW MIN THRESHOLD:", minThreshold)
     return minThreshold;
 }
 
@@ -219,9 +217,9 @@ const goal_state = [ [1, 2, 3],
 
 // Make a reasonably solvable puzzle
 
-let puzzle = Puzzle.fromMatrix([[7, 0, 4],
-                            [8, 1, 3],
-                            [6, 5, 2]]);
+let puzzle = Puzzle.fromMatrix([[8, 6, 7],
+                            [2, 5, 4],
+                            [3, 0, 1]]);
 
 puzzle.printPuzzle();
 // cameFrom[puzzle].printPuzzle();
@@ -245,11 +243,9 @@ puzzle.printPuzzle();
 
 
 
-
-
 // Breadth first search
 const solvePuzzleBFS = (puzzle, goal_state) => {
-    puzzle.printPuzzle();
+    // puzzle.printPuzzle();
     const openList = [];   // Un-explored states
     const closedList = []; // Previously visited states
     let curPuzzle = puzzle;
@@ -259,12 +255,12 @@ const solvePuzzleBFS = (puzzle, goal_state) => {
             // Only explore new states, if we've already explored then don't add to open list
             if (!closedList.find(puzzle => puzzle.isEqualToPuzzle(neighbor))) {
                 neighbor.cameFrom = curPuzzle;
-                neighbor.printPuzzle();
+                // neighbor.printPuzzle();
                 openList.push(neighbor);            
             }
         }
 
-        closedList.push(curPuzzle);
+        // closedList.push(curPuzzle);
         curPuzzle = openList.shift();
     }
 
@@ -283,28 +279,28 @@ const solvePuzzleBFS = (puzzle, goal_state) => {
 // console.log("BFS SOLUTION:", bfsMoves.length, bfsMoves);
 
 
-const aStarSolution = solvePuzzleAStar(puzzle, goal_state);
-let astarMoves = [];
-let FUCKYOU = aStarSolution;
-while (FUCKYOU) {
-    FUCKYOU.printPuzzle();
-    astarMoves.push(slideDirectionsInv[JSON.stringify(FUCKYOU.lastSlideDirection)]);
-    FUCKYOU = FUCKYOU.cameFrom;
-}
-
-console.log("A* SOLUTION:", astarMoves.length, astarMoves);
-
-// let idastar = solvePuzzleIDAStar(puzzle, goal_state);
-// console.log(idastar);
-
-// let idastarMoves = [];
-// while (idastar) {
-//     idastar.printPuzzle();
-//     idastarMoves.push(slideDirectionsInv[JSON.stringify(idastar.lastSlideDirection)]);
-//     idastar = idastar.cameFrom;
+// const aStarSolution = solvePuzzleAStar(puzzle, goal_state);
+// let astarMoves = [];
+// let FUCKYOU = aStarSolution;
+// while (FUCKYOU) {
+//     FUCKYOU.printPuzzle();
+//     astarMoves.push(slideDirectionsInv[JSON.stringify(FUCKYOU.lastSlideDirection)]);
+//     FUCKYOU = FUCKYOU.cameFrom;
 // }
 
-// console.log("IDA* SOLUTION:", idastarMoves.length, idastarMoves);
+// console.log("A* SOLUTION:", astarMoves.length, astarMoves);
+
+let idastar = solvePuzzleIDAStar(puzzle, goal_state);
+console.log(idastar);
+
+let idastarMoves = [];
+while (idastar) {
+    idastar.printPuzzle();
+    idastarMoves.push(slideDirectionsInv[JSON.stringify(idastar.lastSlideDirection)]);
+    idastar = idastar.cameFrom;
+}
+
+console.log("IDA* SOLUTION:", idastarMoves.length, idastarMoves);
 
 
 

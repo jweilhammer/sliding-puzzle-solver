@@ -49,6 +49,8 @@ class Puzzle {
                 puzzle.matrix[row][col] = new Tile(matrix[row][col], row, col);
             }
         }
+
+        
         return puzzle;
     }
 
