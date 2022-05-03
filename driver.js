@@ -1,47 +1,6 @@
 const Puzzle = require("./Puzzle");
 const PriorityQueue = require("./PriorityQueue");
 
-// TODO: Make this a static variable, didn't seem to be working with nodejs...    
-const slideDirections = {
-    "INITIAL": 0,
-    "UP": 1,
-    "DOWN": 2,
-    "LEFT": 3,
-    "RIGHT": 4,
-}
-
-const slideDirectionsInv = {
-    "0": "INITIAL",
-    "1": "UP",
-    "2": "DOWN",
-    "3": "LEFT",
-    "4": "RIGHT",
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 const solvePuzzleAStar = (puzzle, goal_state) => {
     puzzle.printPuzzle();
@@ -176,71 +135,10 @@ const iterativeDeepeningSearch = (solutionPath, costToCurPuzzle, boundingThresho
 const goal_state = [ [1, 2, 3], 
                     [4, 5, 6],
                     [7, 8, 0] ];
-// let puzzle = new Puzzle();
-
-// puzzle.printPuzzle();
-// console.log(puzzle.blank_row, puzzle.blank_col);
-
-// puzzle.slideUp();
-// puzzle.slideUp();
-// puzzle.slideUp();
-// puzzle.printPuzzle();
-
-// puzzle.slideRight();
-// puzzle.slideRight();
-// puzzle.slideRight();
-// puzzle.printPuzzle();
-
-// puzzle.slideDown();
-// puzzle.slideDown();
-// puzzle.slideDown();
-// puzzle.printPuzzle();
-
-// puzzle.slideLeft();
-// puzzle.slideLeft();
-// puzzle.slideLeft();
-// puzzle.printPuzzle();
-
-// console.log(puzzle.isInGoalState(goal_state));
-
-// let puzzle2 = Puzzle.fromPuzzle(puzzle);
-// puzzle.printPuzzle();
-// puzzle2.printPuzzle();
-// console.log(puzzle.isEqualToPuzzle(puzzle2))
-// console.log(!closed_list.find(puzzle => puzzle.isEqualToPuzzle(puzzle2)))
-// puzzle2.matrix[0][0].value=500000;
-// puzzle.printPuzzle();
-// puzzle2.printPuzzle();
-// console.log(puzzle.isEqualToPuzzle(puzzle2))
-// console.log(!closed_list.find(puzzle => puzzle.isEqualToPuzzle(puzzle2)))
-
-
-// Make a reasonably solvable puzzle
 
 let puzzle = Puzzle.fromMatrix([[8, 6, 7],
                             [2, 5, 4],
                             [3, 0, 1]]);
-
-puzzle.printPuzzle();
-// cameFrom[puzzle].printPuzzle();
-// cameFrom[puzzle2].printPuzzle();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 // Breadth first search
@@ -268,6 +166,18 @@ const solvePuzzleBFS = (puzzle, goal_state) => {
     return curPuzzle;
 }
 
+const solvePuzzle = (algorithm) => {
+    Puzzle.goalState = Puzzle.fromMatrix(goal_state);
+    let solutionPuzzle = algorithm(puzzle, goal_state);
+    let solutionMoves = [];
+    while (solutionPuzzle) {
+        solutionMoves.push(Object.keys(Puzzle.slideDirections)[Object.values(Puzzle.slideDirections).indexOf(solutionPuzzle.lastSlideDirection)]);
+        solutionPuzzle = solutionPuzzle.cameFrom;
+    }
+
+    console.log(algorithm.name, "SOLUTION:", solutionMoves.length - 1, solutionMoves);
+}
+
 
 
 // let bfs = solvePuzzleBFS(puzzle, goal_state);
@@ -279,16 +189,9 @@ const solvePuzzleBFS = (puzzle, goal_state) => {
 // console.log("BFS SOLUTION:", bfsMoves.length, bfsMoves);
 
 
-// const aStarSolution = solvePuzzleAStar(puzzle, goal_state);
-// let astarMoves = [];
-// let FUCKYOU = aStarSolution;
-// while (FUCKYOU) {
-//     FUCKYOU.printPuzzle();
-//     astarMoves.push(slideDirectionsInv[JSON.stringify(FUCKYOU.lastSlideDirection)]);
-//     FUCKYOU = FUCKYOU.cameFrom;
-// }
+solvePuzzle(solvePuzzleAStar, puzzle, goal_state)
+solvePuzzle(solvePuzzleIDAStar, puzzle, goal_state)
 
-// console.log("A* SOLUTION:", astarMoves.length, astarMoves);
 
 let idastar = solvePuzzleIDAStar(puzzle, goal_state);
 console.log(idastar);

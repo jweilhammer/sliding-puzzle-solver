@@ -7,15 +7,21 @@ class Tile {
 }
 
 // TODO: Static variable somehow
-const slideDirections = {
-    "INITIAL": 0,
-    "UP": 1,
-    "DOWN": 2,
-    "LEFT": 3,
-    "RIGHT": 4,
-}
+
 
 class Puzzle {
+    static goalState = Puzzle.fromMatrix([ [1, 2, 3], 
+                                           [4, 5, 6],
+                                           [7, 8, 0] ]);
+
+    static slideDirections = {
+        "INITIAL": 0,
+        "UP": 1,
+        "DOWN": 2,
+        "LEFT": 3,
+        "RIGHT": 4,
+    }
+
     constructor(genRandomPuzzle=true) {
         if (genRandomPuzzle) this.matrix = this.generateRandomPuzzle();
         this.lastSlideDirection = 0;
@@ -50,7 +56,6 @@ class Puzzle {
             }
         }
 
-        
         return puzzle;
     }
 
@@ -75,6 +80,7 @@ class Puzzle {
                 puzzle_matrix[row][col] = new Tile(value, row, col);
             }
         }
+
         return puzzle_matrix;
     }
 
@@ -191,37 +197,33 @@ class Puzzle {
         return map;
     }
 
-
-
     generateNeighbors(goal_mapping=null) {
         const neighboringPuzzleStates = [];
-        if (this.canSlideUp() && this.lastSlideDirection != slideDirections["DOWN"]) {
+        if (this.canSlideUp() && this.lastSlideDirection != Puzzle.slideDirections["DOWN"]) {
             let newPuzzle = Puzzle.fromPuzzle(this);
             newPuzzle.slideUp();
-            newPuzzle.lastSlideDirection = slideDirections["UP"];
+            newPuzzle.lastSlideDirection = Puzzle.slideDirections["UP"];
             neighboringPuzzleStates.push(newPuzzle);
         }
 
-        if (this.canSlideDown() && this.lastSlideDirection != slideDirections["UP"]) {
+        if (this.canSlideDown() && this.lastSlideDirection != Puzzle.slideDirections["UP"]) {
             let newPuzzle = Puzzle.fromPuzzle(this);
             newPuzzle.slideDown();
-            newPuzzle.lastSlideDirection = slideDirections["DOWN"];
+            newPuzzle.lastSlideDirection = Puzzle.slideDirections["DOWN"];
             neighboringPuzzleStates.push(newPuzzle);
-    
         }
 
-        if (this.canSlideLeft() && this.lastSlideDirection != slideDirections["RIGHT"]) {
+        if (this.canSlideLeft() && this.lastSlideDirection != Puzzle.slideDirections["RIGHT"]) {
             let newPuzzle = Puzzle.fromPuzzle(this);
             newPuzzle.slideLeft();
-            newPuzzle.lastSlideDirection = slideDirections["LEFT"];
+            newPuzzle.lastSlideDirection = Puzzle.slideDirections["LEFT"];
             neighboringPuzzleStates.push(newPuzzle);
-   
         }
 
-        if (this.canSlideRight() && this.lastSlideDirection != slideDirections["LEFT"]) {
+        if (this.canSlideRight() && this.lastSlideDirection != Puzzle.slideDirections["LEFT"]) {
             let newPuzzle = Puzzle.fromPuzzle(this);
             newPuzzle.slideRight();
-            newPuzzle.lastSlideDirection = slideDirections["RIGHT"];
+            newPuzzle.lastSlideDirection = Puzzle.slideDirections["RIGHT"];
             neighboringPuzzleStates.push(newPuzzle);
         }
 
@@ -235,16 +237,8 @@ class Puzzle {
         return neighboringPuzzleStates;
     }
 
-    isInGoalState(goal_matrix) {
-        for (let row = 0; row < goal_matrix.length; row++) {
-            for (let col = 0; col < goal_matrix[row].length; col++) {
-                if (goal_matrix[row][col] !== this.matrix[row][col].value) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
+    isInGoalState() {
+        return this.isEqualToPuzzle(Puzzle.goalState)
     }
 
     isEqualToPuzzle(puzzle) {
@@ -256,6 +250,7 @@ class Puzzle {
                 }
             }
         }
+
         return true;
     }
 
@@ -304,8 +299,6 @@ class Puzzle {
         }
         process.stdout.write("\n");
     }
-
-
 }
 
 module.exports = Puzzle;
