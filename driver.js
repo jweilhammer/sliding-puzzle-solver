@@ -59,27 +59,6 @@ const solvePuzzleAStar = (puzzle, goal_state) => {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 const SOLVED = 0;
 const NOT_SOLVED = -1;
 
@@ -191,34 +170,3 @@ const solvePuzzle = (algorithm) => {
 
 solvePuzzle(solvePuzzleAStar, puzzle, goal_state)
 solvePuzzle(solvePuzzleIDAStar, puzzle, goal_state)
-
-
-let idastar = solvePuzzleIDAStar(puzzle, goal_state);
-console.log(idastar);
-
-let idastarMoves = [];
-while (idastar) {
-    idastar.printPuzzle();
-    idastarMoves.push(slideDirectionsInv[JSON.stringify(idastar.lastSlideDirection)]);
-    idastar = idastar.cameFrom;
-}
-
-console.log("IDA* SOLUTION:", idastarMoves.length, idastarMoves);
-
-
-
-
-
-let queue = [];
-queue.push(1);
-queue.push(2);
-queue.push(3);
-queue.push(4);
-queue.push(5);
-queue.push(6);
-queue.push(7);
-console.log(queue);
-queue.shift();
-queue.shift();
-queue.shift();
-console.log(queue);
