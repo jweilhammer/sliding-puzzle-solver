@@ -2,11 +2,13 @@ const Puzzle = require("./Puzzle");
 const PriorityQueue = require("./PriorityQueue");
 
 
+// Note:  Since our heuristics are admissasble we don't need to keep track of a closed set
+//        Hashing on a closed set and checking if we've visited before could improve runtime, but also increase memory usage
+//        Using a closed set is only viable if our heuristic is also consistent: https://en.wikipedia.org/wiki/A*_search_algorithm
 const solvePuzzleAStar = (puzzle, goal_state) => {
     puzzle.printPuzzle();
 
     const openList = new PriorityQueue();   // Un-explored states as a priority queue
-    const closedList = []; // Previously visited states
     const goal_mapping = Puzzle.getGoalMapping(goal_state); // Mapping of goal tiles' (row,col) to quickly find heuristic distance
     puzzle.updateManhattanSum(goal_mapping);
     openList.enqueue(puzzle, puzzle.manhattanSum);
@@ -15,18 +17,6 @@ const solvePuzzleAStar = (puzzle, goal_state) => {
         const neighboringPuzzleStates = curPuzzle.generateNeighbors(goal_mapping);
         const costToNeighbor = curPuzzle.costFromStart + 1;
         for(neighbor of neighboringPuzzleStates) {
-            // const closeNeighborIndex = closedList.findIndex(puzzle => puzzle.isEqualToPuzzle(neighbor));
-            // // If on the closed list, check if we found a better way
-            // if (closeNeighborIndex !== -1) {
-            //     const closedPuzzle = closedList[closeNeighborIndex];
-            //     if (closedPuzzle.costFromStart > costToNeighbor) {
-            //         console.log("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
-            //         closedList.splice(closeNeighborIndex, 1);
-            //         closedPuzzle.cameFrom = curPuzzle;
-            //         closedPuzzle.costFromStart = costToNeighbor;
-            //         openList.enqueue(closedPuzzle, closedPuzzle.manhattanSum + closedPuzzle.costFromStart)
-            //     }
-            // }
 
             // If on the open list, check if we found a better way
             const openNeighorIndex = openList.items.findIndex(puzzle => puzzle.element.isEqualToPuzzle(neighbor));
@@ -46,10 +36,8 @@ const solvePuzzleAStar = (puzzle, goal_state) => {
                 neighbor.costFromStart = costToNeighbor;
                 openList.enqueue(neighbor, neighbor.manhattanSum + neighbor.costFromStart);   
             }
-            
         }
 
-        closedList.push(curPuzzle);
         curPuzzle = openList.dequeue();
         // console.log("QUEUE:", openList.items.length, " CLOSED_LIST:", closedList.length);
     }
