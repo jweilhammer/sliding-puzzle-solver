@@ -17,6 +17,7 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                cursor: move;
             }
 
             #center-container {
@@ -29,15 +30,15 @@
     <body>
         <div id="center-container">
             <div class="grid-container">
-                <div class="grid-item row0 col0" id="1">1</div>
-                <div class="grid-item row0 col1" id="2">2</div>
-                <div class="grid-item row0 col2" id="3">3</div>
-                <div class="grid-item row1 col0" id="4">4</div>
-                <div class="grid-item row1 col1" id="5">5</div>
-                <div class="grid-item row1 col2" id="6">6</div>
-                <div class="grid-item row2 col0" id="7">7</div>
-                <div class="grid-item row2 col1" id="8">8</div>
-                <div class="grid-item row2 col2" id="0"></div>
+                <div draggable="true" class="grid-item row0 col0" id="1">1</div>
+                <div draggable="true" class="grid-item row0 col1" id="2">2</div>
+                <div draggable="true" class="grid-item row0 col2" id="3">3</div>
+                <div draggable="true" class="grid-item row1 col0" id="4">4</div>
+                <div draggable="true" class="grid-item row1 col1" id="5">5</div>
+                <div draggable="true" class="grid-item row1 col2" id="6">6</div>
+                <div draggable="true" class="grid-item row2 col0" id="7">7</div>
+                <div draggable="true" class="grid-item row2 col1" id="8">8</div>
+                <div draggable="true" class="grid-item row2 col2" id="0"></div>
             </div>
         </div>
         <script src="driver.js"></script>
