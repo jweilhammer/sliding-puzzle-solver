@@ -521,9 +521,9 @@ const goal_state = [ [1, 2, 3],
                     [4, 5, 6],
                     [7, 8, 0] ];
 
-let puzzle = Puzzle.fromMatrix([[8, 6, 7],
-                            [2, 5, 4],
-                            [3, 0, 1]]);
+// let puzzle = Puzzle.fromMatrix([[8, 6, 7],
+//                             [2, 5, 4],
+//                             [3, 0, 1]]);
 
 
 // Breadth first search
@@ -551,7 +551,7 @@ const solvePuzzleBFS = (puzzle, goal_state) => {
     return curPuzzle;
 }
 
-const solvePuzzle = (algorithm) => {
+const solvePuzzle = (algorithm, puzzle, goal_state) => {
     Puzzle.goalState = Puzzle.fromMatrix(goal_state);
     let solutionPuzzle = algorithm(puzzle, goal_state);
     let solutionMoves = [];
@@ -611,7 +611,7 @@ const swapHtmlTiles = (htmlMatrix, rows, cols) => {
     htmlMatrix[rows[1]][cols[1]].innerHTML = temp;
 }
 
-const solvePuzzleForFunzies = async (htmlMatrix, puzzle) => {
+const solvePuzzleForFunzies = async (htmlMatrix, puzzle, goal_state) => {
     resetPuzzle(htmlMatrix, puzzle);
     sliderPosition = Puzzle.getBlankTilePosition(puzzle);
     solution = solvePuzzle(solvePuzzleIDAStar, puzzle, goal_state);
@@ -645,4 +645,4 @@ const solvePuzzleForFunzies = async (htmlMatrix, puzzle) => {
     }
 }
 
-solvePuzzleForFunzies(htmlMatrix, puzzle);
+solvePuzzleForFunzies(htmlMatrix, new Puzzle(genRandomPuzzle=true), goal_state);
