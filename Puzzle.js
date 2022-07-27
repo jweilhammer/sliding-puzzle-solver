@@ -9,7 +9,7 @@ class Tile {
 // TODO: Static variable somehow
 
 
-class Puzzle {
+export class Puzzle {
     static goalState = Puzzle.fromMatrix([ [1, 2, 3], 
                                            [4, 5, 6],
                                            [7, 8, 0] ]);
@@ -83,6 +83,8 @@ class Puzzle {
 
         return puzzle_matrix;
     }
+
+    static getBlankTilePosition()
 
 
     canSlideLeft() {
@@ -195,6 +197,16 @@ class Puzzle {
         }
 
         return map;
+    }
+
+    static getBlankTilePosition() {
+        for (const row of this.matrix) {
+            for (const tile of row) {
+                if (tile.value === 0) {
+                    return [tile.row, tile.col];
+                }
+            }
+        }
     }
 
     generateNeighbors(goal_mapping=null) {
