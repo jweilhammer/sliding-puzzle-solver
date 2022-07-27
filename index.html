@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            .grid-container {
+                display: inline-grid;
+                grid-template-columns: auto auto auto;
+                background-color: #5921f3;
+                padding: 30px;
+            }
+            
+            .grid-item {
+                background-color: rgb(255, 255, 255);
+                border: 1px solid rgba(0, 0, 0, 0.8);
+                padding: 50px;
+                font-size: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            #center-container {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="center-container">
+            <div class="grid-container">
+                <div class="grid-item row0 col0" id="1">1</div>
+                <div class="grid-item row0 col1" id="2">2</div>
+                <div class="grid-item row0 col2" id="3">3</div>
+                <div class="grid-item row1 col0" id="4">4</div>
+                <div class="grid-item row1 col1" id="5">5</div>
+                <div class="grid-item row1 col2" id="6">6</div>
+                <div class="grid-item row2 col0" id="7">7</div>
+                <div class="grid-item row2 col1" id="8">8</div>
+                <div class="grid-item row2 col2" id="0"></div>
+            </div>
+        </div>
+        <script src="driver.js"></script>
+    </body>
+</html>
+
