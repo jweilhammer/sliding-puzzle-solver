@@ -665,7 +665,7 @@ const solvePuzzleForFunzies = async (htmlMatrix, goal_state) => {
     if (!startingPuzzle) {
         return;
     }
-    
+
     sliderPosition = Puzzle.getBlankTilePosition(startingPuzzle);
     console.log("SLIDER POSITION: ", sliderPosition);
     solution = solvePuzzle(solvePuzzleIDAStar, startingPuzzle, goal_state);
@@ -700,7 +700,6 @@ const solvePuzzleForFunzies = async (htmlMatrix, goal_state) => {
 
 var dragSourceElement = undefined;
 var clickSourceElement = undefined;
-var tileSelected = false;
 
 // https://web.dev/drag-and-drop/
 document.addEventListener('DOMContentLoaded', (e) => {
@@ -711,10 +710,26 @@ document.addEventListener('DOMContentLoaded', (e) => {
 
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/html', this.innerHTML);
+
+      // Unselect clicked tile if we're dragging a different one
+      if (clickSourceElement) {
+          if (this !== clickSourceElement) {
+            clickSourceElement.style.opacity = '1';
+            clickSourceElement = undefined;
+          }
+      }
     }
   
     function handleDragEnd(e) {
-      this.style.opacity = '1';
+      // Keep this tile highlighted if it's clicked
+      if (this === clickSourceElement) {
+        this.style.opacity = '0.4';
+      } 
+      else {
+        this.style.opacity = '1';
+      }
+
+      dragSourceElement = undefined;
     }
   
     function handleDragOver(e) {
@@ -731,9 +746,16 @@ document.addEventListener('DOMContentLoaded', (e) => {
     }
 
     function handleDrop(e) {
+        // Swap dragged tiles
         if (dragSourceElement !== this) {
             dragSourceElement.innerHTML = this.innerHTML;
             this.innerHTML = e.dataTransfer.getData('text/html');
+        }
+
+        // Select this tile as clicked, makes mini/accidental drags feel more natural
+        if (dragSourceElement === this) {
+            clickSourceElement = this;
+            this.style.opacity = '0.4';
         }
         
         return false;
@@ -744,8 +766,8 @@ document.addEventListener('DOMContentLoaded', (e) => {
     function handleTouchAndCLick(e) {
         // Stop zooming when double clicking tiles on mobile
         e.preventDefault();
-        
-        if (tileSelected && clickSourceElement) {
+
+        if (clickSourceElement) {
             // Unselect same tile after double click
             if (clickSourceElement === this) {
                 clickSourceElement.style.opacity = '1';
@@ -758,13 +780,12 @@ document.addEventListener('DOMContentLoaded', (e) => {
                 clickSourceElement.innerHTML = temp;
                 clickSourceElement.classList.remove('over');
                 clickSourceElement.style.opacity = '1';
-                tileSelected = false;
+                clickSourceElement = undefined;
             }
         } else {
             // Visually select this tile
             this.style.opacity = '0.4';
             clickSourceElement = this;
-            tileSelected = true;
         }
     }
   
