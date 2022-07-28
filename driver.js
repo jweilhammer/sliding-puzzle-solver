@@ -641,19 +641,20 @@ const solvePuzzleForFunzies = async (htmlMatrix, puzzle, goal_state) => {
             sliderRow++;
         }
 
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise(r => setTimeout(r, 300));
     }
 }
 
-// solvePuzzleForFunzies(htmlMatrix, new Puzzle(genRandomPuzzle=true), goal_state);
+var dragSourceElement = undefined;
+var clickSourceElement = undefined;
+var tileSelected = false;
 
 // https://web.dev/drag-and-drop/
 document.addEventListener('DOMContentLoaded', (e) => {
 
     function handleDragStart(e) {
       this.style.opacity = '0.4';
-
-      dragSrcEl = this;
+      dragSourceElement = this;
 
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/html', this.innerHTML);
@@ -661,10 +662,6 @@ document.addEventListener('DOMContentLoaded', (e) => {
   
     function handleDragEnd(e) {
       this.style.opacity = '1';
-  
-      items.forEach(function (item) {
-        item.classList.remove('over');
-      });
     }
   
     function handleDragOver(e) {
@@ -681,21 +678,59 @@ document.addEventListener('DOMContentLoaded', (e) => {
     }
 
     function handleDrop(e) {
-        if (dragSrcEl !== this) {
-            dragSrcEl.innerHTML = this.innerHTML;
+        if (dragSourceElement !== this) {
+            dragSourceElement.innerHTML = this.innerHTML;
             this.innerHTML = e.dataTransfer.getData('text/html');
-          }
+        }
         
         return false;
+    }
+
+    // This is so mobile can customize puzzles without having to jump through hoops
+    // Mobile HTML5 drop and drag not supported natively: https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API
+    function handleTouchAndCLick(e) {
+        // Stop zooming when double clicking tiles on mobile
+        e.preventDefault();
+        
+        if (tileSelected && clickSourceElement) {
+            // Unselect same tile after double click
+            if (clickSourceElement === this) {
+                clickSourceElement.style.opacity = '1';
+                clickSourceElement = undefined;
+            }
+            else {
+                // Swap these tiles
+                const temp = this.innerHTML;
+                this.innerHTML = clickSourceElement.innerHTML
+                clickSourceElement.innerHTML = temp;
+                clickSourceElement.classList.remove('over');
+                clickSourceElement.style.opacity = '1';
+                tileSelected = false;
+            }
+        } else {
+            // Visually select this tile
+            this.style.opacity = '0.4';
+            clickSourceElement = this;
+            tileSelected = true;
+        }
     }
   
     let items = document.querySelectorAll('.grid-item');
     items.forEach(function(item) {
+      // Desktop puzzle customization with drag API
       item.addEventListener('dragstart', handleDragStart);
       item.addEventListener('dragover', handleDragOver);
       item.addEventListener('dragenter', handleDragEnter);
       item.addEventListener('dragleave', handleDragLeave);
       item.addEventListener('dragend', handleDragEnd);
       item.addEventListener('drop', handleDrop);
+
+
+      // Mobile and desktop point and swap puzzle customization
+      item.addEventListener('click', handleTouchAndCLick);
+      item.addEventListener('touchstart', handleTouchAndCLick);
     });
   });
+
+
+// solvePuzzleForFunzies(htmlMatrix, new Puzzle(genRandomPuzzle=true), goal_state);
