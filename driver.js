@@ -182,7 +182,7 @@ class Puzzle {
         do {
             puzzle_arr = this.shuffleArray(values);
         } 
-        while (!this.isPuzzleSolvable(puzzle_arr));
+        while (!this.isPuzzleSolvable1Darr(puzzle_arr));
 
         // Turn 1D array into our Puzzle Matrix from last to first to use arr.pop()
         let puzzle_matrix = [[,,,], [,,,], [,,,]];
@@ -380,7 +380,29 @@ class Puzzle {
      * 4   _   5
      * 8   6   7
      */
-    isPuzzleSolvable(arr) {
+    isPuzzleSolvable1Darr(arr) {
+        let inversions = 0;
+        for (let i = 0; i < arr.length; i++) {
+            for (let j = i + 1; j < arr.length; j++) {
+                // Not comparing either side with the blank space (0), and greater than next value
+                if (arr[i] && arr[j] && arr[i] > arr[j]) {
+                    inversions++;
+                }
+            }
+        }
+        // Return true on even, false on odd inversion count
+        return !(inversions % 2)
+    }
+
+    static isPuzzleSolvable2Darr(matrix) {
+        const arr = [];
+
+        for(let row = 0; row < matrix.length; row++){
+            for(let col = 0; col < matrix[0].length; col++) {
+                arr.push(matrix[row][col]);
+            }
+        }
+
         let inversions = 0;
         for (let i = 0; i < arr.length; i++) {
             for (let j = i + 1; j < arr.length; j++) {
@@ -587,7 +609,7 @@ for(let row = 0; row < 3; row++) {
     }
 }
 
-const resetPuzzle = (htmlMatrix, puzzle) => {
+const resetPuzzleGridHTML = (htmlMatrix, puzzle) => {
     console.log(htmlMatrix,puzzle)
     for (let row = 0; row < puzzle.matrix.length; row++) {
         for (let col = 0; col < puzzle.matrix[row].length; col++) {
@@ -604,6 +626,32 @@ const resetPuzzle = (htmlMatrix, puzzle) => {
     }
 }
 
+
+// TODO: Make this less error prone/breakable to editing of elements
+const getPuzzleFromGridHTML = (htmlMatrix) => {
+    console.log(htmlMatrix)
+    const matrix = [[,,,],[,,,],[,,,]];
+    for (let row = 0; row < htmlMatrix.length; row++) {
+        for (let col = 0; col < htmlMatrix[0].length; col++) {
+            console.log(parseInt(htmlMatrix[row][col].innerHTML))
+            if (isNaN(parseInt(htmlMatrix[row][col].innerHTML))) {   
+                console.log("FOUND 0 SPACE")
+                matrix[row][col] = 0;
+            } else {    
+                matrix[row][col] = parseInt(htmlMatrix[row][col].innerHTML);
+            }
+        }
+    }
+
+    console.log(matrix);
+    if (!Puzzle.isPuzzleSolvable2Darr(matrix)) {
+        alert("Puzzle is not in a solveable state");
+        return undefined;
+    }
+
+    return Puzzle.fromMatrix(matrix);
+}
+
 const swapHtmlTiles = (htmlMatrix, rows, cols) => {
     console.log(rows, cols);
     temp = htmlMatrix[rows[0]][cols[0]].innerHTML;
@@ -611,14 +659,19 @@ const swapHtmlTiles = (htmlMatrix, rows, cols) => {
     htmlMatrix[rows[1]][cols[1]].innerHTML = temp;
 }
 
-const solvePuzzleForFunzies = async (htmlMatrix, puzzle, goal_state) => {
-    resetPuzzle(htmlMatrix, puzzle);
-    sliderPosition = Puzzle.getBlankTilePosition(puzzle);
-    solution = solvePuzzle(solvePuzzleIDAStar, puzzle, goal_state);
+const solvePuzzleForFunzies = async (htmlMatrix, goal_state) => {
+    const startingPuzzle = getPuzzleFromGridHTML(htmlMatrix);
+
+    if (!startingPuzzle) {
+        return;
+    }
+    
+    sliderPosition = Puzzle.getBlankTilePosition(startingPuzzle);
+    console.log("SLIDER POSITION: ", sliderPosition);
+    solution = solvePuzzle(solvePuzzleIDAStar, startingPuzzle, goal_state);
     sliderRow = sliderPosition[0];
     sliderCol = sliderPosition[1];
     for(move of solution) {
-
         console.log(move);
 
         if (move === "RIGHT") {
@@ -733,4 +786,4 @@ document.addEventListener('DOMContentLoaded', (e) => {
   });
 
 
-// solvePuzzleForFunzies(htmlMatrix, new Puzzle(genRandomPuzzle=true), goal_state);
+solvePuzzleForFunzies(htmlMatrix, goal_state);

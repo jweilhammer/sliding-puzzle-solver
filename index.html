@@ -20,7 +20,7 @@
                 cursor: move;
             }
 
-            #center-container {
+            .centered {
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -28,7 +28,7 @@
         </style>
     </head>
     <body>
-        <div id="center-container">
+        <div class="centered">
             <div class="grid-container">
                 <div draggable="true" class="grid-item row0 col0" id="1">1</div>
                 <div draggable="true" class="grid-item row0 col1" id="2">2</div>
@@ -41,6 +41,11 @@
                 <div draggable="true" class="grid-item row2 col2" id="0"></div>
             </div>
         </div>
+        
+        <div class="centered">
+            <button style="padding: 10px;" onclick="solvePuzzleForFunzies(htmlMatrix, goal_state)" class="centered">Solve me!</button>
+        </div>
+        
         <script src="driver.js"></script>
     </body>
 </html>
