@@ -7,23 +7,41 @@
                 grid-template-columns: auto auto auto;
                 background-color: #5921f3;
                 padding: 30px;
+                aspect-ratio: 1/1;
+                max-width: 50vw;
+                max-height: 50vh;
+                flex: auto;
             }
             
             .grid-item {
                 background-color: rgb(255, 255, 255);
                 border: 1px solid rgba(0, 0, 0, 0.8);
-                padding: 50px;
-                font-size: 30px;
                 display: flex;
+                flex: auto;
                 align-items: center;
                 justify-content: center;
                 cursor: move;
+                min-width: 30px;
+                min-height: 30px;
+                font-size: 30px;
             }
 
             .centered {
                 display: flex;
+                flex: auto;
                 align-items: center;
                 justify-content: center;
+            }
+
+            /* to make the page fill the entire screen */
+            html {
+                margin: 0px;
+                height: 100%;
+            }
+
+            body {
+                margin: 0px;
+                min-height: 100%;
             }
         </style>
     </head>
@@ -40,11 +58,13 @@
                 <div draggable="true" class="grid-item row2 col1" id="8">8</div>
                 <div draggable="true" class="grid-item row2 col2" id="0"></div>
             </div>
+
+        </div>
+        <div class="centered">
+            <button style="padding: 5%; font-size: 30px" onclick="solvePuzzleForFunzies(htmlMatrix, goal_state)" class="centered">Solve me!</button>
         </div>
         
-        <div class="centered">
-            <button style="padding: 10px;" onclick="solvePuzzleForFunzies(htmlMatrix, goal_state)" class="centered">Solve me!</button>
-        </div>
+
         
         <script src="driver.js"></script>
     </body>
