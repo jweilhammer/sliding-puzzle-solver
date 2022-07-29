@@ -143,7 +143,6 @@ class Puzzle {
         for (let row = 0; row < matrix.length; row++) {
             for (let col = 0; col < matrix[0].length; col++) {
                 if (!matrix[row][col]) {
-                    console.log("BLANK TILE", row, col)
                     puzzle.blank_row = row;
                     puzzle.blank_col = col;
                 }
@@ -154,10 +153,7 @@ class Puzzle {
     }
 
     static getBlankTilePosition(puzzle) {
-        console.log("FUCK")
-        console.log(puzzle.matrix)
         for (let row = 0; row < puzzle.matrix.length; row++) {
-            console.log(row, puzzle.matrix[row]);
             for (let col = 0; col < puzzle.matrix[row].length; col++) {
                 if (puzzle.matrix[row][col] === 0) {
                     return [row, col];
@@ -440,15 +436,24 @@ class Puzzle {
 const solvePuzzleAStar = (puzzle, goal_state) => {
     puzzle.printPuzzle();
 
+    const closedList = {}; // doesn't have to be a queue
     const openList = new PriorityQueue();   // Un-explored states as a priority queue
     const goal_mapping = Puzzle.getGoalMapping(goal_state); // Mapping of goal tiles' (row,col) to quickly find heuristic distance
     puzzle.updateManhattanSum(goal_mapping);
     openList.enqueue(puzzle, puzzle.manhattanSum);
     let curPuzzle = puzzle;
     while (!curPuzzle.isInGoalState(goal_state)) {
+        
+        closedList[JSON.stringify(curPuzzle.matrix)] = 1;
         const neighboringPuzzleStates = curPuzzle.generateNeighbors(goal_mapping);
         const costToNeighbor = curPuzzle.costFromStart + 1;
         for(neighbor of neighboringPuzzleStates) {
+
+            // If on the closed list, don't explore that pat
+            if (closedList[JSON.stringify(neighbor.matrix)]) {
+                // console.log("FOUND THIS ON THE CLOSED LIST YO", JSON.stringify(neighbor.matrix), closedList[JSON.stringify(curPuzzle.matrix)])
+                continue;
+            }
 
             // If on the open list, check if we found a better way
             const openNeighorIndex = openList.items.findIndex(puzzle => puzzle.element.isEqualToPuzzle(neighbor));
@@ -483,6 +488,8 @@ const SOLVED = 0;
 const NOT_SOLVED = -1;
 
 // https://en.wikipedia.org/wiki/Iterative_deepening_A*#Pseudocode
+// Will recursively search and prune baths based on threshold sum of heuristic
+// Restarts at beginning node and chooses the best path each iteration
 const solvePuzzleIDAStar = (puzzle, goal_state) => {
     const goal_mapping = Puzzle.getGoalMapping(goal_state); // Mapping of goal tiles' (row,col) to quickly find heuristic distance
     let curPuzzle = puzzle;
@@ -490,10 +497,7 @@ const solvePuzzleIDAStar = (puzzle, goal_state) => {
     let threshold = curPuzzle.manhattanSum;
     const solutionPath = [curPuzzle] // Stack of Puzzles up to our current state
     while (curPuzzle.manhattanSum !== 0) {
-        // console.log("SOLUTION_PATH:", solutionPath.length, " BOUNDING_THRESHOLD:", threshold);
-        newThreshold = iterativeDeepeningSearch(solutionPath, 0, threshold, goal_mapping);
-        threshold = newThreshold;
-
+        threshold = iterativeDeepeningSearch(solutionPath, 0, threshold, goal_mapping);
         if (threshold === Infinity) {
             console.log("unsolvable");
             return;
@@ -501,10 +505,11 @@ const solvePuzzleIDAStar = (puzzle, goal_state) => {
         curPuzzle = solutionPath[solutionPath.length-1]; // Get top of stack
     }
 
-    curPuzzle.printPuzzle()
     return curPuzzle;
 }
 
+// Recursively loop through neighboring paths and prune branches based on bounding threshold
+// Will return the minimum threshold from all neighboring state paths (sum of heuristsics + cost to traverse to neighbor)
 const iterativeDeepeningSearch = (solutionPath, costToCurPuzzle, boundingThreshold, goal_mapping) => {
     let curPuzzle = solutionPath[solutionPath.length-1]; // Get top of stack
     let costToSolution = costToCurPuzzle + curPuzzle.manhattanSum
@@ -514,18 +519,22 @@ const iterativeDeepeningSearch = (solutionPath, costToCurPuzzle, boundingThresho
     }
 
     if (curPuzzle.manhattanSum === 0) {
-        // console.log("DID I REACH THE GOAL?")
         return SOLVED;
     }
 
     minThreshold = Infinity;
     for (neighbor of curPuzzle.generateNeighbors(goal_mapping)) {
-        neighbor.cameFrom = curPuzzle;
-        solutionPath.push(neighbor);
-        threshold = iterativeDeepeningSearch(solutionPath, costToCurPuzzle + 1 + neighbor.manhattanSum, boundingThreshold, goal_mapping);
-        if (threshold == SOLVED) return threshold;
-        if (threshold < minThreshold) minThreshold = threshold;
-        solutionPath.pop();
+
+        // If neighbor is already on our solution path, don't re-explore to prevent loops
+        const neighborSolutionIndex = solutionPath.findIndex(puzzle => puzzle.isEqualToPuzzle(neighbor));
+        if (neighborSolutionIndex === -1) {
+            neighbor.cameFrom = curPuzzle;
+            solutionPath.push(neighbor);
+            threshold = iterativeDeepeningSearch(solutionPath, costToCurPuzzle + 1 + neighbor.manhattanSum, boundingThreshold, goal_mapping);
+            if (threshold == SOLVED) return threshold;
+            if (threshold < minThreshold) minThreshold = threshold;
+            solutionPath.pop();
+        }
     }
 
     return minThreshold;
@@ -534,10 +543,6 @@ const iterativeDeepeningSearch = (solutionPath, costToCurPuzzle, boundingThresho
 const goal_state = [ [1, 2, 3], 
                     [4, 5, 6],
                     [7, 8, 0] ];
-
-// let puzzle = Puzzle.fromMatrix([[8, 6, 7],
-//                             [2, 5, 4],
-//                             [3, 0, 1]]);
 
 
 // Breadth first search
@@ -596,16 +601,13 @@ const htmlMatrix = [[,,,], [,,,], [,,,]];
 for(let row = 0; row < 3; row++) {
     for(let col = 0; col < 3; col++) {
         let gridItem = document.getElementsByClassName("row" + row + " col" + col)[0];
-        console.log(gridItem);
         htmlMatrix[row][col] = gridItem;
     }
 }
 
 const resetPuzzleGridHTML = (htmlMatrix, puzzle) => {
-    console.log(htmlMatrix,puzzle)
     for (let row = 0; row < puzzle.matrix.length; row++) {
         for (let col = 0; col < puzzle.matrix[row].length; col++) {
-            console.log(puzzle.matrix[row][col])
 
             // Make blank space actually blank
             if (puzzle.matrix[row][col] === 0) {
@@ -621,7 +623,6 @@ const resetPuzzleGridHTML = (htmlMatrix, puzzle) => {
 
 // TODO: Make this less error prone/breakable to editing of elements
 const getPuzzleFromGridHTML = (htmlMatrix) => {
-    console.log(htmlMatrix)
     const matrix = [[,,,],[,,,],[,,,]];
     for (let row = 0; row < htmlMatrix.length; row++) {
         for (let col = 0; col < htmlMatrix[0].length; col++) {
@@ -633,7 +634,6 @@ const getPuzzleFromGridHTML = (htmlMatrix) => {
         }
     }
 
-    console.log(matrix);
     if (!Puzzle.isPuzzleSolvable2Darr(matrix)) {
         alert("Puzzle is not in a solveable state");
         return undefined;
@@ -656,7 +656,6 @@ const solvePuzzleForFunzies = async (htmlMatrix, goal_state) => {
     }
 
     sliderPosition = Puzzle.getBlankTilePosition(startingPuzzle);
-    console.log("SLIDER POSITION: ", sliderPosition);
     solution = solvePuzzle(solvePuzzleIDAStar, startingPuzzle, goal_state);
     sliderRow = sliderPosition[0];
     sliderCol = sliderPosition[1];
@@ -794,6 +793,3 @@ document.addEventListener('DOMContentLoaded', (e) => {
       item.addEventListener('touchstart', handleTouchAndCLick);
     });
   });
-
-
-solvePuzzleForFunzies(htmlMatrix, goal_state);
