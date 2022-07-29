@@ -104,17 +104,6 @@ class PriorityQueue {
 }
 
 
-class Tile {
-    constructor(value, row, col) {
-      this.value = value;
-      this.row = row;
-      this.col = col;
-    }
-}
-
-// TODO: Static variable somehow
-
-
 class Puzzle {
     static goalState = Puzzle.fromMatrix([ [1, 2, 3], 
                                            [4, 5, 6],
@@ -147,10 +136,10 @@ class Puzzle {
         return copy;
     }
 
-    // TODO: Only working for 3x3
+    // TODO: Only working for 3x3, maybe also validate this is a valid puzzle too :-)
     static fromMatrix(matrix) {
         let puzzle = new this(false);
-        puzzle.matrix = [[,,,], [,,,], [,,,]]; 
+
         for (let row = 0; row < matrix.length; row++) {
             for (let col = 0; col < matrix[0].length; col++) {
                 if (!matrix[row][col]) {
@@ -158,18 +147,20 @@ class Puzzle {
                     puzzle.blank_row = row;
                     puzzle.blank_col = col;
                 }
-                puzzle.matrix[row][col] = new Tile(matrix[row][col], row, col);
             }
         }
-
+        puzzle.matrix = matrix;
         return puzzle;
     }
 
     static getBlankTilePosition(puzzle) {
-        for (const row of puzzle.matrix) {
-            for (const tile of row) {
-                if (tile.value === 0) {
-                    return [tile.row, tile.col];
+        console.log("FUCK")
+        console.log(puzzle.matrix)
+        for (let row = 0; row < puzzle.matrix.length; row++) {
+            console.log(row, puzzle.matrix[row]);
+            for (let col = 0; col < puzzle.matrix[row].length; col++) {
+                if (puzzle.matrix[row][col] === 0) {
+                    return [row, col];
                 }
             }
         }
@@ -193,7 +184,7 @@ class Puzzle {
                     this.blank_row = row;
                     this.blank_col = col;
                 }
-                puzzle_matrix[row][col] = new Tile(value, row, col);
+                puzzle_matrix[row][col] = value;
             }
         }
 
@@ -244,8 +235,8 @@ class Puzzle {
             return false;
         }
 
-        this.matrix[this.blank_row][this.blank_col].value = this.matrix[this.blank_row][this.blank_col - 1].value;
-        this.matrix[this.blank_row][this.blank_col - 1].value = 0;
+        this.matrix[this.blank_row][this.blank_col] = this.matrix[this.blank_row][this.blank_col - 1];
+        this.matrix[this.blank_row][this.blank_col - 1] = 0;
         this.blank_col--;
     }
 
@@ -256,8 +247,8 @@ class Puzzle {
             return false;
         }
 
-        this.matrix[this.blank_row][this.blank_col].value = this.matrix[this.blank_row][this.blank_col + 1].value;
-        this.matrix[this.blank_row][this.blank_col + 1].value = 0;
+        this.matrix[this.blank_row][this.blank_col] = this.matrix[this.blank_row][this.blank_col + 1];
+        this.matrix[this.blank_row][this.blank_col + 1] = 0;
         this.blank_col++;
     }
 
@@ -268,8 +259,8 @@ class Puzzle {
             return false;
         }
 
-        this.matrix[this.blank_row][this.blank_col].value = this.matrix[this.blank_row - 1][this.blank_col].value;
-        this.matrix[this.blank_row - 1][this.blank_col].value = 0;
+        this.matrix[this.blank_row][this.blank_col] = this.matrix[this.blank_row - 1][this.blank_col];
+        this.matrix[this.blank_row - 1][this.blank_col] = 0;
         this.blank_row--;
     }
 
@@ -279,18 +270,19 @@ class Puzzle {
             return false;
         }
 
-        this.matrix[this.blank_row][this.blank_col].value = this.matrix[this.blank_row + 1][this.blank_col].value;
-        this.matrix[this.blank_row + 1][this.blank_col].value = 0;
+        this.matrix[this.blank_row][this.blank_col] = this.matrix[this.blank_row + 1][this.blank_col];
+        this.matrix[this.blank_row + 1][this.blank_col] = 0;
         this.blank_row++;
     }
 
     // Updates manhattan sum for this puzzle state.  Takes a goal mapping from Puzzle's goal mapping static method
     updateManhattanSum(goal_mapping) {
         let manhattanSum = 0;
-        for(let row of this.matrix) {
-            for(let tile of row) {
-                if (tile.value) {
-                    manhattanSum += ( Math.abs(tile.row - goal_mapping[tile.value.toString()].row) + Math.abs(tile.col - goal_mapping[tile.value.toString()].col) );    
+        for(let row = 0; row < this.matrix.length; row++) {
+            for(let col = 0; col < this.matrix[row].length; col++) {
+                if (this.matrix[row][col]) {
+                    const goalPos = goal_mapping[this.matrix[row][col]]
+                    manhattanSum += ( Math.abs(row - goalPos.row) + Math.abs(col - goalPos.col) );    
                 }
             }
         }
@@ -361,7 +353,7 @@ class Puzzle {
         // TODO: Type checks, size checks, etc
         for (let row = 0; row < puzzle.matrix.length; row++) {
             for (let col = 0; col < puzzle.matrix[row].length; col++) {
-                if (puzzle.matrix[row][col].value !== this.matrix[row][col].value) {
+                if (puzzle.matrix[row][col] !== this.matrix[row][col]) {
                     return false;
                 }
             }
@@ -432,7 +424,7 @@ class Puzzle {
         let string = "";
         for (const row of this.matrix) {
             for (const tile of row) {
-                string += tile.value + " ";;
+                string += tile + " ";;
             }
             string += "\n";
         }
@@ -613,14 +605,14 @@ const resetPuzzleGridHTML = (htmlMatrix, puzzle) => {
     console.log(htmlMatrix,puzzle)
     for (let row = 0; row < puzzle.matrix.length; row++) {
         for (let col = 0; col < puzzle.matrix[row].length; col++) {
-            console.log(puzzle.matrix[row][col].value)
+            console.log(puzzle.matrix[row][col])
 
             // Make blank space actually blank
-            if (puzzle.matrix[row][col].value === 0) {
+            if (puzzle.matrix[row][col] === 0) {
                 htmlMatrix[row][col].innerHTML = " "
             }
             else {
-                htmlMatrix[row][col].innerHTML = puzzle.matrix[row][col].value;
+                htmlMatrix[row][col].innerHTML = puzzle.matrix[row][col];
             }
         }
     }
@@ -633,9 +625,7 @@ const getPuzzleFromGridHTML = (htmlMatrix) => {
     const matrix = [[,,,],[,,,],[,,,]];
     for (let row = 0; row < htmlMatrix.length; row++) {
         for (let col = 0; col < htmlMatrix[0].length; col++) {
-            console.log(parseInt(htmlMatrix[row][col].innerHTML))
             if (isNaN(parseInt(htmlMatrix[row][col].innerHTML))) {   
-                console.log("FOUND 0 SPACE")
                 matrix[row][col] = 0;
             } else {    
                 matrix[row][col] = parseInt(htmlMatrix[row][col].innerHTML);
@@ -653,7 +643,6 @@ const getPuzzleFromGridHTML = (htmlMatrix) => {
 }
 
 const swapHtmlTiles = (htmlMatrix, rows, cols) => {
-    console.log(rows, cols);
     temp = htmlMatrix[rows[0]][cols[0]].innerHTML;
     htmlMatrix[rows[0]][cols[0]].innerHTML = htmlMatrix[rows[1]][cols[1]].innerHTML;
     htmlMatrix[rows[1]][cols[1]].innerHTML = temp;
