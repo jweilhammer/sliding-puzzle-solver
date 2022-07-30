@@ -703,8 +703,9 @@ const solvePuzzleForFunzies = async (htmlMatrix, goal_state) => {
     }
 }
 
-var dragSourceElement = undefined;
-var clickSourceElement = undefined;
+
+let dragSourceElement = undefined;
+let clickSourceElement = undefined;
 
 // https://web.dev/drag-and-drop/
 document.addEventListener('DOMContentLoaded', (e) => {
@@ -755,6 +756,11 @@ document.addEventListener('DOMContentLoaded', (e) => {
         if (dragSourceElement !== this) {
             dragSourceElement.innerHTML = this.innerHTML;
             this.innerHTML = e.dataTransfer.getData('text/html');
+        }
+
+        // Don't keep click selection if dragging that same tile after clicking it
+        if (dragSourceElement === clickSourceElement) {
+            clickSourceElement = undefined;
         }
 
         // Select this tile as clicked, makes mini/accidental drags feel more natural
