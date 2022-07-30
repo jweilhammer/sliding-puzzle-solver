@@ -407,9 +407,9 @@ class Puzzle {
     // Modern Fisher–Yates shuffle:
     // https://en.wikipedia.org/wiki/Fisher-Yates_shuffle
     static shuffleArray(array) {
-        for (var i = array.length - 1; i > 0; i--) {
-            var j = Math.floor(Math.random() * (i + 1)); // random from 0 -> i
-            var temp = array[i];
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1)); // random from 0 -> i
+            const temp = array[i];
             array[i] = array[j];
             array[j] = temp;
         }
@@ -584,14 +584,51 @@ const solvePuzzle = (algorithm, puzzle, goal_state) => {
     return solutionMoves.reverse();
 }
 
+const resetClickSourceElement = () => {
+    console.log("resetClickSourceElement()")
+    // Unselect any tiles before shuffling
+    if (clickSourceElement) {
+        console.log("CLICK SOURCE ELEMENT EXISTS", clickSourceElement);
+
+        // Leave sliding tile blank
+        if (isNaN(parseInt(clickSourceElement.innerHTML))) {
+            console.log("MAKING SLIDING TILE BLANK", "!isNaN(parseInt(clickSourceElement.innerHTML))", !isNaN(parseInt(clickSourceElement.innerHTML)), parseInt(clickSourceElement.innerHTML));
+            clickSourceElement.style.opacity = '0';
+        }
+        else {
+            console.log("MAKING REGULAR TILE VISIBLE")
+            clickSourceElement.style.opacity = '1';
+        }
+
+        clickSourceElement = undefined;
+    }
+}
+
+
+const resetDragSourceElement = () => {
+    console.log("resetDragSourceElement()")
+    // Unselect any tiles before shuffling
+    if (dragSourceElement) {
+        console.log("DRAG SOURCE ELEMENT EXISTS", dragSourceElement);
+
+        // Leave sliding tile blank
+        if (isNaN(parseInt(dragSourceElement.innerHTML))) {
+            console.log("MAKING SLIDING TILE BLANK", "!isNaN(parseInt(clickSourceElement.innerHTML))", isNaN(parseInt(dragSourceElement.innerHTML)), parseInt(dragSourceElement.innerHTML));
+            dragSourceElement.style.opacity = '0';
+        }
+        else {
+            console.log("MAKING REGULAR TILE VISIBLE")
+            dragSourceElement.style.opacity = '1';
+        }
+
+        dragSourceElement = undefined;
+    }
+}
 
 const shuffleHtmlMatrix = () => {
 
     // Unselect any tiles before shuffling
-    if (clickSourceElement) {
-        clickSourceElement.style.opacity = '1';
-        clickSourceElement = undefined;
-    }
+    resetClickSourceElement();
 
     const values = [1, 2, 3, 4, 5, 6, 7, 8, 0];
     let puzzle_arr = [];
@@ -653,14 +690,6 @@ const getPuzzleFromGridHTML = (htmlMatrix) => {
     return Puzzle.fromMatrix(matrix);
 }
 
-const swapHtmlTiles = (sliderTile, tile2) => {
-    sliderTile.style.opacity = '1';
-    temp = sliderTile.innerHTML;
-    sliderTile.innerHTML = tile2.innerHTML;
-    tile2.innerHTML = temp;
-    tile2.style.opacity = '0';
-}
-
 const solvePuzzleForFunzies = async (htmlMatrix, goal_state) => {
     const startingPuzzle = getPuzzleFromGridHTML(htmlMatrix);
 
@@ -669,10 +698,7 @@ const solvePuzzleForFunzies = async (htmlMatrix, goal_state) => {
     }
 
     // Unselect any tiles before sorting
-    if (clickSourceElement) {
-        clickSourceElement.style.opacity = '1';
-        clickSourceElement = undefined;
-    }
+    resetClickSourceElement();
 
     sliderPosition = Puzzle.getBlankTilePosition(startingPuzzle);
     sliderRow = sliderPosition[0];
@@ -737,24 +763,28 @@ document.addEventListener('DOMContentLoaded', (e) => {
       e.dataTransfer.setData('text/html', this.innerHTML);
 
       // Unselect clicked tile if we're dragging a different one
-      if (clickSourceElement) {
-          if (this !== clickSourceElement) {
-            clickSourceElement.style.opacity = '1';
-            clickSourceElement = undefined;
-          }
+      if (this !== clickSourceElement) {
+        resetClickSourceElement();
       }
     }
   
     function handleDragEnd(e) {
+
+        console.log("HANDLE DRAG END", e);
+        console.log("THIS TILE IS HANDLING IT", this)
+        console.log("DRAG SOURCE ELEMENT IS: ", dragSourceElement);
+
       // Keep this tile highlighted if it's clicked
       if (this === clickSourceElement) {
-        this.style.opacity = '0.4';
+        dragSourceElement = undefined; // reset without unselecting
       } 
       else {
-        this.style.opacity = '1';
+        if (isNaN(parseInt(this.innerHTML))) {
+            this.style.opacity = '0';
+        } else {
+            this.style.opacity = '1'
+        }
       }
-
-      dragSourceElement = undefined;
     }
   
     function handleDragOver(e) {
@@ -779,17 +809,24 @@ document.addEventListener('DOMContentLoaded', (e) => {
         if (dragSourceElement !== this) {
             dragSourceElement.innerHTML = this.innerHTML;
             this.innerHTML = e.dataTransfer.getData('text/html');
+            if (isNaN(parseInt(this.innerHTML))) {
+                this.style.opacity = '0';
+            }
+            else {
+                this.style.opacity = '1';
+            }
+
+            // Don't keep click selection if dragging that same tile after clicking it
+            if (dragSourceElement === clickSourceElement) {
+                resetClickSourceElement();
+            }
         }
 
-        // Don't keep click selection if dragging that same tile after clicking it
-        if (dragSourceElement === clickSourceElement) {
-            clickSourceElement = undefined;
-        }
 
         // Select this tile as clicked, makes mini/accidental drags feel more natural
         if (dragSourceElement === this) {
-            clickSourceElement = this;
             this.style.opacity = '0.4';
+            clickSourceElement = this;
         }
         
         return false;
@@ -804,14 +841,13 @@ document.addEventListener('DOMContentLoaded', (e) => {
         if (clickSourceElement && !playMode) {
             // Unselect same tile after double click
             if (clickSourceElement === this) {
-                clickSourceElement.style.opacity = '1';
-                clickSourceElement = undefined;
+                resetClickSourceElement();
             }
             else {
                 // Swap the two different tiles
                 if (!playMode) {
-                    swapClickedTile(clickSourceElement, this);
-                    clickSourceElement = undefined;
+                    swapHtmlTiles(clickSourceElement, this);
+                    resetClickSourceElement();
                 }
             }
         } else {
@@ -823,26 +859,26 @@ document.addEventListener('DOMContentLoaded', (e) => {
                         // Make neighbors of blank space clickable if they're in bounds
                         if (this === htmlMatrix[row][col]) {
                             if (row - 1 >= 0 && isNaN(parseInt(htmlMatrix[row-1][col].innerHTML))) {
-                                swapClickedTile(htmlMatrix[row-1][col], this);
+                                swapHtmlTiles(htmlMatrix[row-1][col], this);
                             }
                             
                             if (row + 1 <= (htmlMatrix.length - 1) && isNaN(parseInt(htmlMatrix[row+1][col].innerHTML))) {
-                                swapClickedTile(htmlMatrix[row+1][col], this);
+                                swapHtmlTiles(htmlMatrix[row+1][col], this);
 
                             }
             
                             if (col - 1 >= 0 && isNaN(parseInt(htmlMatrix[row][col-1].innerHTML))) {
-                                swapClickedTile(htmlMatrix[row][col-1], this);
+                                swapHtmlTiles(htmlMatrix[row][col-1], this);
 
                             }
             
                             if (col + 1 <= (htmlMatrix[row].length - 1) && isNaN(parseInt(htmlMatrix[row][col+1].innerHTML))) {
-                                swapClickedTile(htmlMatrix[row][col+1], this);
+                                swapHtmlTiles(htmlMatrix[row][col+1], this);
                             }
                         }
                     }
                 }
-                clickSourceElement = undefined;
+                resetClickSourceElement();
                 playModeResetAllMovableTiles();
                 playModeSetMovableTiles();
             }
@@ -854,12 +890,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
         }
     }
 
-    const swapClickedTile = (clickedTile, tileToSwap) => {
-        const temp = tileToSwap.innerHTML;
-        tileToSwap.innerHTML = clickedTile.innerHTML
-        clickedTile.innerHTML = temp;
-        clickedTile.style.opacity = '1';
-    }
+
   
     let items = document.querySelectorAll('.grid-item');
     items.forEach(function(item) {
@@ -880,6 +911,14 @@ document.addEventListener('DOMContentLoaded', (e) => {
       item.addEventListener('touchstart', handleTouchAndCLick);
     });
 });
+
+const swapHtmlTiles = (tile1, tile2) => {
+    const temp = tile1.innerHTML
+    tile1.innerHTML = tile2.innerHTML
+    tile2.innerHTML = temp;
+    tile1.style.opacity = isNaN(parseInt(tile1.innerHTML)) ? "0" : "1";
+    tile2.style.opacity = isNaN(parseInt(tile2.innerHTML)) ? "0" : "1";
+}
 
 
 let playMode = false;
@@ -923,6 +962,7 @@ const playModeSetMovableTiles = () => {
 
             // Make neighbors of blank space clickable if they're in bounds
             if (isNaN(parseInt(htmlMatrix[row][col].innerHTML))) {
+
                 htmlMatrix[row][col].style.opacity = '0'; // highlight blank tile
 
                 if (row - 1 >= 0) {
@@ -940,6 +980,8 @@ const playModeSetMovableTiles = () => {
                 if (col + 1 <= (htmlMatrix[row].length - 1)) {
                     htmlMatrix[row][col+1].style.pointerEvents = 'auto';
                 }
+            } else {
+                htmlMatrix[row][col].style.opacity = '1'; // highlight blank tile
             }
         }
     }
