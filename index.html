@@ -21,7 +21,16 @@
                 flex: auto;
                 align-items: center;
                 justify-content: center;
-                cursor: move;
+
+                /* Make numbers not hightlightable/selectable in all browsers
+                   Makes the play mode feel lots more natural if user decides to drag cursor
+                   Also includes an 'unselectable=on' attribute set via js
+                */
+                -moz-user-select: -moz-none;
+                -khtml-user-select: none;
+                -webkit-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
             }
 
             .centered {
@@ -53,14 +62,15 @@
                 <div draggable="true" class="grid-item row1 col1" id="5">5</div>
                 <div draggable="true" class="grid-item row1 col2" id="6">4</div>
                 <div draggable="true" class="grid-item row2 col0" id="7">3</div>
-                <div draggable="true" class="grid-item row2 col1" id="8"></div>
+                <div draggable="true" class="grid-item row2 col1" id="8"> </div>
                 <div draggable="true" class="grid-item row2 col2" id="0">1</div>
             </div>
 
         </div>
         <div class="centered">
-            <button style="padding: 5vmin; font-size: 10vmin" onclick="shuffleHtmlMatrix()" class="centered">Shuffle</button>
-            <button style="padding: 5vmin; font-size: 10vmin" onclick="solvePuzzleForFunzies(htmlMatrix, goal_state)" class="centered">Solve me!</button>
+            <button id="shuffleButton" style="padding: 5vmin; font-size: 10vmin" onclick="shuffleHtmlMatrix()">Shuffle</button>
+            <button id="playButton" style="padding: 5vmin; font-size: 10vmin" onclick="togglePlayMode()">Play puzzle</button>
+            <button id="solveButton" style="padding: 5vmin; font-size: 10vmin" onclick="solvePuzzleForFunzies(htmlMatrix, goal_state)">Solve me!</button>
         </div>
         
 

@@ -585,28 +585,14 @@ const solvePuzzle = (algorithm, puzzle, goal_state) => {
 }
 
 
-
-// let bfs = solvePuzzleBFS(puzzle, goal_state);
-// let bfsMoves = [];
-// while (bfs) {
-//     bfsMoves.push(slideDirectionsInv[JSON.stringify(bfs.lastSlideDirection)]);
-//     bfs = bfs.cameFrom;
-// }
-// console.log("BFS SOLUTION:", bfsMoves.length, bfsMoves);
-
-
-// solvePuzzle(solvePuzzleAStar, puzzle, goal_state)
-
-const htmlMatrix = [[,,,], [,,,], [,,,]];
-for(let row = 0; row < 3; row++) {
-    for(let col = 0; col < 3; col++) {
-        let gridItem = document.getElementsByClassName("row" + row + " col" + col)[0];
-        htmlMatrix[row][col] = gridItem;
-    }
-}
-
-
 const shuffleHtmlMatrix = () => {
+
+    // Unselect any tiles before shuffling
+    if (clickSourceElement) {
+        clickSourceElement.style.opacity = '1';
+        clickSourceElement = undefined;
+    }
+
     const values = [1, 2, 3, 4, 5, 6, 7, 8, 0];
     let puzzle_arr = [];
     do {
@@ -616,7 +602,15 @@ const shuffleHtmlMatrix = () => {
 
     for(let row = 0; row < htmlMatrix.length; row++) {
         for(let col = 0; col < htmlMatrix[row].length; col++) {
-            htmlMatrix[row][col].innerHTML = puzzle_arr.pop();
+            let value = puzzle_arr.pop();
+            if (value === 0) { 
+                htmlMatrix[row][col].innerHTML = " ";
+                htmlMatrix[row][col].style.opacity = '0';
+            }
+            else {
+                htmlMatrix[row][col].innerHTML = value;
+                htmlMatrix[row][col].style.opacity = '1';
+            }
         }
     }
     
@@ -659,10 +653,12 @@ const getPuzzleFromGridHTML = (htmlMatrix) => {
     return Puzzle.fromMatrix(matrix);
 }
 
-const swapHtmlTiles = (htmlMatrix, rows, cols) => {
-    temp = htmlMatrix[rows[0]][cols[0]].innerHTML;
-    htmlMatrix[rows[0]][cols[0]].innerHTML = htmlMatrix[rows[1]][cols[1]].innerHTML;
-    htmlMatrix[rows[1]][cols[1]].innerHTML = temp;
+const swapHtmlTiles = (sliderTile, tile2) => {
+    sliderTile.style.opacity = '1';
+    temp = sliderTile.innerHTML;
+    sliderTile.innerHTML = tile2.innerHTML;
+    tile2.innerHTML = temp;
+    tile2.style.opacity = '0';
 }
 
 const solvePuzzleForFunzies = async (htmlMatrix, goal_state) => {
@@ -672,30 +668,38 @@ const solvePuzzleForFunzies = async (htmlMatrix, goal_state) => {
         return;
     }
 
+    // Unselect any tiles before sorting
+    if (clickSourceElement) {
+        clickSourceElement.style.opacity = '1';
+        clickSourceElement = undefined;
+    }
+
     sliderPosition = Puzzle.getBlankTilePosition(startingPuzzle);
-    solution = solvePuzzle(solvePuzzleIDAStar, startingPuzzle, goal_state);
     sliderRow = sliderPosition[0];
     sliderCol = sliderPosition[1];
+    htmlMatrix[sliderRow][sliderCol].style.opacity = '0';
+    solution = solvePuzzle(solvePuzzleIDAStar, startingPuzzle, goal_state);
+    
     for(move of solution) {
         console.log(move);
 
         if (move === "RIGHT") {
-            swapHtmlTiles(htmlMatrix, [sliderRow, sliderRow], [sliderCol, sliderCol+1]);
+            swapHtmlTiles(htmlMatrix[sliderRow][sliderCol], htmlMatrix[sliderRow][sliderCol+1]);
             sliderCol++;
         }
 
         if (move === "LEFT") {
-            swapHtmlTiles(htmlMatrix, [sliderRow, sliderRow], [sliderCol, sliderCol-1]);
+            swapHtmlTiles(htmlMatrix[sliderRow][sliderCol], htmlMatrix[sliderRow][sliderCol-1]);
             sliderCol--;
         }
 
         if (move === "UP") {
-            swapHtmlTiles(htmlMatrix, [sliderRow, sliderRow-1], [sliderCol, sliderCol]);
+            swapHtmlTiles(htmlMatrix[sliderRow][sliderCol], htmlMatrix[sliderRow-1][sliderCol]);
             sliderRow--;
         }
         
         if (move === "DOWN") {
-            swapHtmlTiles(htmlMatrix, [sliderRow, sliderRow+1], [sliderCol, sliderCol]);
+            swapHtmlTiles(htmlMatrix[sliderRow][sliderCol], htmlMatrix[sliderRow+1][sliderCol]);
             sliderRow++;
         }
 
@@ -703,14 +707,29 @@ const solvePuzzleForFunzies = async (htmlMatrix, goal_state) => {
     }
 }
 
-
+// UI ELEMENTS
 let dragSourceElement = undefined;
 let clickSourceElement = undefined;
+let playButton = document.getElementById("playButton");
+const htmlMatrix = [[,,,], [,,,], [,,,]];
 
 // https://web.dev/drag-and-drop/
 document.addEventListener('DOMContentLoaded', (e) => {
+    for(let row = 0; row < 3; row++) {
+        for(let col = 0; col < 3; col++) {
+            let gridItem = document.getElementsByClassName("row" + row + " col" + col)[0];
+            htmlMatrix[row][col] = gridItem;
+        }
+    }
+
+
+    shuffleHtmlMatrix()
 
     function handleDragStart(e) {
+        if (playMode) {
+            return;
+        }
+
       this.style.opacity = '0.4';
       dragSourceElement = this;
 
@@ -752,6 +771,10 @@ document.addEventListener('DOMContentLoaded', (e) => {
     }
 
     function handleDrop(e) {
+        if (playMode) {
+            return;
+        }
+
         // Swap dragged tiles
         if (dragSourceElement !== this) {
             dragSourceElement.innerHTML = this.innerHTML;
@@ -778,30 +801,71 @@ document.addEventListener('DOMContentLoaded', (e) => {
         // Stop zooming when double clicking tiles on mobile
         e.preventDefault();
 
-        if (clickSourceElement) {
+        if (clickSourceElement && !playMode) {
             // Unselect same tile after double click
             if (clickSourceElement === this) {
                 clickSourceElement.style.opacity = '1';
                 clickSourceElement = undefined;
             }
             else {
-                // Swap these tiles
-                const temp = this.innerHTML;
-                this.innerHTML = clickSourceElement.innerHTML
-                clickSourceElement.innerHTML = temp;
-                clickSourceElement.classList.remove('over');
-                clickSourceElement.style.opacity = '1';
-                clickSourceElement = undefined;
+                // Swap the two different tiles
+                if (!playMode) {
+                    swapClickedTile(clickSourceElement, this);
+                    clickSourceElement = undefined;
+                }
             }
         } else {
-            // Visually select this tile
-            this.style.opacity = '0.4';
-            clickSourceElement = this;
+            if (playMode) {
+                // need indices for checking neighbors
+                for (let row = 0; row < htmlMatrix.length; row++) {
+                    for (let col = 0; col < htmlMatrix[row].length; col++) {
+            
+                        // Make neighbors of blank space clickable if they're in bounds
+                        if (this === htmlMatrix[row][col]) {
+                            if (row - 1 >= 0 && isNaN(parseInt(htmlMatrix[row-1][col].innerHTML))) {
+                                swapClickedTile(htmlMatrix[row-1][col], this);
+                            }
+                            
+                            if (row + 1 <= (htmlMatrix.length - 1) && isNaN(parseInt(htmlMatrix[row+1][col].innerHTML))) {
+                                swapClickedTile(htmlMatrix[row+1][col], this);
+
+                            }
+            
+                            if (col - 1 >= 0 && isNaN(parseInt(htmlMatrix[row][col-1].innerHTML))) {
+                                swapClickedTile(htmlMatrix[row][col-1], this);
+
+                            }
+            
+                            if (col + 1 <= (htmlMatrix[row].length - 1) && isNaN(parseInt(htmlMatrix[row][col+1].innerHTML))) {
+                                swapClickedTile(htmlMatrix[row][col+1], this);
+                            }
+                        }
+                    }
+                }
+                clickSourceElement = undefined;
+                playModeResetAllMovableTiles();
+                playModeSetMovableTiles();
+            }
+            else {
+                // Visually select this tile
+                this.style.opacity = '0.4';
+                clickSourceElement = this;
+            }
         }
+    }
+
+    const swapClickedTile = (clickedTile, tileToSwap) => {
+        const temp = tileToSwap.innerHTML;
+        tileToSwap.innerHTML = clickedTile.innerHTML
+        clickedTile.innerHTML = temp;
+        clickedTile.style.opacity = '1';
     }
   
     let items = document.querySelectorAll('.grid-item');
     items.forEach(function(item) {
+        item.style.cursor = 'move';
+        item.setAttribute("unselectable", "on");
+
       // Desktop puzzle customization with drag API
       item.addEventListener('dragstart', handleDragStart);
       item.addEventListener('dragover', handleDragOver);
@@ -817,3 +881,66 @@ document.addEventListener('DOMContentLoaded', (e) => {
     });
 });
 
+
+let playMode = false;
+const togglePlayMode = () => {
+    if (playMode) {
+        playMode = false;
+        playButton.innerHTML = "Play Puzzle";
+        clickSourceElement = undefined;
+        dragSourceElement = undefined;
+        for (row of htmlMatrix) {
+            for (tile of row) {
+                tile.setAttribute('draggable', true);
+                tile.style.pointerEvents = 'auto';
+                tile.style.cursor = 'move';
+                tile.style.opacity = isNaN(parseInt(tile.innerHTML)) ? '0' : '1';
+            }
+        }
+    }
+    else {
+        playMode = true;
+        playButton.innerHTML = "Customize Puzzle";
+        playModeResetAllMovableTiles();
+        playModeSetMovableTiles();
+    }
+}
+
+const playModeResetAllMovableTiles = () => {
+    for (row of htmlMatrix) {
+        for (tile of row) {
+            tile.setAttribute('draggable', false);
+            tile.style.pointerEvents = 'none';
+            tile.style.cursor = 'default';
+        }
+    }
+}
+
+const playModeSetMovableTiles = () => {
+    // need indices for finding neigbhors
+    for (let row = 0; row < htmlMatrix.length; row++) {
+        for (let col = 0; col < htmlMatrix[row].length; col++) {
+
+            // Make neighbors of blank space clickable if they're in bounds
+            if (isNaN(parseInt(htmlMatrix[row][col].innerHTML))) {
+                htmlMatrix[row][col].style.opacity = '0'; // highlight blank tile
+
+                if (row - 1 >= 0) {
+                    htmlMatrix[row-1][col].style.pointerEvents = 'auto';
+                }
+                
+                if (row + 1 <= (htmlMatrix.length - 1)) {
+                    htmlMatrix[row+1][col].style.pointerEvents = 'auto';
+                }
+
+                if (col - 1 >= 0) {
+                    htmlMatrix[row][col-1].style.pointerEvents = 'auto';
+                }
+
+                if (col + 1 <= (htmlMatrix[row].length - 1)) {
+                    htmlMatrix[row][col+1].style.pointerEvents = 'auto';
+                }
+            }
+        }
+    }
+}
