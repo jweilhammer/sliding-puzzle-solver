@@ -167,9 +167,9 @@ class Puzzle {
         const values = [1, 2, 3, 4, 5, 6, 7, 8, 0];
         let puzzle_arr = [];
         do {
-            puzzle_arr = this.shuffleArray(values);
+            puzzle_arr = Puzzle.shuffleArray(values);
         } 
-        while (!this.isPuzzleSolvable1Darr(puzzle_arr));
+        while (!Puzzle.isPuzzleSolvable1Darr(puzzle_arr));
 
         // Turn 1D array into our Puzzle Matrix from last to first to use arr.pop()
         let puzzle_matrix = [[,,,], [,,,], [,,,]];
@@ -368,7 +368,7 @@ class Puzzle {
      * 4   _   5
      * 8   6   7
      */
-    isPuzzleSolvable1Darr(arr) {
+    static isPuzzleSolvable1Darr(arr) {
         let inversions = 0;
         for (let i = 0; i < arr.length; i++) {
             for (let j = i + 1; j < arr.length; j++) {
@@ -406,7 +406,7 @@ class Puzzle {
     
     // Modern Fisher–Yates shuffle:
     // https://en.wikipedia.org/wiki/Fisher-Yates_shuffle
-    shuffleArray(array) {
+    static shuffleArray(array) {
         for (var i = array.length - 1; i > 0; i--) {
             var j = Math.floor(Math.random() * (i + 1)); // random from 0 -> i
             var temp = array[i];
@@ -605,6 +605,23 @@ for(let row = 0; row < 3; row++) {
     }
 }
 
+
+const shuffleHtmlMatrix = () => {
+    const values = [1, 2, 3, 4, 5, 6, 7, 8, 0];
+    let puzzle_arr = [];
+    do {
+        puzzle_arr = Puzzle.shuffleArray(values);
+    } 
+    while (!Puzzle.isPuzzleSolvable1Darr(puzzle_arr));
+
+    for(let row = 0; row < htmlMatrix.length; row++) {
+        for(let col = 0; col < htmlMatrix[row].length; col++) {
+            htmlMatrix[row][col].innerHTML = puzzle_arr.pop();
+        }
+    }
+    
+}
+
 const resetPuzzleGridHTML = (htmlMatrix, puzzle) => {
     for (let row = 0; row < puzzle.matrix.length; row++) {
         for (let col = 0; col < puzzle.matrix[row].length; col++) {
@@ -792,4 +809,5 @@ document.addEventListener('DOMContentLoaded', (e) => {
       item.addEventListener('click', handleTouchAndCLick);
       item.addEventListener('touchstart', handleTouchAndCLick);
     });
-  });
+});
+
