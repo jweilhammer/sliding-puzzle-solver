@@ -547,26 +547,29 @@ const goal_state = [ [1, 2, 3],
 
 // Breadth first search
 const solvePuzzleBFS = (puzzle, goal_state) => {
-    // puzzle.printPuzzle();
+    const startTime = performance.now();
+
     const openList = [];   // Un-explored states
-    const closedList = []; // Previously visited states
+    const closedSet = {}; // Previously visited states
     let curPuzzle = puzzle;
     while (!curPuzzle.isInGoalState(goal_state)) {
         neighboringPuzzleStates = curPuzzle.generateNeighbors();
         for(neighbor of neighboringPuzzleStates) {
             // Only explore new states, if we've already explored then don't add to open list
-            if (!closedList.find(puzzle => puzzle.isEqualToPuzzle(neighbor))) {
+            if (!closedSet[JSON.stringify(neighbor.matrix)]) {
                 neighbor.cameFrom = curPuzzle;
                 // neighbor.printPuzzle();
-                openList.push(neighbor);            
+                openList.push(neighbor);      
             }
         }
 
-        // closedList.push(curPuzzle);
+        closedSet[JSON.stringify(curPuzzle.matrix)] = 1;
         curPuzzle = openList.shift();
     }
-
-    // curPuzzle.printPuzzle();
+    
+    const endTime = performance.now();
+    approxMaxMem = openList.length + Object.keys(closedSet).length * JSON.stringify(curPuzzle.matrix).length;
+    console.log(`Runtime: ${endTime - startTime} milliseconds`, "Approx mem units consumed:", approxMaxMem);
     return curPuzzle;
 }
 
