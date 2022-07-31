@@ -700,11 +700,20 @@ const solvePuzzleForFunzies = async (htmlMatrix, goal_state) => {
     // Unselect any tiles before sorting
     resetClickSourceElement();
 
+    const algorithmMappings = {
+        "IDA*": solvePuzzleIDAStar,
+        "A*": solvePuzzleAStar,
+        "BFS": solvePuzzleBFS
+    }
+
+    console.log(document.getElementById("algorithmsDropdown").value)
+    const algorithm = algorithmMappings[document.getElementById("algorithmsDropdown").value];
+
     sliderPosition = Puzzle.getBlankTilePosition(startingPuzzle);
     sliderRow = sliderPosition[0];
     sliderCol = sliderPosition[1];
     htmlMatrix[sliderRow][sliderCol].style.opacity = '0';
-    solution = solvePuzzle(solvePuzzleIDAStar, startingPuzzle, goal_state);
+    solution = solvePuzzle(algorithm, startingPuzzle, goal_state);
     
     for(move of solution) {
         console.log(move);

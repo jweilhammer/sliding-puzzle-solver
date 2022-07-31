@@ -40,6 +40,10 @@
                 justify-content: center;
             }
 
+            .flexy {
+                font-size: 5vmin;
+            }
+
             /* to make the page fill the entire screen */
             html {
                 margin: 0px;
@@ -69,8 +73,17 @@
         </div>
         <div class="centered">
             <button id="shuffleButton" style="padding: 5vmin; font-size: 10vmin" onclick="shuffleHtmlMatrix()">Shuffle</button>
-            <button id="playButton" style="padding: 5vmin; font-size: 10vmin" onclick="togglePlayMode()">Play puzzle</button>
-            <button id="solveButton" style="padding: 5vmin; font-size: 10vmin" onclick="solvePuzzleForFunzies(htmlMatrix, goal_state)">Solve me!</button>
+            <button id="playButton" style="padding: 5vmin; font-size: 8vmin" onclick="togglePlayMode()">Play puzzle</button>
+            <button id="solveButton" style="padding: 5vmin; font-size: 8vmin" onclick="solvePuzzleForFunzies(htmlMatrix, goal_state)">Solve me!</button>
+        </div>
+
+        <div class="centered">
+            <label class="flexy" for="algorithms">Choose a search algorithm:</label>
+            <select class="flexy" name="algorithms" id="algorithmsDropdown">
+                <option value="IDA*">Iterative Deepening A*</option>
+                <option value="A*">A* (with closed set)</option>
+                <option value="BFS">Breadth-First Search</option>
+              </select>
         </div>
         
 
