@@ -434,7 +434,7 @@ class Puzzle {
 //        Hashing on a closed set and checking if we've visited before could improve runtime, but also increase memory usage
 //        Using a closed set is only viable if our heuristic is also consistent: https://en.wikipedia.org/wiki/A*_search_algorithm
 const solvePuzzleAStar = (puzzle, goal_state) => {
-    puzzle.printPuzzle();
+    const startTime = performance.now();
 
     const closedList = {}; // doesn't have to be a queue
     const openList = new PriorityQueue();   // Un-explored states as a priority queue
@@ -479,8 +479,15 @@ const solvePuzzleAStar = (puzzle, goal_state) => {
         // console.log("QUEUE:", openList.items.length, " CLOSED_LIST:", closedList.length);
     }
 
+    const endTime = performance.now();
+
     // curPuzzle.printPuzzle();
-    return curPuzzle;
+
+    return {
+        "solutionPuzzle": curPuzzle,
+        "runtimeMs": endTime - startTime,
+        "maxPuzzlesInMemory": Object.keys(closedList).length + openList.items.length,
+    };
 }
 
 
@@ -491,6 +498,8 @@ const NOT_SOLVED = -1;
 // Will recursively search and prune baths based on threshold sum of heuristic
 // Restarts at beginning node and chooses the best path each iteration
 const solvePuzzleIDAStar = (puzzle, goal_state) => {
+    const startTime = performance.now();
+
     const goal_mapping = Puzzle.getGoalMapping(goal_state); // Mapping of goal tiles' (row,col) to quickly find heuristic distance
     let curPuzzle = puzzle;
     curPuzzle.updateManhattanSum(goal_mapping);
@@ -505,7 +514,13 @@ const solvePuzzleIDAStar = (puzzle, goal_state) => {
         curPuzzle = solutionPath[solutionPath.length-1]; // Get top of stack
     }
 
-    return curPuzzle;
+    const endTime = performance.now();
+
+    return {
+        "solutionPuzzle": curPuzzle,
+        "runtimeMs": endTime - startTime,
+        "maxPuzzlesInMemory": solutionPath.length,
+    };
 }
 
 // Recursively loop through neighboring paths and prune branches based on bounding threshold
@@ -568,14 +583,17 @@ const solvePuzzleBFS = (puzzle, goal_state) => {
     }
     
     const endTime = performance.now();
-    approxMaxMem = openList.length + Object.keys(closedSet).length * JSON.stringify(curPuzzle.matrix).length;
-    console.log(`Runtime: ${endTime - startTime} milliseconds`, "Approx mem units consumed:", approxMaxMem);
-    return curPuzzle;
+    return {
+        "solutionPuzzle": curPuzzle,
+        "runtimeMs": endTime - startTime,
+        "maxPuzzlesInMemory": Object.keys(closedSet).length + openList.length,
+    };
 }
 
 const solvePuzzle = (algorithm, puzzle, goal_state) => {
     Puzzle.goalState = Puzzle.fromMatrix(goal_state);
-    let solutionPuzzle = algorithm(puzzle, goal_state);
+    let solution = algorithm(puzzle, goal_state);
+    let solutionPuzzle = solution['solutionPuzzle'];
     let solutionMoves = [];
     while (solutionPuzzle) {
         solutionMoves.push(Object.keys(Puzzle.slideDirections)[Object.values(Puzzle.slideDirections).indexOf(solutionPuzzle.lastSlideDirection)]);
@@ -584,7 +602,11 @@ const solvePuzzle = (algorithm, puzzle, goal_state) => {
 
     console.log(algorithm.name, "SOLUTION:", solutionMoves.length - 1, solutionMoves);
 
-    return solutionMoves.reverse();
+    return {
+        "solutionMoves": solutionMoves.reverse(),
+        "runtimeMs": solution["runtimeMs"],
+        "maxPuzzlesInMemory": solution["maxPuzzlesInMemory"]
+    }
 }
 
 const resetClickSourceElement = () => {
@@ -718,7 +740,7 @@ const solvePuzzleForFunzies = async (htmlMatrix, goal_state) => {
     htmlMatrix[sliderRow][sliderCol].style.opacity = '0';
     solution = solvePuzzle(algorithm, startingPuzzle, goal_state);
     
-    for(move of solution) {
+    for(move of solution['solutionMoves']) {
         console.log(move);
 
         if (move === "RIGHT") {
@@ -743,12 +765,21 @@ const solvePuzzleForFunzies = async (htmlMatrix, goal_state) => {
 
         await new Promise(r => setTimeout(r, 300));
     }
+
+    console.log("RUNTIME:", solution['runtimeMs'], "ms. MAX PUZZLES IN MEM:", solution['maxPuzzlesInMemory']);
+    console.log("APPROXIMATE MEMORY USAGE", (solution['maxPuzzlesInMemory']*112 / (1024 * 1024)), "MB");
+
+    solutionOutput.innerHTML = `RUNTIME: ${solution['runtimeMs']}ms<br />
+                                MAX PUZZLES IN MEM: ${solution['maxPuzzlesInMemory']}<br />
+                                APPROXIMATE MEMORY USAGE ${(solution['maxPuzzlesInMemory']*112 / (1024 * 1024))}MB
+                                `;
 }
 
 // UI ELEMENTS
 let dragSourceElement = undefined;
 let clickSourceElement = undefined;
-let playButton = document.getElementById("playButton");
+const playButton = document.getElementById("playButton");
+const solutionOutput = document.getElementById("output");
 const htmlMatrix = [[,,,], [,,,], [,,,]];
 
 // https://web.dev/drag-and-drop/
