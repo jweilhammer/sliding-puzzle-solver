@@ -3,22 +3,24 @@
     <head>
         <style>
             .grid-container {
-                display: inline-grid;
-                grid-template-columns: auto auto auto;
-                background-color: #5921f3;
-                padding: 2vmin;
+                display: grid;
+                grid-auto-columns: 1fr;
+                grid-auto-rows: 1fr;
+                grid-template-columns: 1fr 1fr 1fr;
+                grid-template-rows: 1fr 1fr 1fr;
                 aspect-ratio: 1/1;
                 max-width: 50vmin;
                 max-height: 50vmin;
                 flex: auto;
-                font-size: 10vmin;
+                font-size: 5vmin;
             }
             
             .grid-item {
-                background-color: rgb(255, 255, 255);
+                background-image: url('test.png');
                 border: 1px solid rgba(0, 0, 0, 0.8);
                 display: flex;
                 flex: auto;
+                text-align: center;
                 align-items: center;
                 justify-content: center;
 
@@ -55,21 +57,26 @@
                 min-height: 100%;
             }
         </style>
+        <!-- For updating css classes dynmically with JS
+            Currently only using for updating background image size to match puzzle size during resizing events on the window
+            Unable to let it flex because of lots of things
+            Can't easily set an <img> and make it overflow since positions/sizes between tile and total puzzle grid conflict
+        -->
+        <style id="dynamicStyling"></style>
     </head>
     <body>
         <div class="centered">
-            <div class="grid-container">
-                <div draggable="true" class="grid-item row0 col0" id="1">8</div>
-                <div draggable="true" class="grid-item row0 col1" id="2">6</div>
-                <div draggable="true" class="grid-item row0 col2" id="3">7</div>
-                <div draggable="true" class="grid-item row1 col0" id="4">2</div>
+            <div id="gridContainer" class="grid-container">
+                <div draggable="true" class="grid-item row0 col0" id="1">1</div>
+                <div draggable="true" class="grid-item row0 col1" id="2">2</div>
+                <div draggable="true" class="grid-item row0 col2" id="3">3</div>
+                <div draggable="true" class="grid-item row1 col0" id="4">4</div>
                 <div draggable="true" class="grid-item row1 col1" id="5">5</div>
-                <div draggable="true" class="grid-item row1 col2" id="6">4</div>
-                <div draggable="true" class="grid-item row2 col0" id="7">3</div>
-                <div draggable="true" class="grid-item row2 col1" id="8"> </div>
-                <div draggable="true" class="grid-item row2 col2" id="0">1</div>
+                <div draggable="true" class="grid-item row1 col2" id="6">6</div>
+                <div draggable="true" class="grid-item row2 col0" id="7">7</div>
+                <div draggable="true" class="grid-item row2 col1" id="8">8</div>
+                <div draggable="true" class="grid-item row2 col2" id="0"> </div>
             </div>
-
         </div>
         <div class="centered">
             <button id="shuffleButton" style="padding: 5vmin; font-size: 10vmin" onclick="shuffleHtmlMatrix()">Shuffle</button>
@@ -90,9 +97,6 @@
             <p id="output"></p>
         </div>
 
-        
-
-        
         <script src="driver.js"></script>
     </body>
 </html>

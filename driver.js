@@ -662,20 +662,47 @@ const shuffleHtmlMatrix = () => {
     } 
     while (!Puzzle.isPuzzleSolvable1Darr(puzzle_arr));
 
+    const backgroundPositions = getBackgroundPositions(htmlMatrix.length, htmlMatrix[0].length);
+
     for(let row = 0; row < htmlMatrix.length; row++) {
         for(let col = 0; col < htmlMatrix[row].length; col++) {
             let value = puzzle_arr.pop();
             if (value === 0) { 
                 htmlMatrix[row][col].innerHTML = " ";
                 htmlMatrix[row][col].style.opacity = '0';
+
+                // TODO: Make blank space anywhere for images?  For now I'm taking out 100%, 100% here to use as the bottom right tile
+                htmlMatrix[row][col].style.backgroundPosition = '100% 100%';
             }
             else {
                 htmlMatrix[row][col].innerHTML = value;
                 htmlMatrix[row][col].style.opacity = '1';
+                htmlMatrix[row][col].style.backgroundPosition = `${backgroundPositions[value]['rowPercent']}% ${backgroundPositions[value]['colPercent']}%`;
             }
         }
     }
+}
+
+const getBackgroundPositions = (rows, cols) => {
     
+    // Holds keys for the value the user sees for the puzzle
+    //  [1, 2, 3]
+    //  [4, 5, 6]
+    //  [7, 8  0]
+    const positionMatrix = {}
+
+    // Step for the even values of percentages between 0-100% for the number of tiles
+    // Ex. 3 tiles = [0, 50, 100].  4 tiles = [0, 33.3, 66.6, 100]
+    const rowPercentStep = (100 / (rows - 1));
+    const colPercentStep = (100 / (cols - 1));
+    for(let row = 0; row < rows; row++){
+        for(let col = 0; col < cols; col++){
+            console.log("SETTING POSITION FOR", row, col, {rowPercent: rowPercentStep*row, colPercent: colPercentStep*col})
+            positionMatrix[row + 1 + cols * col] = {rowPercent: rowPercentStep*row, colPercent: colPercentStep*col};
+        }
+    }
+
+    return positionMatrix
 }
 
 const resetPuzzleGridHTML = (htmlMatrix, puzzle) => {
@@ -781,18 +808,32 @@ let clickSourceElement = undefined;
 const playButton = document.getElementById("playButton");
 const solutionOutput = document.getElementById("output");
 const htmlMatrix = [[,,,], [,,,], [,,,]];
+const gridContainer = document.getElementById("gridContainer");
+const styler = document.getElementById("dynamicStyling");
+
 
 // https://web.dev/drag-and-drop/
 document.addEventListener('DOMContentLoaded', (e) => {
-    for(let row = 0; row < 3; row++) {
-        for(let col = 0; col < 3; col++) {
+    console.log(gridContainer);
+    console.log(gridContainer.offsetWidth, gridContainer.offsetHeight);
+    styler.innerHTML = `.grid-item { background-size: ${gridContainer.offsetWidth}px ${gridContainer.offsetHeight}px; }`
+
+
+    // TODO: Make dynamic size
+    let rows = 3, cols = 3;
+    const totalGridItems = rows*cols
+    for(let row = 0; row < rows; row++) {
+        for(let col = 0; col < cols; col++) {
             let gridItem = document.getElementsByClassName("row" + row + " col" + col)[0];
             htmlMatrix[row][col] = gridItem;
+            console.log(gridItem);
+            gridItem.style.backgroundPosition = `${col * 50}% ${row * 50}%`;
+            if (isNaN(parseInt(gridItem.innerHTML))) {
+                gridItem.style.opacity = '0';
+            }
         }
     }
 
-
-    shuffleHtmlMatrix()
 
     function handleDragStart(e) {
         if (playMode) {
@@ -848,16 +889,20 @@ document.addEventListener('DOMContentLoaded', (e) => {
             return;
         }
 
-        // Swap dragged tiles
         if (dragSourceElement !== this) {
-            dragSourceElement.innerHTML = this.innerHTML;
-            this.innerHTML = e.dataTransfer.getData('text/html');
+            // Swap dragged tiles
+            temp = { text: this.innerHTML, bgPosition: this.style.backgroundPosition };
+            this.innerHTML = dragSourceElement.innerHTML;
+            this.style.backgroundPosition = dragSourceElement.style.backgroundPosition;
+            dragSourceElement.innerHTML = temp.text;
+            dragSourceElement.style.backgroundPosition = temp.bgPosition;
+            
             if (isNaN(parseInt(this.innerHTML))) {
                 this.style.opacity = '0';
             }
             else {
                 this.style.opacity = '1';
-            }
+            }a
 
             // Don't keep click selection if dragging that same tile after clicking it
             if (dragSourceElement === clickSourceElement) {
@@ -955,10 +1000,19 @@ document.addEventListener('DOMContentLoaded', (e) => {
     });
 });
 
+addEventListener('resize', (event) => {
+    // console.log(event);
+    
+    styler.innerHTML = `.grid-item { background-size: ${gridContainer.offsetWidth}px ${gridContainer.offsetHeight}px; }`
+});
+
 const swapHtmlTiles = (tile1, tile2) => {
     const temp = tile1.innerHTML
-    tile1.innerHTML = tile2.innerHTML
+    const tempBackground = tile1.style.backgroundPosition;
+    tile1.innerHTML = tile2.innerHTML;
+    tile1.style.backgroundPosition = tile2.style.backgroundPosition;
     tile2.innerHTML = temp;
+    tile2.style.backgroundPosition = tempBackground;
     tile1.style.opacity = isNaN(parseInt(tile1.innerHTML)) ? "0" : "1";
     tile2.style.opacity = isNaN(parseInt(tile2.innerHTML)) ? "0" : "1";
 }
@@ -1010,18 +1064,22 @@ const playModeSetMovableTiles = () => {
 
                 if (row - 1 >= 0) {
                     htmlMatrix[row-1][col].style.pointerEvents = 'auto';
+                    htmlMatrix[row-1][col].style.cursor = 'pointer';
                 }
                 
                 if (row + 1 <= (htmlMatrix.length - 1)) {
                     htmlMatrix[row+1][col].style.pointerEvents = 'auto';
+                    htmlMatrix[row+1][col].style.cursor = 'pointer';
                 }
 
                 if (col - 1 >= 0) {
                     htmlMatrix[row][col-1].style.pointerEvents = 'auto';
+                    htmlMatrix[row][col-1].style.cursor = 'pointer';
                 }
 
                 if (col + 1 <= (htmlMatrix[row].length - 1)) {
                     htmlMatrix[row][col+1].style.pointerEvents = 'auto';
+                    htmlMatrix[row][col+1].style.cursor = 'pointer';
                 }
             } else {
                 htmlMatrix[row][col].style.opacity = '1'; // highlight blank tile
