@@ -12,7 +12,7 @@ class QElement {
 }
  
 // PriorityQueue class
-export class PriorityQueue {
+class PriorityQueue {
  
     // An array is used to implement priority
     constructor()
@@ -102,5 +102,3 @@ export class PriorityQueue {
         return str;
     }
 }
-
-

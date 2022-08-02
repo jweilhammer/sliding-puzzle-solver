@@ -1,15 +1,4 @@
-class Tile {
-    constructor(value, row, col) {
-      this.value = value;
-      this.row = row;
-      this.col = col;
-    }
-}
-
-// TODO: Static variable somehow
-
-
-export class Puzzle {
+class Puzzle {
     static goalState = Puzzle.fromMatrix([ [1, 2, 3], 
                                            [4, 5, 6],
                                            [7, 8, 0] ]);
@@ -41,22 +30,30 @@ export class Puzzle {
         return copy;
     }
 
-    // TODO: Only working for 3x3
+    // TODO: Only working for 3x3, maybe also validate this is a valid puzzle too :-)
     static fromMatrix(matrix) {
         let puzzle = new this(false);
-        puzzle.matrix = [[,,,], [,,,], [,,,]]; 
+
         for (let row = 0; row < matrix.length; row++) {
             for (let col = 0; col < matrix[0].length; col++) {
                 if (!matrix[row][col]) {
-                    console.log("BLANK TILE", row, col)
                     puzzle.blank_row = row;
                     puzzle.blank_col = col;
                 }
-                puzzle.matrix[row][col] = new Tile(matrix[row][col], row, col);
             }
         }
-
+        puzzle.matrix = matrix;
         return puzzle;
+    }
+
+    static getBlankTilePosition(puzzle) {
+        for (let row = 0; row < puzzle.matrix.length; row++) {
+            for (let col = 0; col < puzzle.matrix[row].length; col++) {
+                if (puzzle.matrix[row][col] === 0) {
+                    return [row, col];
+                }
+            }
+        }
     }
 
     // Gives me a random, solveable puzzle
@@ -64,9 +61,9 @@ export class Puzzle {
         const values = [1, 2, 3, 4, 5, 6, 7, 8, 0];
         let puzzle_arr = [];
         do {
-            puzzle_arr = this.shuffleArray(values);
+            puzzle_arr = Puzzle.shuffleArray(values);
         } 
-        while (!this.isPuzzleSolvable(puzzle_arr));
+        while (!Puzzle.isPuzzleSolvable1Darr(puzzle_arr));
 
         // Turn 1D array into our Puzzle Matrix from last to first to use arr.pop()
         let puzzle_matrix = [[,,,], [,,,], [,,,]];
@@ -77,14 +74,12 @@ export class Puzzle {
                     this.blank_row = row;
                     this.blank_col = col;
                 }
-                puzzle_matrix[row][col] = new Tile(value, row, col);
+                puzzle_matrix[row][col] = value;
             }
         }
 
         return puzzle_matrix;
     }
-
-    static getBlankTilePosition()
 
 
     canSlideLeft() {
@@ -130,8 +125,8 @@ export class Puzzle {
             return false;
         }
 
-        this.matrix[this.blank_row][this.blank_col].value = this.matrix[this.blank_row][this.blank_col - 1].value;
-        this.matrix[this.blank_row][this.blank_col - 1].value = 0;
+        this.matrix[this.blank_row][this.blank_col] = this.matrix[this.blank_row][this.blank_col - 1];
+        this.matrix[this.blank_row][this.blank_col - 1] = 0;
         this.blank_col--;
     }
 
@@ -142,8 +137,8 @@ export class Puzzle {
             return false;
         }
 
-        this.matrix[this.blank_row][this.blank_col].value = this.matrix[this.blank_row][this.blank_col + 1].value;
-        this.matrix[this.blank_row][this.blank_col + 1].value = 0;
+        this.matrix[this.blank_row][this.blank_col] = this.matrix[this.blank_row][this.blank_col + 1];
+        this.matrix[this.blank_row][this.blank_col + 1] = 0;
         this.blank_col++;
     }
 
@@ -154,8 +149,8 @@ export class Puzzle {
             return false;
         }
 
-        this.matrix[this.blank_row][this.blank_col].value = this.matrix[this.blank_row - 1][this.blank_col].value;
-        this.matrix[this.blank_row - 1][this.blank_col].value = 0;
+        this.matrix[this.blank_row][this.blank_col] = this.matrix[this.blank_row - 1][this.blank_col];
+        this.matrix[this.blank_row - 1][this.blank_col] = 0;
         this.blank_row--;
     }
 
@@ -165,18 +160,19 @@ export class Puzzle {
             return false;
         }
 
-        this.matrix[this.blank_row][this.blank_col].value = this.matrix[this.blank_row + 1][this.blank_col].value;
-        this.matrix[this.blank_row + 1][this.blank_col].value = 0;
+        this.matrix[this.blank_row][this.blank_col] = this.matrix[this.blank_row + 1][this.blank_col];
+        this.matrix[this.blank_row + 1][this.blank_col] = 0;
         this.blank_row++;
     }
 
     // Updates manhattan sum for this puzzle state.  Takes a goal mapping from Puzzle's goal mapping static method
     updateManhattanSum(goal_mapping) {
         let manhattanSum = 0;
-        for(let row of this.matrix) {
-            for(let tile of row) {
-                if (tile.value) {
-                    manhattanSum += ( Math.abs(tile.row - goal_mapping[tile.value.toString()].row) + Math.abs(tile.col - goal_mapping[tile.value.toString()].col) );    
+        for(let row = 0; row < this.matrix.length; row++) {
+            for(let col = 0; col < this.matrix[row].length; col++) {
+                if (this.matrix[row][col]) {
+                    const goalPos = goal_mapping[this.matrix[row][col]]
+                    manhattanSum += ( Math.abs(row - goalPos.row) + Math.abs(col - goalPos.col) );    
                 }
             }
         }
@@ -197,16 +193,6 @@ export class Puzzle {
         }
 
         return map;
-    }
-
-    static getBlankTilePosition() {
-        for (const row of this.matrix) {
-            for (const tile of row) {
-                if (tile.value === 0) {
-                    return [tile.row, tile.col];
-                }
-            }
-        }
     }
 
     generateNeighbors(goal_mapping=null) {
@@ -257,7 +243,7 @@ export class Puzzle {
         // TODO: Type checks, size checks, etc
         for (let row = 0; row < puzzle.matrix.length; row++) {
             for (let col = 0; col < puzzle.matrix[row].length; col++) {
-                if (puzzle.matrix[row][col].value !== this.matrix[row][col].value) {
+                if (puzzle.matrix[row][col] !== this.matrix[row][col]) {
                     return false;
                 }
             }
@@ -276,7 +262,29 @@ export class Puzzle {
      * 4   _   5
      * 8   6   7
      */
-    isPuzzleSolvable(arr) {
+    static isPuzzleSolvable1Darr(arr) {
+        let inversions = 0;
+        for (let i = 0; i < arr.length; i++) {
+            for (let j = i + 1; j < arr.length; j++) {
+                // Not comparing either side with the blank space (0), and greater than next value
+                if (arr[i] && arr[j] && arr[i] > arr[j]) {
+                    inversions++;
+                }
+            }
+        }
+        // Return true on even, false on odd inversion count
+        return !(inversions % 2)
+    }
+
+    static isPuzzleSolvable2Darr(matrix) {
+        const arr = [];
+
+        for(let row = 0; row < matrix.length; row++){
+            for(let col = 0; col < matrix[0].length; col++) {
+                arr.push(matrix[row][col]);
+            }
+        }
+
         let inversions = 0;
         for (let i = 0; i < arr.length; i++) {
             for (let j = i + 1; j < arr.length; j++) {
@@ -292,10 +300,10 @@ export class Puzzle {
     
     // Modern Fisher–Yates shuffle:
     // https://en.wikipedia.org/wiki/Fisher-Yates_shuffle
-    shuffleArray(array) {
-        for (var i = array.length - 1; i > 0; i--) {
-            var j = Math.floor(Math.random() * (i + 1)); // random from 0 -> i
-            var temp = array[i];
+    static shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1)); // random from 0 -> i
+            const temp = array[i];
             array[i] = array[j];
             array[j] = temp;
         }
@@ -303,14 +311,14 @@ export class Puzzle {
     }
 
     printPuzzle() {
+        let string = "";
         for (const row of this.matrix) {
             for (const tile of row) {
-                process.stdout.write(tile.value + " ");
+                string += tile + " ";;
             }
-            process.stdout.write("\n");
+            string += "\n";
         }
-        process.stdout.write("\n");
+        string += "\n";
+        console.log(string)
     }
 }
-
-module.exports = Puzzle;
