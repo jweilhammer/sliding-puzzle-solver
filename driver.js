@@ -74,30 +74,27 @@ const solvePuzzleForFunzies = async (htmlMatrix) => {
                                 APPROXIMATE MEMORY USAGE ${(solution['maxPuzzlesInMemory']*112 / (1024 * 1024))}MB
                                 `;
     
+
+    // 200 ms for 3x3 (9 tiles).  Get faster as the puzzle scales up
+    let moveDelayMs = 1800 / (puzzleRows * puzzleCols);
     for(move of solution['solutionMoves']) {
         // console.log("[", sliderRow, "x", sliderCol, "]", move);
 
         if (move === "RIGHT") {
             swapHtmlTiles(htmlMatrix[sliderRow][sliderCol], htmlMatrix[sliderRow][sliderCol+1]);
             sliderCol++;
-        }
-
-        if (move === "LEFT") {
+        } else if (move === "LEFT") {
             swapHtmlTiles(htmlMatrix[sliderRow][sliderCol], htmlMatrix[sliderRow][sliderCol-1]);
             sliderCol--;
-        }
-
-        if (move === "UP") {
+        }else if (move === "UP") {
             swapHtmlTiles(htmlMatrix[sliderRow][sliderCol], htmlMatrix[sliderRow-1][sliderCol]);
             sliderRow--;
-        }
-        
-        if (move === "DOWN") {
+        }else if (move === "DOWN") {
             swapHtmlTiles(htmlMatrix[sliderRow][sliderCol], htmlMatrix[sliderRow+1][sliderCol]);
             sliderRow++;
         }
 
-        await new Promise(r => setTimeout(r, 0));
+        await new Promise(r => setTimeout(r, moveDelayMs));
     }
 
 
