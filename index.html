@@ -2,13 +2,20 @@
 <html>
     <head>
         <style>
-            .grid-container {
+            .gridContainer {
+                /* Some sort of CSS Magic to keep child grid centered */
+                margin: -1px auto 0 auto; 
+                padding: 1px 0 0 0;
+
+                max-width: 60vmin;
+                max-height: 60vmin;
+            }
+            
+            .grid {
                 display: grid;
                 grid-auto-columns: 1fr;
                 grid-auto-rows: 1fr;
                 aspect-ratio: 1/1;
-                max-width: 60vmin;
-                max-height: 60vmin;
                 flex: auto;
             }
 
@@ -82,9 +89,8 @@
         <style id="dynamicStyling"></style>
     </head>
     <body>
-        <div class="centered">
-            <div id="gridContainer" class="grid-container">
-            </div>
+        <div class="centered gridContainer" id ="gridContainer">
+            <div id="grid" class="grid"></div>
         </div>
         <div class="centered">
             <button id="shuffleButton" class="buttons" onclick="shuffleHtmlMatrix()">Shuffle</button>
@@ -101,7 +107,7 @@
         </div>
 
         <div class="centered">
-            <label class="flexy" for="algorithms">Choose a search algorithm:</label>
+            <label class="flexy" for="algorithms">Algorithm:</label>
             <select class="flexy" name="algorithms" id="algorithmsDropdown">
                 <option value="Strategic">Strategically</option>
                 <option value="IDA*">Iterative Deepening A*</option>

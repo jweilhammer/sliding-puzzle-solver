@@ -4,8 +4,10 @@ let clickSourceElement = undefined;
 const playButton = document.getElementById("playButton");
 const solutionOutput = document.getElementById("output");
 let htmlMatrix = [[,,,], [,,,], [,,,]];
+const grid = document.getElementById("grid");
 const gridContainer = document.getElementById("gridContainer");
 const styler = document.getElementById("dynamicStyling");
+const algorithmDropdown =document.getElementById("algorithmsDropdown");
 
 // Default puzzle grid dimensions
 const rowInput = document.getElementById("rowInput");
@@ -160,7 +162,8 @@ const getPuzzleFromGridHTML = (htmlMatrix) => {
 
 // https://web.dev/drag-and-drop/
 document.addEventListener('DOMContentLoaded', (e) => {
-    updatePuzzleDimensions(5, 5);
+    updatePuzzleDimensions(parseInt(rowInput.value), parseInt(colInput.value));
+    updateBackgroundImageSize();
 });
 
 
@@ -260,6 +263,46 @@ const updatePuzzleDimensions = (newRow, newCol) => {
         return false;
     }
 
+    // Max size of 100x100
+    if (newRow > 100) {
+        rowInput.value = 100;
+        updateBackgroundImageSize();
+        return false;
+    }
+
+    if (newCol > 100) {
+        colInput.value = 100;
+        updateBackgroundImageSize();
+        return false;
+    }
+
+
+    // Minimum rows/cols of 2.
+    // TODO: Allow 1xN or Nx1 puzzles?
+    if (newRow < 2) {
+        rowInput.value = 2;
+        updateBackgroundImageSize();
+        return false;
+    }
+
+    if (newCol < 2) {
+        colInput.value = 2;
+        updateBackgroundImageSize();
+        return false;
+    }
+
+
+    // Only allow strategic algorithm on puzzles that are larger
+    // TODO: Optimize IDA* for 4x4?  Don't see the point though..
+    //       Easier to compare with other algorithms at 3x3
+    if (newRow * newCol > 9) {
+        console.log("PUZZLE IS LARGE", newRow * newCol);
+        toggleStrategicOnlyAlgorithm(true);
+    } else {
+        toggleStrategicOnlyAlgorithm(false);
+    }
+
+
     if (newRow === puzzleRows && newCol === puzzleCols) {
         return false;
     } else {
@@ -267,22 +310,16 @@ const updatePuzzleDimensions = (newRow, newCol) => {
         puzzleCols = newCol;
     }
 
-    // Too large of space.  Could still solve but nobody is going to stick around that long
-    // Also, makes things easier for responsive resizing
-    // if (newRow * newCol > 400) {
-    //     return false;
-    // }
-
 
     // Remove all current tiles
     resetClickSourceElement();
-    while (gridContainer.firstChild) {
-        gridContainer.removeChild(gridContainer.firstChild);
+    while (grid.firstChild) {
+        grid.removeChild(grid.firstChild);
     }
 
-    gridContainer.style.gridTemplateRows = `${'1fr '.repeat(newRow)}`;
-    gridContainer.style.gridTemplateColumns = `${'1fr '.repeat(newCol)}`;
-    gridContainer.style.fontSize = null;
+    grid.style.gridTemplateRows = `${'1fr '.repeat(newRow)}`;
+    grid.style.gridTemplateColumns = `${'1fr '.repeat(newCol)}`;
+    grid.style.fontSize = null;
     
 
     value = 1;
@@ -306,22 +343,59 @@ const updatePuzzleDimensions = (newRow, newCol) => {
             tile.draggable = true;
             tile.style.backgroundPosition = `${col * colPercentStep}% ${row * rowPercentStep}%`;
             tile.style.opacity = value === newRow*newCol ? '0' : '1';
-            gridContainer.appendChild(tile);
+            grid.appendChild(tile);
             attachTileEventListeners(tile);
             htmlMatrix[row][col] = tile;
             value++;
         }
     }
+}
 
-    updateBackgroundImageSize();
+const toggleStrategicOnlyAlgorithm = (strategicOnly) => {
+
+    // Remove all other algorithms since our puzzle space is too large
+    if (strategicOnly) {
+        const childrenToRemove = [];
+        for (const child of algorithmDropdown.children) {
+            if (child.value !== "Strategic") {
+                childrenToRemove.push(child);
+            }
+        }
+
+        for (const child of childrenToRemove) {
+            algorithmDropdown.removeChild(child);
+        }
+
+    } else if (algorithmDropdown.childElementCount <= 1) {
+
+        // Add the other algorithms back in!
+        const algorithms = {
+            "IDA*": "Iterative Deepening A*",
+            "A*": "A* (with closed set)",
+            "BFS": "Breadth-First Search"
+        }
+
+        for (key in algorithms) {
+            console.log("ADDING", key, algorithms[key]);
+            const option = document.createElement("option");
+            option.value = key;
+            option.textContent = algorithms[key];
+            algorithmDropdown.appendChild(option);
+        }
+    }
 }
 
 const updateBackgroundImageSize = () => {
-    gridContainer.style.backgroundSize = `${gridContainer.offsetWidth}px ${gridContainer.offsetHeight}px`
-    gridContainer.style.fontSize = `${Math.min(
-        gridContainer.childNodes[0].offsetWidth,
-        gridContainer.childNodes[0].offsetHeight
-    )/2}px`
+    // Keep our segmented tile background sizes the same as the grid container as window resizes
+    grid.style.backgroundSize = `${gridContainer.offsetWidth}px ${gridContainer.offsetHeight}px`
+
+    // At a certain point, we don't care about seeing the tiles
+    if (puzzleCols * puzzleRows > 1000) {
+        grid.style.fontSize = 0;
+    } else {
+        // Magic formula that will keep things looking nice and prevent grid from getting out of bounds due to the numbers
+        grid.style.fontSize = `${800 * ( 0.001 * gridContainer.offsetWidth) /  ( 2 * Math.max(puzzleCols, puzzleRows))}px`;
+    }
 }
 
 const attachTileEventListeners = (tile) => {
