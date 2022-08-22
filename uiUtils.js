@@ -9,7 +9,12 @@ const grid = document.getElementById("grid");
 const gridContainer = document.getElementById("gridContainer");
 const styler = document.getElementById("dynamicStyling");
 const algorithmDropdown =document.getElementById("algorithmsDropdown");
+
+// Dimension inputs
+const rowInput = document.getElementById("rowInput");
 const colInput = document.getElementById("colInput");
+const rowSlider = document.getElementById("rowSlider");
+const colSlider = document.getElementById("colSlider");
 
 
 // App state
@@ -271,14 +276,16 @@ const updatePuzzleDimensions = (newRow, newCol) => {
     }
 
     // Max size of 100x100
-    if (newRow > 100) {
-        rowInput.value = 100;
+    if (newRow > 50) {
+        rowInput.value = 50;
+        rowSlider.value = 50;
         updateBackgroundImageSize();
         return false;
     }
 
-    if (newCol > 100) {
-        colInput.value = 100;
+    if (newCol > 50) {
+        colInput.value = 50;
+        colSlider.value = 50;
         updateBackgroundImageSize();
         return false;
     }
@@ -288,12 +295,14 @@ const updatePuzzleDimensions = (newRow, newCol) => {
     // TODO: Allow 1xN or Nx1 puzzles?
     if (newRow < 2) {
         rowInput.value = 2;
+        rowSlider.value = 2;
         updateBackgroundImageSize();
         return false;
     }
 
     if (newCol < 2) {
         colInput.value = 2;
+        colSlider.value = 2;
         updateBackgroundImageSize();
         return false;
     }
@@ -423,13 +432,26 @@ const attachTileEventListeners = (tile) => {
     tile.addEventListener('touchstart', handleTileTouchAndCLick);
 }
 
+rowSlider.addEventListener('change', (e) => {
+    rowInput.value = rowSlider.value;
+    updatePuzzleDimensions(parseInt(rowInput.value), parseInt(colInput.value));
+    updateBackgroundImageSize();
+});
+
+colSlider.addEventListener('change', (e) => {
+    colInput.value = colSlider.value;
+    updatePuzzleDimensions(parseInt(rowInput.value), parseInt(colInput.value));
+    updateBackgroundImageSize();
+});
 
 rowInput.addEventListener('change', (e) => {
+    rowSlider.value = rowInput.value;
     updatePuzzleDimensions(parseInt(rowInput.value), parseInt(colInput.value));
     updateBackgroundImageSize();
 });
 
 colInput.addEventListener('change', (e) => {
+    colSlider.value = colInput.value;
     updatePuzzleDimensions(parseInt(rowInput.value), parseInt(colInput.value));
     updateBackgroundImageSize();
 });
