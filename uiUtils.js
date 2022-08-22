@@ -8,12 +8,13 @@ const grid = document.getElementById("grid");
 const gridContainer = document.getElementById("gridContainer");
 const styler = document.getElementById("dynamicStyling");
 const algorithmDropdown =document.getElementById("algorithmsDropdown");
-
-// Default puzzle grid dimensions
-const rowInput = document.getElementById("rowInput");
 const colInput = document.getElementById("colInput");
-let puzzleRows = 0;
-let puzzleCols = 0;
+
+
+// App state
+let puzzleRows = undefined;
+let puzzleCols = undefined;
+let solutionAnimating = false;
 
 const resetClickSourceElement = () => {
     // Unselect any tiles before shuffling
@@ -51,8 +52,9 @@ const resetDragSourceElement = () => {
 
 
 const shuffleHtmlMatrix = () => {
-    // Unselect any tiles before shuffling
+    // Unselect any tiles and stop animation before shuffling
     resetClickSourceElement();
+    solutionAnimating = false;
 
     // Get all tile Values in 1D array, plus blank tile (0)
     let tileValue = 1;
@@ -65,7 +67,6 @@ const shuffleHtmlMatrix = () => {
 
     let puzzle_arr = [];
     do {
-        console.log("GETTING NEW PUZZLE INSTEAD OF", puzzle_arr);
         puzzle_arr = Puzzle.shuffleArray(values);
     } 
     while (!Puzzle.isPuzzleSolvable1Darr(puzzle_arr, puzzleRows, puzzleCols));
@@ -176,19 +177,22 @@ addEventListener('resize', (event) => {
 
 
 const swapHtmlTiles = (tile1, tile2) => {
-    const temp = tile1.innerHTML
+    const temp = tile1.textContent
     const tempBackground = tile1.style.backgroundPosition;
-    tile1.innerHTML = tile2.innerHTML;
+    tile1.textContent = tile2.textContent;
     tile1.style.backgroundPosition = tile2.style.backgroundPosition;
-    tile2.innerHTML = temp;
+    tile2.textContent = temp;
     tile2.style.backgroundPosition = tempBackground;
-    tile1.style.opacity = isNaN(parseInt(tile1.innerHTML)) ? "0" : "1";
-    tile2.style.opacity = isNaN(parseInt(tile2.innerHTML)) ? "0" : "1";
+    tile1.style.opacity = isNaN(parseInt(tile1.textContent)) ? "0" : "1";
+    tile2.style.opacity = isNaN(parseInt(tile2.textContent)) ? "0" : "1";
 }
 
 
 let playMode = false;
 const togglePlayMode = () => {
+    // Stop animation if solution is playing out
+    solutionAnimating = false;
+
     if (playMode) {
         playMode = false;
         playButton.innerHTML = "Play Puzzle";
@@ -259,6 +263,8 @@ const playModeSetMovableTiles = () => {
 
 
 const updatePuzzleDimensions = (newRow, newCol) => {
+    solutionAnimating = false;
+
     if (isNaN(newRow) || isNaN(newCol)) {
         return false;
     }

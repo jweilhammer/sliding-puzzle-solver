@@ -412,8 +412,6 @@ class Puzzle {
             }
         }
 
-        console.log(arr, matrix.length, matrix[0].length);
-
         return Puzzle.isPuzzleSolvable1Darr(arr, matrix.length, matrix[0].length);
     }
     

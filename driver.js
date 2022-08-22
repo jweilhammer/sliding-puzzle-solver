@@ -1,5 +1,6 @@
 const solvePuzzle = (algorithm, puzzle, goal_state) => {
-    console.log("INSIDE SOLVE PUZZLE")
+    // Stop animation of previous solution if user clicks solve again mid-way through
+    solutionAnimating = false;
 
     let solution = algorithm(puzzle, goal_state);
 
@@ -29,6 +30,12 @@ const solvePuzzle = (algorithm, puzzle, goal_state) => {
 
 
 const solvePuzzleForFunzies = async (htmlMatrix) => {
+
+    // Don't do anything if user is spamming solve button
+    if (solutionAnimating) {
+        return;
+    }
+
     const startingPuzzle = getPuzzleFromGridHTML(htmlMatrix);
 
     console.log("STARTING PUZZLE:", startingPuzzle);
@@ -57,12 +64,11 @@ const solvePuzzleForFunzies = async (htmlMatrix) => {
         "BFS": solvePuzzleBFS
     }
 
-    console.log(document.getElementById("algorithmsDropdown").value)
     const algorithm = algorithmMappings[document.getElementById("algorithmsDropdown").value];
+    let sliderPosition = Puzzle.getBlankTilePosition(startingPuzzle);
+    let sliderRow = sliderPosition[0];
+    let sliderCol = sliderPosition[1];
 
-    sliderPosition = Puzzle.getBlankTilePosition(startingPuzzle);
-    sliderRow = sliderPosition[0];
-    sliderCol = sliderPosition[1];
     htmlMatrix[sliderRow][sliderCol].style.opacity = '0';
     solution = solvePuzzle(algorithm, startingPuzzle, goalState);
 
@@ -73,12 +79,16 @@ const solvePuzzleForFunzies = async (htmlMatrix) => {
                                 MAX PUZZLES IN MEM: ${solution['maxPuzzlesInMemory']}<br />
                                 APPROXIMATE MEMORY USAGE ${(solution['maxPuzzlesInMemory']*112 / (1024 * 1024))}MB
                                 `;
-    
 
     // 200 ms for 3x3 (9 tiles).  Get faster as the puzzle scales up
     let moveDelayMs = 1800 / (puzzleRows * puzzleCols);
+    solutionAnimating = true;
     for(move of solution['solutionMoves']) {
-        // console.log("[", sliderRow, "x", sliderCol, "]", move);
+
+        // Only move tiles if our solution is allowed to animate
+        if (!solutionAnimating) {
+            return;
+        }
 
         if (move === "RIGHT") {
             swapHtmlTiles(htmlMatrix[sliderRow][sliderCol], htmlMatrix[sliderRow][sliderCol+1]);
@@ -86,10 +96,10 @@ const solvePuzzleForFunzies = async (htmlMatrix) => {
         } else if (move === "LEFT") {
             swapHtmlTiles(htmlMatrix[sliderRow][sliderCol], htmlMatrix[sliderRow][sliderCol-1]);
             sliderCol--;
-        }else if (move === "UP") {
+        } else if (move === "UP") {
             swapHtmlTiles(htmlMatrix[sliderRow][sliderCol], htmlMatrix[sliderRow-1][sliderCol]);
             sliderRow--;
-        }else if (move === "DOWN") {
+        } else if (move === "DOWN") {
             swapHtmlTiles(htmlMatrix[sliderRow][sliderCol], htmlMatrix[sliderRow+1][sliderCol]);
             sliderRow++;
         }
@@ -97,5 +107,5 @@ const solvePuzzleForFunzies = async (htmlMatrix) => {
         await new Promise(r => setTimeout(r, moveDelayMs));
     }
 
-
+    solutionAnimating = false;
 }
