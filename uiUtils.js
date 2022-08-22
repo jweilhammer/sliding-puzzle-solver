@@ -1,6 +1,10 @@
 // UI ELEMENTS
 let dragSourceElement = undefined;
 let clickSourceElement = undefined;
+const dimensionInputContainer = document.getElementById("dimensionInputContainer");
+const editInputWrapper = document.getElementById("editInputWrapper");
+const imageUploadForm = document.getElementById("ImageUploadForm");
+const imageInputURL = document.getElementById("imageInputURL");
 const playButton = document.getElementById("playButton");
 const summaryOutput = document.getElementById("outputSummary");
 const solutionOutput = document.getElementById("outputMoves");
@@ -12,10 +16,10 @@ const algorithmDropdown =document.getElementById("algorithmsDropdown");
 let htmlMatrix = [[]];
 
 // Dimension inputs
-const rowInput = document.getElementById("rowInput");
-const colInput = document.getElementById("colInput");
-const rowSlider = document.getElementById("rowSlider");
-const colSlider = document.getElementById("colSlider");
+let rowInput = document.getElementById("rowInput");
+let colInput = document.getElementById("colInput");
+let rowSlider = document.getElementById("rowSlider");
+let colSlider = document.getElementById("colSlider");
 
 
 // App state
@@ -174,6 +178,7 @@ const getPuzzleFromGridHTML = (htmlMatrix) => {
 document.addEventListener('DOMContentLoaded', (e) => {
     updatePuzzleDimensions(parseInt(rowInput.value), parseInt(colInput.value));
     updateBackgroundImageSize();
+    styler.innerHTML = ".grid-item { background-image: url('test.jpg'); }"
 });
 
 
@@ -196,7 +201,6 @@ const swapHtmlTiles = (tile1, tile2) => {
     tile2.style.opacity = isNaN(parseInt(tile2.textContent)) ? "0" : "1";
 }
 
-
 let playMode = false;
 const togglePlayMode = () => {
     // Stop animation if solution is playing out
@@ -215,13 +219,23 @@ const togglePlayMode = () => {
                 tile.style.opacity = isNaN(parseInt(tile.innerHTML)) ? '0' : '1';
             }
         }
+        addEditElements();
     }
     else {
         playMode = true;
-        playButton.innerHTML = "Customize Puzzle";
+        playButton.innerHTML = "Edit Puzzle";
         playModeResetAllMovableTiles();
         playModeSetMovableTiles();
+        removeEditElements();
     }
+}
+
+const removeEditElements = () => {
+    dimensionInputContainer.innerHTML = "";
+}
+
+const addEditElements = () => {
+    dimensionInputContainer.append(editInputWrapper);
 }
 
 const playModeResetAllMovableTiles = () => {
@@ -471,7 +485,7 @@ function handleTileDragOver (e) {
 }
 
 function handleTileDragStart (e) {
-    if (playMode) {
+    if (playMode || solutionAnimating) {
         return;
     }
 
@@ -489,6 +503,7 @@ function handleTileDragStart (e) {
 }
 
 function handleTileDragEnd (e) {
+
   // Keep this tile highlighted if it's clicked
   if (this === clickSourceElement) {
     dragSourceElement = undefined; // reset without unselecting
@@ -503,7 +518,7 @@ function handleTileDragEnd (e) {
 }
 
 function handleTileDrop (e) {
-    if (playMode) {
+    if (playMode || solutionAnimating) {
         return;
     }
 
@@ -541,8 +556,11 @@ function handleTileDrop (e) {
 // Mobile HTML5 drop and drag not supported natively: https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API
 function handleTileTouchAndCLick (e) {
     // Stop zooming when double clicking tiles on mobile
-    // TODO: Attach this to rest of page?
     e.preventDefault();
+
+    if (solutionAnimating) {
+        return;
+    }
 
     if (clickSourceElement && !playMode) {
         // Unselect same tile after double click
@@ -593,6 +611,23 @@ function handleTileTouchAndCLick (e) {
             this.style.opacity = '0.4';
             clickSourceElement = this;
         }
+    }
+}
+
+// Prevent default and return false to prevent page reload
+// Using form onsubmit for free URL validation from URL input tage
+function handleImageURL () {
+    console.log("SETTING NEW IMAGE TO:", imageInputURL.value);
+    styler.innerHTML = `.grid-item { background-image: url('${imageInputURL.value}'); }`;
+}
+
+function handleImageUpload () {
+    const fileInput = document.getElementById('imageUpload');
+    const reader = new FileReader();
+    const file = fileInput.files[0];
+    if (file && file['type'].split('/')[0] === 'image') {
+        console.log("IMAGE IS VALID", typeof(file), file);
+        styler.innerHTML = `.grid-item { background-image: url('${reader.readAsDataURL(file)}'); }`;
     }
 }
 

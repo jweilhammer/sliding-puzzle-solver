@@ -1,11 +1,21 @@
 <!DOCTYPE html>
 <html>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <head>
         <style>
+
+            .title {
+                font-size: 6vmin;
+                margin-top: 2.5vmin;
+            }
+
             .gridContainer {
                 /* Some sort of CSS Magic to keep child grid centered */
                 margin: -1px auto 0 auto; 
                 padding: 1px 0 0 0;
+
+                margin-top: 2.5vmin;
 
                 max-width: 60vmin;
                 max-height: 60vmin;
@@ -20,7 +30,6 @@
             }
 
             .grid-item {
-                background-image: url('test.jpg');
                 background-size: inherit;
                 border: 1px solid rgba(0, 0, 0, 0.8);
                 display: flex;
@@ -55,16 +64,27 @@
             .inputs {
                 font-size: 4vmin;
             }
+
+
             
             .buttons {
-                margin-top: 2vmin;
-                margin-bottom: 1vmin;
                 font-size: 5vmin;
-                padding: 3vmin;
+                padding: 2vmin;
+                margin:1vmin 1vmin 1vmin 1vmin;
+                border-radius:0.30em;
+                box-sizing: border-box;
+                background-color:#CCCCCC;
+                text-align:center;
+                position:relative;
             }
-            
 
-            .dimensionInputContainer {
+            .buttons:active{
+                top:0.1em;
+                background-color:#999999;
+            }
+
+
+            .dimensionInput {
                 /* Keep things centered and a little to the left since we justify flex-end */
                 font-family: "Fira Mono", monospace;
                 width: 60vmin;
@@ -74,7 +94,8 @@
                 /* Line up the sliders with each other */
                 justify-content: flex-end;
             }
-            .dimensionInputs {
+
+            .numberInput {
                 width: 8vmin;
             }
 
@@ -150,38 +171,50 @@
                 cursor: default;
             }
         </style>
-        <!-- For updating css classes dynmically with JS
-            Currently only using for updating background image size to match puzzle size during resizing events on the window
-            Unable to let it flex because of lots of things
-            Can't easily set an <img> and make it overflow since positions/sizes between tile and total puzzle grid conflict
+        <!-- 
+            For updating css classes dynmically with JS
+            Currently using to update background image via CSS for our grid items
         -->
         <style id="dynamicStyling"></style>
     </head>
     <body>
+        <div class="centered title" id ="title">
+            Edit Puzzle (click/drag to swap tiles)
+        </div>
         <div class="centered gridContainer" id ="gridContainer">
             <div id="grid" class="grid"></div>
         </div>
         <div class="centered">
             <button id="shuffleButton" class="buttons" onclick="shuffleHtmlMatrix()">Shuffle</button>
-            <button id="playButton" class="buttons" onclick="togglePlayMode()">Play puzzle</button>
+            <button id="playButton" class="buttons" onclick="togglePlayMode()">Play Puzzle</button>
             <button id="solveButton" class="buttons" onclick="solvePuzzleForFunzies(htmlMatrix)">Solve me!</button>
         </div>
-        <div class="centered">
-            <div class ="dimensionInputContainer">
-                <label class="inputs" for="rowInput">Rows:</label>
-                <input id="rowInput" type="number" class="inputs dimensionInputs" value="3"></input>
-                <input type="range" min="2" max="50" value="3" class="slider" id="rowSlider">
+
+        <div id="dimensionInputContainer"">
+            <div id="editInputWrapper">
+                <div class="centered">
+                    <div class ="dimensionInput">
+                        <label class="inputs" for="rowInput">Rows:</label>
+                        <input id="rowInput" type="number" class="inputs numberInput" value="3"></input>
+                        <input type="range" min="2" max="50" value="3" class="slider" id="rowSlider">
+                    </div>
+                </div>
+                <div class="centered">
+                    <div class ="dimensionInput">
+                        <label class="inputs" for="colInput">Cols:</label>
+                        <input id="colInput" type="number" class="inputs numberInput" value="3"></input>
+                        <input type="range" min="2" max="50" value="3" class="slider" id="colSlider">
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="centered">
-            <div class ="dimensionInputContainer">
-                <label class="inputs" for="colInput">Cols:</label>
-                <input id="colInput" type="number" class="inputs dimensionInputs" value="3"></input>
-                <input type="range" min="2" max="50" value="3" class="slider" id="colSlider">
-            </div>
+        <div id="customImageInput" class="centered inputs">
+            <label for="imageInputURL">Image URL:</label>
+            <input type="url" id="imageInputURL" name="imageInputURL" onchange="handleImageURL()"></input>
+            <input type="file" id="imageUpload" class="imageUpload"   onchange="handleImageUpload()"></input>
         </div>
-
+        
 
         <div class="centered">
             <label class="inputs" for="algorithms">Algorithm:</label>

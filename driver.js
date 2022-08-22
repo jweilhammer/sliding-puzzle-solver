@@ -44,7 +44,9 @@ const solvePuzzleForFunzies = async (htmlMatrix) => {
         return;
     }
 
-    
+    if (!playMode) {
+        togglePlayMode();
+    } 
 
     // Rows and cols tracked in UI utils to resize puzzle grid
     const goalState = Array(puzzleRows).fill().map(() => Array(puzzleCols));
@@ -84,7 +86,7 @@ const solvePuzzleForFunzies = async (htmlMatrix) => {
     // Get only first 3 decimal places for runtime
     summaryOutput.value = '';
     summaryOutput.value += `Runtime: ${solution['runtimeMs'].toFixed(3)}ms\n`;
-    summaryOutput.value += `Moves: ${solutionMoves.length} ${selectedAlgorithm !== "Strategic" ? "(optimal)" : "(not optimal)"}\n`;
+    summaryOutput.value += `Moves: ${solutionMoves.length} ${(selectedAlgorithm !== "Strategic" || solutionMoves.length === 0) ? "(optimal)" : "(not optimal)"}\n`;
     summaryOutput.value += `Max puzzles in memory: ${solution['maxPuzzlesInMemory']}`;
 
 
