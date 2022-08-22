@@ -4,11 +4,12 @@ let clickSourceElement = undefined;
 const playButton = document.getElementById("playButton");
 const summaryOutput = document.getElementById("outputSummary");
 const solutionOutput = document.getElementById("outputMoves");
-let htmlMatrix = [[,,,], [,,,], [,,,]];
+const outputAreaContainer = document.getElementById('outputAreaContainer');
 const grid = document.getElementById("grid");
 const gridContainer = document.getElementById("gridContainer");
 const styler = document.getElementById("dynamicStyling");
 const algorithmDropdown =document.getElementById("algorithmsDropdown");
+let htmlMatrix = [[]];
 
 // Dimension inputs
 const rowInput = document.getElementById("rowInput");
@@ -60,6 +61,8 @@ const resetDragSourceElement = () => {
 const shuffleHtmlMatrix = () => {
     // Unselect any tiles and stop animation before shuffling
     resetClickSourceElement();
+    hideOutputTextAreas();
+
     solutionAnimating = false;
 
     // Get all tile Values in 1D array, plus blank tile (0)
@@ -591,4 +594,12 @@ function handleTileTouchAndCLick (e) {
             clickSourceElement = this;
         }
     }
+}
+
+const hideOutputTextAreas = () => {
+    outputAreaContainer.style.visibility = 'hidden';
+}
+
+const showOutputTextAreas = () => {
+    outputAreaContainer.style.visibility = 'visible';
 }

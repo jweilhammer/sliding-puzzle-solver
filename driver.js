@@ -44,6 +44,8 @@ const solvePuzzleForFunzies = async (htmlMatrix) => {
         return;
     }
 
+    
+
     // Rows and cols tracked in UI utils to resize puzzle grid
     const goalState = Array(puzzleRows).fill().map(() => Array(puzzleCols));
     let value = 1;
@@ -56,6 +58,7 @@ const solvePuzzleForFunzies = async (htmlMatrix) => {
 
     // Unselect any tiles before sorting
     resetClickSourceElement();
+    hideOutputTextAreas();
 
     const algorithmMappings = {
         "Strategic": solvePuzzleStrategically,
@@ -83,16 +86,16 @@ const solvePuzzleForFunzies = async (htmlMatrix) => {
     summaryOutput.value += `Runtime: ${solution['runtimeMs'].toFixed(3)}ms\n`;
     summaryOutput.value += `Moves: ${solutionMoves.length} ${selectedAlgorithm !== "Strategic" ? "(optimal)" : "(not optimal)"}\n`;
     summaryOutput.value += `Max puzzles in memory: ${solution['maxPuzzlesInMemory']}`;
-    summaryOutput.mou
 
 
     solutionOutput.value = solutionMoves.length > 20000 ? 'See console for full move list...\n' : '';
-    let moveList = "";
+    let moveList = "Moves: (scrollable)\n";
     for(const [index, move] of solutionMoves.slice(0, 20000).entries()) {
         moveList += `${index+1}: ${move}\n`;
     }
 
     solutionOutput.value += moveList;
+    showOutputTextAreas();
                                   
     // 200 ms for 3x3 (9 tiles).  Get faster as the puzzle scales up
     let moveDelayMs = 1800 / (puzzleRows * puzzleCols);

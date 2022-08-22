@@ -54,19 +54,19 @@
 
             .inputs {
                 font-size: 4vmin;
-                font-family: "Fira Mono", monospace;
             }
+            
             .buttons {
                 margin-top: 2vmin;
                 margin-bottom: 1vmin;
                 font-size: 5vmin;
                 padding: 3vmin;
-                font-family: "Fira Mono", monospace;
             }
             
 
             .dimensionInputContainer {
                 /* Keep things centered and a little to the left since we justify flex-end */
+                font-family: "Fira Mono", monospace;
                 width: 50vmin;
                 margin-right: 5vmin;
                 display: inline-flex;
@@ -142,8 +142,6 @@
                 width: 50%;
                 font-size:3vmin;
                 font-family: "Fira Mono", monospace;
-                overflow:auto;
-
                 text-align: left;
 
                 border: none;
@@ -196,9 +194,9 @@
               </select>
         </div>
 
-        <div class="centered outputAreaContainer"">
-            <textarea readonly='yes' class="outputArea" id="outputMoves"></textarea>
+        <div class="centered outputAreaContainer" id="outputAreaContainer" style="visibility: hidden;">
             <textarea readonly='yes' class="outputArea" id="outputSummary"></textarea>
+            <textarea readonly='yes' class="outputArea" id="outputMoves" style="overflow-y: scroll"></textarea>
         </div>
 
         <script src="strategicSolve.js" defer></script>
