@@ -80,21 +80,19 @@ const solvePuzzleForFunzies = async (htmlMatrix) => {
 
     // Get only first 3 decimal places for runtime
     summaryOutput.value = '';
-    summaryOutput.value += `Moves: ${solutionMoves.length} ${selectedAlgorithm !== "Strategic" ? "(optimal)" : "(not optimal)"}\n`;
     summaryOutput.value += `Runtime: ${solution['runtimeMs'].toFixed(3)}ms\n`;
+    summaryOutput.value += `Moves: ${solutionMoves.length} ${selectedAlgorithm !== "Strategic" ? "(optimal)" : "(not optimal)"}\n`;
     summaryOutput.value += `Max puzzles in memory: ${solution['maxPuzzlesInMemory']}`;
     summaryOutput.mou
 
-    if (solutionMoves.length > 20000) {
-        solutionOutput.value = 'See console for full solution move list...'
-    }
-    else {
-        solutionOutput.value = '';
-        for(const [index, move] of solutionMoves.entries()) {
-            solutionOutput.value += `${index+1}: ${move}\n`;
-        }
+
+    solutionOutput.value = solutionMoves.length > 20000 ? 'See console for full move list...\n' : '';
+    let moveList = "";
+    for(const [index, move] of solutionMoves.slice(0, 20000).entries()) {
+        moveList += `${index+1}: ${move}\n`;
     }
 
+    solutionOutput.value += moveList;
                                   
     // 200 ms for 3x3 (9 tiles).  Get faster as the puzzle scales up
     let moveDelayMs = 1800 / (puzzleRows * puzzleCols);
