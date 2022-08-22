@@ -13,7 +13,8 @@ const solvePuzzleStrategically = (puzzle, goalState) => {
         return {
             "solutionPuzzle": puzzle,
             "runtimeMs": 0,
-            "solutionMoves": []
+            "solutionMoves": [],
+            "maxPuzzlesInMemory": 1,
         };
     }
 
@@ -205,7 +206,8 @@ const solvePuzzleStrategically = (puzzle, goalState) => {
             return {
                 "solutionPuzzle": puzzle,
                 "runtimeMs": endTime - startTime,
-                "solutionMoves": solutionMoves
+                "solutionMoves": solutionMoves,
+                "maxPuzzlesInMemory": 1,
             };
         }
     }

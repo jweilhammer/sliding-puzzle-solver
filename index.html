@@ -6,6 +6,7 @@
                 /* Some sort of CSS Magic to keep child grid centered */
                 margin: -1px auto 0 auto; 
                 padding: 1px 0 0 0;
+                margin-top: 5vh;
 
                 max-width: 60vmin;
                 max-height: 60vmin;
@@ -47,11 +48,12 @@
                 justify-content: center;
             }
 
-            .flexy {
+            .inputs {
                 font-size: 4vmin;
             }
-
             .buttons {
+                margin-top: 2vmin;
+                margin-bottom: 1vmin;
                 font-size: 5vmin;
                 padding: 3vmin;
             }
@@ -80,6 +82,25 @@
                 margin: 0px;
                 min-height: 100%;
             }
+
+            .outputAreaContainer {
+                height: 10vh;
+            }
+
+            .outputArea {
+                height: 100%;
+                width: 50%;
+                font:3vmin Arial;
+                overflow:auto;
+
+                text-align:center;
+
+                border: none;
+                background-color: transparent;
+                outline: none;
+                resize: none;
+                cursor: default;
+            }
         </style>
         <!-- For updating css classes dynmically with JS
             Currently only using for updating background image size to match puzzle size during resizing events on the window
@@ -97,18 +118,17 @@
             <button id="playButton" class="buttons" onclick="togglePlayMode()">Play puzzle</button>
             <button id="solveButton" class="buttons" onclick="solvePuzzleForFunzies(htmlMatrix)">Solve me!</button>
         </div>
-
         <div class="centered">
-            <label class="flexy" for="rowInput">Rows:</label>
-            <input id="rowInput" type="number" class="flexy dimensionInputs" value="3"></input>
-            <label class="flexy" for="colInput">Columns:</label>
-            <input id="colInput" type="number" class="flexy dimensionInputs" value="3"></input>
+            <label class="inputs" for="rowInput">Rows:</label>
+            <input id="rowInput" type="number" class="inputs dimensionInputs" value="3"></input>
+            <label class="inputs" for="colInput">Columns:</label>
+            <input id="colInput" type="number" class="inputs dimensionInputs" value="3"></input>
             </select>
         </div>
 
         <div class="centered">
-            <label class="flexy" for="algorithms">Algorithm:</label>
-            <select class="flexy" name="algorithms" id="algorithmsDropdown">
+            <label class="inputs" for="algorithms">Algorithm:</label>
+            <select class="inputs" name="algorithms" id="algorithmsDropdown">
                 <option value="Strategic">Strategically</option>
                 <option value="IDA*">Iterative Deepening A*</option>
                 <option value="A*">A* (with closed set)</option>
@@ -116,10 +136,9 @@
               </select>
         </div>
 
-
-
-        <div class="centered flexy">
-            <p id="output"></p>
+        <div class="centered outputAreaContainer"">
+            <textarea readonly='yes' class="centered flexy outputArea" id="outputSummary"></textarea>
+            <textarea readonly='yes' class="centered flexy outputArea" id="outputMoves"></textarea>
         </div>
 
         <script src="strategicSolve.js" defer></script>

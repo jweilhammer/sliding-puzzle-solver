@@ -2,7 +2,8 @@
 let dragSourceElement = undefined;
 let clickSourceElement = undefined;
 const playButton = document.getElementById("playButton");
-const solutionOutput = document.getElementById("output");
+const summaryOutput = document.getElementById("outputSummary");
+const solutionOutput = document.getElementById("outputMoves");
 let htmlMatrix = [[,,,], [,,,], [,,,]];
 const grid = document.getElementById("grid");
 const gridContainer = document.getElementById("gridContainer");
@@ -320,7 +321,7 @@ const updatePuzzleDimensions = (newRow, newCol) => {
     // Remove all current tiles
     resetClickSourceElement();
     while (grid.firstChild) {
-        grid.removeChild(grid.firstChild);
+        grid.innerHTML = "";
     }
 
     grid.style.gridTemplateRows = `${'1fr '.repeat(newRow)}`;

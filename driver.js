@@ -64,22 +64,38 @@ const solvePuzzleForFunzies = async (htmlMatrix) => {
         "BFS": solvePuzzleBFS
     }
 
-    const algorithm = algorithmMappings[document.getElementById("algorithmsDropdown").value];
+    const selectedAlgorithm = document.getElementById("algorithmsDropdown").value
+    const algorithm = algorithmMappings[selectedAlgorithm];
     let sliderPosition = Puzzle.getBlankTilePosition(startingPuzzle);
     let sliderRow = sliderPosition[0];
     let sliderCol = sliderPosition[1];
 
     htmlMatrix[sliderRow][sliderCol].style.opacity = '0';
-    solution = solvePuzzle(algorithm, startingPuzzle, goalState);
+    const solution = solvePuzzle(algorithm, startingPuzzle, goalState);
+    const solutionMoves = solution['solutionMoves'];
 
     console.log("RUNTIME:", solution['runtimeMs'], "ms. MAX PUZZLES IN MEM:", solution['maxPuzzlesInMemory']);
     console.log("APPROXIMATE MEMORY USAGE", (solution['maxPuzzlesInMemory']*112 / (1024 * 1024)), "MB");
 
-    solutionOutput.innerHTML = `RUNTIME: ${solution['runtimeMs']}ms<br />
-                                MAX PUZZLES IN MEM: ${solution['maxPuzzlesInMemory']}<br />
-                                APPROXIMATE MEMORY USAGE ${(solution['maxPuzzlesInMemory']*112 / (1024 * 1024))}MB
-                                `;
 
+    // Get only first 3 decimal places for runtime
+    summaryOutput.value = '';
+    summaryOutput.value += `Moves: ${solutionMoves.length} ${selectedAlgorithm !== "Strategic" ? "(optimal)" : "(not optimal)"}\n`;
+    summaryOutput.value += `Runtime: ${solution['runtimeMs'].toFixed(3)}ms\n`;
+    summaryOutput.value += `Max puzzles in memory: ${solution['maxPuzzlesInMemory']}`;
+    summaryOutput.mou
+
+    if (solutionMoves.length > 20000) {
+        solutionOutput.value = 'See console for full solution move list...'
+    }
+    else {
+        solutionOutput.value = '';
+        for(const [index, move] of solutionMoves.entries()) {
+            solutionOutput.value += `${index+1}: ${move}\n`;
+        }
+    }
+
+                                  
     // 200 ms for 3x3 (9 tiles).  Get faster as the puzzle scales up
     let moveDelayMs = 1800 / (puzzleRows * puzzleCols);
     solutionAnimating = true;
