@@ -88,13 +88,13 @@ const solvePuzzleForFunzies = async (htmlMatrix) => {
     summaryOutput.value += `Max puzzles in memory: ${solution['maxPuzzlesInMemory']}`;
 
 
-    solutionOutput.value = solutionMoves.length > 20000 ? 'See console for full move list...\n' : '';
-    let moveList = "Moves: (scrollable)\n";
+    let moveList = "Move list (scrollable):\n";
     for(const [index, move] of solutionMoves.slice(0, 20000).entries()) {
         moveList += `${index+1}: ${move}\n`;
     }
 
-    solutionOutput.value += moveList;
+    solutionOutput.value = moveList;
+    solutionOutput.value += solutionMoves.length > 20000 ? 'See console for full move list...\n' : ''
     showOutputTextAreas();
                                   
     // 200 ms for 3x3 (9 tiles).  Get faster as the puzzle scales up
