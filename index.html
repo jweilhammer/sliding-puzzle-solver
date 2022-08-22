@@ -54,17 +54,17 @@
 
             .inputs {
                 font-size: 4vmin;
+                font-family: "Fira Mono", monospace;
             }
             .buttons {
                 margin-top: 2vmin;
                 margin-bottom: 1vmin;
                 font-size: 5vmin;
                 padding: 3vmin;
+                font-family: "Fira Mono", monospace;
             }
+            
 
-            .test {
-                
-            }
             .dimensionInputContainer {
                 /* Keep things centered and a little to the left since we justify flex-end */
                 width: 50vmin;
@@ -140,7 +140,8 @@
             .outputArea {
                 height: 100%;
                 width: 50%;
-                font:3vmin Arial;
+                font-size:3vmin;
+                font-family: "Fira Mono", monospace;
                 overflow:auto;
 
                 text-align: left;
@@ -178,7 +179,7 @@
 
         <div class="centered">
             <div class ="dimensionInputContainer">
-                <label class="inputs" for="colInput">Columns:</label>
+                <label class="inputs" for="colInput">Cols:</label>
                 <input id="colInput" type="number" class="inputs dimensionInputs" value="3"></input>
                 <input type="range" min="2" max="50" value="3" class="slider" id="colSlider">
             </div>
@@ -196,8 +197,8 @@
         </div>
 
         <div class="centered outputAreaContainer"">
-            <textarea readonly='yes' class="outputArea" id="outputSummary"></textarea>
             <textarea readonly='yes' class="outputArea" id="outputMoves"></textarea>
+            <textarea readonly='yes' class="outputArea" id="outputSummary"></textarea>
         </div>
 
         <script src="strategicSolve.js" defer></script>
