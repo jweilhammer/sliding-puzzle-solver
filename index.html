@@ -95,6 +95,7 @@
 
 
             .dimensionInput {
+                margin-top: 2vmin;
                 /* Keep things centered and a little to the left since we justify flex-end */
                 font-family: "Fira Mono", monospace;
                 width: 60vmin;
@@ -103,9 +104,6 @@
                 
                 /* Line up the sliders with each other */
                 justify-content: flex-end;
-
-                margin-bottom: 3vmin;
-
             }
 
             .numberInput {
@@ -113,7 +111,14 @@
             }
 
             .customImageInput {
+                display: flex;
                 flex-basis: 100%;
+            }
+
+            .imageInputURL {
+                width: 30vmin;
+                display:inline-block;
+                line-height:150%;
             }
 
             .slider {
@@ -222,21 +227,27 @@
 
         <div id="dimensionInputContainer"">
             <div id="editInputWrapper" class="centered editInputWrapper">
-                <div class ="dimensionInput">
-                    <label class="inputs" for="rowInput">Rows:</label>
-                    <input id="rowInput" type="number" class="inputs numberInput" value="3"></input>
-                    <input type="range" min="2" max="25" value="3" class="slider" id="rowSlider">
+                <div class ="centered" style="flex-basis: 100%;">
+                    <div class ="dimensionInput" style="margin-bottom: 3vmin;">
+                        <label class="inputs" for="rowInput">Rows:</label>
+                        <input id="rowInput" type="number" class="inputs numberInput" value="3"></input>
+                        <input type="range" min="2" max="25" value="3" class="slider" id="rowSlider">
+                    </div>
                 </div>
-                <div class ="dimensionInput">
-                    <label class="inputs" for="colInput">Cols:</label>
-                    <input id="colInput" type="number" class="inputs numberInput" value="3"></input>
-                    <input type="range" min="2" max="25" value="3" class="slider" id="colSlider">
+                
+                <div class ="centered" style="flex-basis: 100%;">
+                    <div class ="dimensionInput">
+                        <label class="inputs" for="colInput">Cols:</label>
+                        <input id="colInput" type="number" class="inputs numberInput" value="3"></input>
+                        <input type="range" min="2" max="25" value="3" class="slider" id="colSlider">
+                    </div>
                 </div>
+                
                 <div id="customImageInput" class="centered inputs customImageInput">
                     <label for="imageInputURL">Image URL:</label>
-                    <input type="url" id="imageInputURL" name="imageInputURL" onchange="handleImageURL()"></input>
+                    <input type="url" id="imageInputURL" name="imageInputURL" class="imageInputURL" onchange="handleImageURL()"></input>
                     <input type="file" id="imageUpload" style="display: none;" onchange="handleImageUpload()"></input>
-                    <input type="button" value="Browse" onclick="document.getElementById('imageUpload').click();" />
+                    <input type="button" value="Browse" class="buttons" onclick="document.getElementById('imageUpload').click();" />
                 </div>
             </div>
         </div>
