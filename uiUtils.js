@@ -169,8 +169,12 @@ const getPuzzleFromGridHTML = (htmlMatrix) => {
 
     // console.log("MATRIX TO SOLVE:", matrix);
 
+    let errorMessage = "Puzzle is not in a solveable state!\n\n";
+    errorMessage += "Try to edit and swap a non-blank tile with another to the left or right of it to keep the rest of your state\n\n";
+    errorMessage += "You can also shuffle, reset, or resize the puzzle to get in a solvable state again :-)";
+    
     if (!Puzzle.isPuzzleSolvable2Darr(matrix)) {
-        alert("Puzzle is not in a solveable state");
+        alert(errorMessage);
         return undefined;
     }
 
@@ -209,6 +213,10 @@ let playMode = false;
 const togglePlayMode = () => {
     // Stop animation if solution is playing out
     solutionAnimating = false;
+
+    // Convert to Puzzle to make sure it's solveable before letting user play it
+    getPuzzleFromGridHTML(htmlMatrix);
+
 
     if (playMode) {
         playMode = false;
@@ -348,6 +356,10 @@ const updatePuzzleDimensions = (newRow, newCol) => {
     } else {
         puzzleRows = newRow;
         puzzleCols = newCol;
+        rowInput.value = newRow;
+        colInput.value = newCol;
+        rowSlider.value = newRow;
+        colSlider.value = newCol;
         resetClickSourceElement();
     }
 
@@ -357,7 +369,6 @@ const updatePuzzleDimensions = (newRow, newCol) => {
     // Destroying and recreating 2500+ tiles with large image + event listeners takes up a lot of CPU..
     // Remove extra tiles if are rows/cols are smaller
     // Need to actually call remove child for each element or it will stay in the Puzzle/Grid/UI
-    // TODO: Scale image resolution?  Or is this good enough?
     const newHtmlMatrix = Array(newRow).fill().map(() => Array(newCol));
     let rowDiff = puzzleRows - oldRows;
     let colDiff = puzzleCols - oldCols;
@@ -717,3 +728,32 @@ const showOutputTextAreas = () => {
     }
 }
 
+    // Reset our tile background positions and number overlays/ids for the current dimensions
+const resetPuzzle = () => {
+    value = 1;
+    const colPercentStep = (100 / (puzzleCols - 1));
+    const rowPercentStep = (100 / (puzzleRows - 1));
+    for(let row = 0; row < puzzleRows; row++){ 
+        for(let col = 0; col < puzzleCols; col++) {
+            // We can re-use this tile, copy reference over to the new matrix
+            const tile = htmlMatrix[row][col];
+            tile.textContent = value === puzzleRows*puzzleCols ? " " : value; // last tile is blank
+            tile.id = value === puzzleRows*puzzleCols ? 0 : value;
+            tile.draggable = true;
+            tile.style.backgroundPosition = `${col * colPercentStep}% ${row * rowPercentStep}%`;
+            tile.style.opacity = value === puzzleRows*puzzleCols ? '0' : '1';
+            value++;
+        }
+    }
+}
+
+// Set state to a random solvable puzzle from [2-25 x 2-25]
+const randomizePuzzle = () => {
+    const newRow = Math.floor(Math.random() * 25); + 2
+    const newCol = Math.floor(Math.random() * 25); + 2
+    // TODO: fix update puzzle dimensions to take both dimension changes at once.  For now this is fine
+    updatePuzzleDimensions(puzzleRows, newCol);
+    updatePuzzleDimensions(newRow, newCol);
+    updateBackgroundImageSize();
+    shuffleHtmlMatrix();
+}
