@@ -5,6 +5,7 @@ const dimensionInputContainer = document.getElementById("dimensionInputContainer
 const editInputWrapper = document.getElementById("editInputWrapper");
 const imageUploadForm = document.getElementById("ImageUploadForm");
 const imageInputURL = document.getElementById("imageInputURL");
+let imageURL = undefined;
 const playButton = document.getElementById("playButton");
 const summaryOutput = document.getElementById("outputSummary");
 const solutionOutput = document.getElementById("outputMoves");
@@ -23,8 +24,8 @@ let colSlider = document.getElementById("colSlider");
 
 
 // App state
-let puzzleRows = undefined;
-let puzzleCols = undefined;
+let puzzleRows = 0;
+let puzzleCols = 0;
 let solutionAnimating = false;
 
 const resetClickSourceElement = () => {
@@ -329,59 +330,93 @@ const updatePuzzleDimensions = (newRow, newCol) => {
     // TODO: Optimize IDA* for 4x4?  Don't see the point though..
     //       Easier to compare with other algorithms at 3x3
     if (newRow * newCol > 9) {
-        console.log("PUZZLE IS LARGE", newRow * newCol);
         toggleStrategicOnlyAlgorithm(true);
     } else {
         toggleStrategicOnlyAlgorithm(false);
     }
 
 
+    // Set these new rows/cols to our UI state
+    const oldRows = puzzleRows;
+    const oldCols = puzzleCols; 
     if (newRow === puzzleRows && newCol === puzzleCols) {
         return false;
     } else {
         puzzleRows = newRow;
         puzzleCols = newCol;
+        resetClickSourceElement();
     }
 
 
-    // Remove all current tiles
-    resetClickSourceElement();
-    while (grid.firstChild) {
-        grid.innerHTML = "";
+    // We have a new set of rows and/or cols
+    // Optimization: Create a new matrix and re-use tiles that we can to optimize for large images
+    // Destroying and recreating 2500+ tiles with large image + event listeners takes up a lot of CPU..
+    // Remove extra tiles if are rows/cols are smaller
+    // Need to actually call remove child for each element or it will stay in the Puzzle/Grid/UI
+    // TODO: Scale image resolution?  Or is this good enough?
+    const newHtmlMatrix = Array(newRow).fill().map(() => Array(newCol));
+    let rowDiff = puzzleRows - oldRows;
+    let colDiff = puzzleCols - oldCols;
+
+    // Remove whole rows first
+    if (rowDiff < 0 && rowDiff !== 0) {
+        const rowsToRemove = Math.abs(rowDiff);
+        for(let row = oldRows - 1; row >= oldRows - rowsToRemove; row--) {
+            htmlMatrix[row].forEach((element) => { 
+                grid.removeChild(element);
+            });
+        }
     }
 
-    grid.style.gridTemplateRows = `${'1fr '.repeat(newRow)}`;
-    grid.style.gridTemplateColumns = `${'1fr '.repeat(newCol)}`;
-    grid.style.fontSize = null;
-    
+    // Remove col from every row
+    if (colDiff < 0 && colDiff !== 0) {
+        const colsToRemove = Math.abs(colDiff);
+        for(let row of htmlMatrix) {
+            for(let col = oldCols - 1; col >= oldCols - colsToRemove; col--) {
+                grid.removeChild(row[col]);
+            }
+        }
+    }
 
+    // Reset our tile background positions and number overlays/ids
+    // Add new tiles in if needed
     value = 1;
-    htmlMatrix = Array(newRow).fill().map(() => Array(newCol));
     const colPercentStep = (100 / (newCol - 1));
     const rowPercentStep = (100 / (newRow - 1));
-
-    preset = [[16, 12, 17, 19, 10],
-    [5, 7, 24, 23, 11],
-    [22, 0, 21, 2, 1],
-    [20, 4, 3, 6, 13],
-    [15, 8, 18, 9, 14]
-    ]
-
     for(let row = 0; row < newRow; row++){ 
         for(let col = 0; col < newCol; col++) {
-            const tile = document.createElement("div");
-            tile.className = `grid-item row${row} col${col}`;
-            tile.textContent = value === newCol*newRow ? " " : value; // last tile is blank
-            tile.id =  value === newRow*newCol ? 0 : value;
-            tile.draggable = true;
-            tile.style.backgroundPosition = `${col * colPercentStep}% ${row * rowPercentStep}%`;
-            tile.style.opacity = value === newRow*newCol ? '0' : '1';
-            grid.appendChild(tile);
-            attachTileEventListeners(tile);
-            htmlMatrix[row][col] = tile;
+            // This is a new row/col, add a new tile in
+            if (row >= oldRows || col >= oldCols) {
+                const tile = document.createElement("div");
+                tile.className = `grid-item row${row} col${col}`;
+                tile.textContent = value === newCol*newRow ? " " : value; // last tile is blank
+                tile.id =  value === newRow*newCol ? 0 : value;
+                tile.draggable = true;
+                tile.style.backgroundPosition = `${col * colPercentStep}% ${row * rowPercentStep}%`;
+                tile.style.opacity = value === newRow*newCol ? '0' : '1';
+                grid.insertBefore(tile, grid.children[value-1]);
+                attachTileEventListeners(tile);
+                newHtmlMatrix[row][col] = tile;
+            } 
+            else {
+                // We can re-use this tile, copy reference over to the new matrix
+                const tile = htmlMatrix[row][col];
+                tile.textContent = value === newCol*newRow ? " " : value; // last tile is blank
+                tile.id = value === newRow*newCol ? 0 : value;
+                tile.draggable = true;
+                tile.style.backgroundPosition = `${col * colPercentStep}% ${row * rowPercentStep}%`;
+                tile.style.opacity = value === newRow*newCol ? '0' : '1';
+                newHtmlMatrix[row][col] = tile;
+            }
             value++;
         }
     }
+
+    // Update our CSS grid rows + columns, set to have even size throughout
+    grid.style.gridTemplateRows = `${'1fr '.repeat(newRow)}`;
+    grid.style.gridTemplateColumns = `${'1fr '.repeat(newCol)}`;
+    grid.style.fontSize = null;
+    htmlMatrix = newHtmlMatrix;
 }
 
 const toggleStrategicOnlyAlgorithm = (strategicOnly) => {
@@ -623,17 +658,17 @@ function handleImageURL () {
 
 function handleImageUpload () {
     const fileInput = document.getElementById('imageUpload');
-    const reader = new FileReader();
-
-    reader.addEventListener("load", () => {
-        // convert image file to base64 string
-        styler.innerHTML = `.grid-item { background-image: url('${reader.result}'); }`;
-      }, false)
-
     const file = fileInput.files[0];
     if (file && file['type'].split('/')[0] === 'image') {
-        console.log("IMAGE IS VALID", typeof(file), file);
-        reader.readAsDataURL(file);
+        // Reclaim any used space by the browser after uploading more than one image
+        if (imageURL) {
+            URL.revokeObjectURL(imageURL);
+        }
+
+        // Using URL.createObjectURL() seems to be more efficient than FileReader.readAsDataUrl()
+        let url = URL.createObjectURL(file);
+        styler.innerHTML = `.grid-item { background-image: url('${url}'); }`;
+        imageURL = url;
     }
 }
 
