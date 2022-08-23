@@ -294,16 +294,16 @@ const updatePuzzleDimensions = (newRow, newCol) => {
     }
 
     // Max size of 100x100
-    if (newRow > 50) {
-        rowInput.value = 50;
-        rowSlider.value = 50;
+    if (newRow > 25) {
+        rowInput.value = 25;
+        rowSlider.value = 25;
         updateBackgroundImageSize();
         return false;
     }
 
-    if (newCol > 50) {
-        colInput.value = 50;
-        colSlider.value = 50;
+    if (newCol > 25) {
+        colInput.value = 25;
+        colSlider.value = 25;
         updateBackgroundImageSize();
         return false;
     }
