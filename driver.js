@@ -84,6 +84,7 @@ const solvePuzzleForFunzies = async (htmlMatrix) => {
 
 
     // Get only first 3 decimal places for runtime
+    showOutputTextAreas();
     summaryOutput.value = '';
     summaryOutput.value += `Runtime: ${solution['runtimeMs'].toFixed(3)}ms\n`;
     summaryOutput.value += `Moves: ${solutionMoves.length} ${(selectedAlgorithm !== "Strategic" || solutionMoves.length === 0) ? "(optimal)" : "(nonoptimal)"}\n`;
@@ -97,7 +98,6 @@ const solvePuzzleForFunzies = async (htmlMatrix) => {
 
     solutionOutput.value = moveList;
     solutionOutput.value += solutionMoves.length > 20000 ? 'See console for full move list...\n' : ''
-    showOutputTextAreas();
                                   
     // 200 ms for 3x3 (9 tiles).  Get faster as the puzzle scales up
     let moveDelayMs = 1800 / (puzzleRows * puzzleCols);

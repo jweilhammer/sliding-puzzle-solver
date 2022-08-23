@@ -7,9 +7,12 @@ const imageUploadForm = document.getElementById("ImageUploadForm");
 const imageInputURL = document.getElementById("imageInputURL");
 let imageURL = undefined;
 const playButton = document.getElementById("playButton");
-const summaryOutput = document.getElementById("outputSummary");
-const solutionOutput = document.getElementById("outputMoves");
+
 const outputAreaContainer = document.getElementById('outputAreaContainer');
+let summaryOutput = undefined;
+let solutionOutput = undefined;
+let outputAreas = undefined;
+
 const grid = document.getElementById("grid");
 const gridContainer = document.getElementById("gridContainer");
 const styler = document.getElementById("dynamicStyling");
@@ -221,6 +224,7 @@ const togglePlayMode = () => {
             }
         }
         addEditElements();
+        hideOutputTextAreas();
     }
     else {
         playMode = true;
@@ -688,9 +692,28 @@ function handleImageUpload () {
 }
 
 const hideOutputTextAreas = () => {
-    outputAreaContainer.style.visibility = 'hidden';
+    if (outputAreaContainer.childElementCount >= 1) {
+        outputAreaContainer.removeChild(outputAreas);
+    }
 }
 
 const showOutputTextAreas = () => {
-    outputAreaContainer.style.visibility = 'visible';
+    if (outputAreaContainer.childElementCount <= 0) {
+        if (!outputAreas) {
+            summaryOutput = document.createElement("textarea");
+            summaryOutput.className = "outputArea summaryOutput";
+            summaryOutput.readOnly = true;
+
+            solutionOutput = document.createElement("textarea");
+            solutionOutput.className = "outputArea moveOutput";
+            solutionOutput.readOnly = true;
+
+            outputAreas = document.createElement("div");
+            outputAreas.className = "centered outputAreaContainer"
+            outputAreas.append(summaryOutput, solutionOutput);
+        }
+
+        outputAreaContainer.appendChild(outputAreas);
+    }
 }
+
