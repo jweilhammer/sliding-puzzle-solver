@@ -660,15 +660,30 @@ function handleImageUpload () {
     const fileInput = document.getElementById('imageUpload');
     const file = fileInput.files[0];
     if (file && file['type'].split('/')[0] === 'image') {
-        // Reclaim any used space by the browser after uploading more than one image
-        if (imageURL) {
-            URL.revokeObjectURL(imageURL);
-        }
+        const tempImageUrl = URL.createObjectURL(file);
+        const img = new Image();
+        img.src = tempImageUrl;
+        img.onload = function(imgElement) {
+            // Use tmp canvas to resize to 500 px wide, scale height at the same rate
+            const resizedWidth = 500;
+            const canvas = document.createElement('canvas');
+            const scaleResize = resizedWidth / imgElement.target.width;
+            canvas.width = resizedWidth;
+            canvas.height = imgElement.target.height * scaleResize;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(imgElement.target, 0, 0, canvas.width, canvas.height);
+            ctx.canvas.toBlob((blob) => {
+                // Reclaim any used space by the browser after uploading more than one image
+                URL.revokeObjectURL(tempImageUrl);
+                if (imageURL) {
+                    URL.revokeObjectURL(imageURL);
+                }
 
-        // Using URL.createObjectURL() seems to be more efficient than FileReader.readAsDataUrl()
-        let url = URL.createObjectURL(file);
-        styler.innerHTML = `.grid-item { background-image: url('${url}'); }`;
-        imageURL = url;
+                imageURL = URL.createObjectURL(blob);
+                styler.innerHTML = `.grid-item { background-image: url('${imageURL}'); }`;
+                console.log("resized URL: ", imageURL);
+            });
+        }
     }
 }
 
