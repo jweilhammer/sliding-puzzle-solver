@@ -624,10 +624,16 @@ function handleImageURL () {
 function handleImageUpload () {
     const fileInput = document.getElementById('imageUpload');
     const reader = new FileReader();
+
+    reader.addEventListener("load", () => {
+        // convert image file to base64 string
+        styler.innerHTML = `.grid-item { background-image: url('${reader.result}'); }`;
+      }, false)
+
     const file = fileInput.files[0];
     if (file && file['type'].split('/')[0] === 'image') {
         console.log("IMAGE IS VALID", typeof(file), file);
-        styler.innerHTML = `.grid-item { background-image: url('${reader.readAsDataURL(file)}'); }`;
+        reader.readAsDataURL(file);
     }
 }
 

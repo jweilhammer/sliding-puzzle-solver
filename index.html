@@ -212,7 +212,8 @@
         <div id="customImageInput" class="centered inputs">
             <label for="imageInputURL">Image URL:</label>
             <input type="url" id="imageInputURL" name="imageInputURL" onchange="handleImageURL()"></input>
-            <input type="file" id="imageUpload" class="imageUpload"   onchange="handleImageUpload()"></input>
+            <input type="file" id="imageUpload" style="display: none;" onchange="handleImageUpload()"></input>
+            <input type="button" value="Browse" onclick="document.getElementById('imageUpload').click();" />
         </div>
         
 
