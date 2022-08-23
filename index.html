@@ -15,13 +15,14 @@
                 margin: -1px auto 0 auto; 
                 padding: 1px 0 0 0;
 
+                /* Use --vw --vh fallback for browsers that do not support Custom Properties */
+                height: 60vmin;
+                width: 60vmin;
+
                 margin-top: 1vh;
+                max-width: 45vh;
+                max-height: 45vh;
 
-                max-width: 50vh;
-                max-height: 50vh;
-
-                width: 60vw;
-                height: 60vw;
             }
             
             .grid {
@@ -78,9 +79,11 @@
 
             
             .buttons {
-                font-size: 5vmin;
-                padding: 1.5vmin;
+                font-size: 4.5vmin;
+                padding: 1vmin;
+
                 margin:1vh 1vh 1vw 1vw;
+
                 border-radius:0.30em;
                 box-sizing: border-box;
                 background-color:#CCCCCC;
