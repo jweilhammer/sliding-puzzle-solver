@@ -7,7 +7,7 @@
 
             .title {
                 font-size: 5vmin;
-                margin-top: 1vh;
+                padding-top: 1vh;
             }
 
             .gridContainer {
@@ -17,8 +17,11 @@
 
                 margin-top: 1vh;
 
-                max-width: 60vmin;
-                max-height: 60vmin;
+                max-width: 50vh;
+                max-height: 50vh;
+
+                width: 60vw;
+                height: 60vw;
             }
             
             .grid {
@@ -155,19 +158,31 @@
             }
 
             .outputAreaContainer {
-                padding-top: 10vmin;
-                height: 10vh;
-                justify-content: left;
+                width: 100%;
+                margin: 3vh 0 0 0;
+                height: 15vh;
+            }
+
+            .summaryOutput {
+                text-align: right;
+                border: none;
+                width: 67vmin;
+                margin-right: 2%;
+            }
+
+            .moveOutput {
+                text-align: left;
+                overflow-y: scroll;
+                border: solid 1px;
+                border-radius: 5px;
+                margin-right: 20vmin;
+                width: 33vmin;
             }
 
             .outputArea {
                 height: 100%;
-                width: 50%;
-                font-size:3vmin;
+                font-size: 3vmin;
                 font-family: "Fira Mono", monospace;
-                text-align: left;
-
-                border: none;
                 background-color: transparent;
                 outline: none;
                 resize: none;
@@ -231,8 +246,8 @@
         </div>
 
         <div class="centered outputAreaContainer" id="outputAreaContainer" style="visibility: hidden;">
-            <textarea readonly='yes' class="outputArea" id="outputSummary"></textarea>
-            <textarea readonly='yes' class="outputArea" id="outputMoves" style="overflow-y: scroll"></textarea>
+            <textarea readonly='yes' class="outputArea summaryOutput" id="outputSummary"></textarea>
+            <textarea readonly='yes' class="outputArea moveOutput" id="outputMoves"></textarea>
         </div>
 
         <script src="strategicSolve.js" defer></script>
