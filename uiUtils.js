@@ -374,21 +374,23 @@ const updatePuzzleDimensions = (newRow, newCol) => {
     let colDiff = puzzleCols - oldCols;
 
     // Remove whole rows first
-    if (rowDiff < 0 && rowDiff !== 0) {
+    if (rowDiff < 0) {
         const rowsToRemove = Math.abs(rowDiff);
         for(let row = oldRows - 1; row >= oldRows - rowsToRemove; row--) {
-            htmlMatrix[row].forEach((element) => { 
+            htmlMatrix[row].forEach((element, index) => { 
                 grid.removeChild(element);
+                htmlMatrix[row][index] = null;
             });
         }
     }
 
     // Remove col from every row
-    if (colDiff < 0 && colDiff !== 0) {
+    if (colDiff < 0) {
         const colsToRemove = Math.abs(colDiff);
         for(let row of htmlMatrix) {
             for(let col = oldCols - 1; col >= oldCols - colsToRemove; col--) {
-                grid.removeChild(row[col]);
+                if (row[col] != null)
+                    grid.removeChild(row[col]);
             }
         }
     }
@@ -751,8 +753,6 @@ const resetPuzzle = () => {
 const randomizePuzzle = () => {
     const newRow = Math.floor(Math.random() * 25); + 2
     const newCol = Math.floor(Math.random() * 25); + 2
-    // TODO: fix update puzzle dimensions to take both dimension changes at once.  For now this is fine
-    updatePuzzleDimensions(puzzleRows, newCol);
     updatePuzzleDimensions(newRow, newCol);
     updateBackgroundImageSize();
     shuffleHtmlMatrix();
