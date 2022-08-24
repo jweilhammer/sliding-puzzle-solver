@@ -79,21 +79,41 @@
 
             
             .buttons {
-                font-size: 4.5vmin;
-                padding: 1vmin;
+                font-size: 5vmin;
+                padding: 0.9vh;
 
-                margin:1vh 1vh 1vw 1vw;
+                margin:1vmin 1vmin 1vw 1vw;
 
                 border-radius:0.30em;
                 box-sizing: border-box;
-                background-color:#CCCCCC;
                 text-align:center;
                 position:relative;
+                cursor: pointer;
             }
 
             .buttons:active{
                 top:0.1em;
-                background-color:#999999;
+            }
+
+            .buttons:hover{
+                opacity: 0.9;
+            }
+
+            .buttonsRow1 {
+                background-color:#EAECEE;
+            }
+
+            .buttonsRow2 {
+                background-color:#D5D8DC;
+            }
+            
+            .buttonsRow3 {
+                background-color:#ABB2B9;
+            }
+
+            .algorithmsDropdown {
+                font-size: 2vh;
+                padding: 0.9vh;
             }
 
 
@@ -212,6 +232,8 @@
                 resize: none;
                 cursor: default;
             }
+
+
         </style>
         <!-- 
             For updating css classes dynmically with JS
@@ -227,14 +249,24 @@
             <div id="grid" class="grid"></div>
         </div>
         <div class="centered">
-            <button id="shuffleButton" class="buttons" onclick="shuffleHtmlMatrix()">Shuffle</button>
-            <button id="resetButton" class="buttons" onclick="resetPuzzle()">Reset</button>
-            <button id="randomizeButton" class="buttons" onclick="randomizePuzzle()">Randomize</button>
+            <button id="shuffleButton" class="buttons buttonsRow1" onclick="shuffleHtmlMatrix()">Shuffle</button>
+            <button id="resetButton" class="buttons buttonsRow1" onclick="resetPuzzle()">Reset</button>
+            <button id="randomizeButton" class="buttons buttonsRow1" onclick="randomizePuzzle()">Randomize</button>
         </div>
 
         <div class="centered">
-            <button id="playButton" class="buttons" onclick="togglePlayMode()">Play Puzzle</button>
-            <button id="solveButton" class="buttons" onclick="solvePuzzleForFunzies(htmlMatrix)">Solve me!</button>
+            <button id="playButton" class="buttons buttonsRow2" onclick="togglePlayMode()">Play Puzzle</button>
+            <button id="playButton" class="buttons buttonsRow2" onclick="alert('coming soon!')">Edit Goal</button>
+        </div>
+
+        <div class="centered">
+            <button id="solveButton" class="buttons buttonsRow3" onclick="solvePuzzleForFunzies(htmlMatrix)">Solve</button>
+            <select class="algorithmsDropdown" name="algorithms" id="algorithmsDropdown">
+                <option value="Strategic">Strategically</option>
+                <option value="IDA*">IDA*</option>
+                <option value="A*">A* (closed set)</option>
+                <option value="BFS">BFS</option>
+            </select>
         </div>
 
         <div id="dimensionInputContainer"">
@@ -264,18 +296,6 @@
             </div>
         </div>
 
-
-        
-
-        <div class="centered">
-            <label class="inputs" for="algorithms">Algorithm:</label>
-            <select class="inputs" name="algorithms" id="algorithmsDropdown">
-                <option value="Strategic">Strategically</option>
-                <option value="IDA*">Iterative Deepening A*</option>
-                <option value="A*">A* (with closed set)</option>
-                <option value="BFS">Breadth-First Search</option>
-              </select>
-        </div>
 
         <div id="outputAreaContainer" style="width: 100%; height: 100%;"></div>
 
