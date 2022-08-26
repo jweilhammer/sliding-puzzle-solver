@@ -165,7 +165,9 @@ const getPuzzleFromGridHTML = (htmlMatrix) => {
 document.addEventListener('DOMContentLoaded', (e) => {
     updatePuzzleDimensions(parseInt(rowInput.value), parseInt(colInput.value));
     updateBackgroundImageSize();
-    styler.innerHTML = ".grid-item { background-image: url('test.jpg'); }"
+
+    // Set intial image and add borders so we can toggle on all items without adding one for the grid itself
+    styler.innerHTML = ".grid-item { background-image: url('test.jpg'); border: 1px solid black;}"
 });
 
 
@@ -414,7 +416,6 @@ const updatePuzzleDimensions = (newRow, newCol) => {
     // Update our CSS grid rows + columns, set to have even size throughout
     grid.style.gridTemplateRows = `${'1fr '.repeat(newRow)}`;
     grid.style.gridTemplateColumns = `${'1fr '.repeat(newCol)}`;
-    grid.style.fontSize = null;
     htmlMatrix = newHtmlMatrix;
 }
 
@@ -445,8 +446,9 @@ const updateBackgroundImageSize = () => {
     if (puzzleCols * puzzleRows > 1000) {
         grid.style.fontSize = 0;
     } else {
-        // Magic formula that will keep things looking nice and prevent grid from getting out of bounds due to the numbers
-        grid.style.fontSize = `${800 * ( 0.001 * gridContainer.offsetWidth) /  ( 2 * Math.max(puzzleCols, puzzleRows))}px`;
+        if (showNumbers)
+            // Magic formula that will keep things looking nice and prevent grid from getting out of bounds due to the numbers
+            grid.style.fontSize = `${800 * ( 0.001 * gridContainer.offsetWidth) /  ( 2 * Math.max(puzzleCols, puzzleRows))}px`;
     }
 }
 
@@ -637,7 +639,7 @@ function handleTileTouchAndCLick (e) {
 // Using form onsubmit for free URL validation from URL input tage
 function handleImageURL () {
     console.log("SETTING NEW IMAGE TO:", imageInputURL.value);
-    styler.innerHTML = `.grid-item { background-image: url('${imageInputURL.value}'); }`;
+    styler.innerHTML = `.grid-item { background-image: url('${imageInputURL.value}'); border: 1px solid black;}`;
 }
 
 function handleImageUpload () {
@@ -664,7 +666,7 @@ function handleImageUpload () {
                 }
 
                 imageURL = URL.createObjectURL(blob);
-                styler.innerHTML = `.grid-item { background-image: url('${imageURL}'); }`;
+                styler.innerHTML = `.grid-item { background-image: url('${imageURL}'); border: 1px solid black; }`;
                 console.log("resized URL: ", imageURL);
             });
         }
@@ -786,4 +788,26 @@ const getRowTileValues = (row) => {
     }
 
     return tempValues;
+}
+
+const toggleBorders = () => {
+    // Remove border from the dynamic css file
+    // Using this to set borders on just the tiles and not the grid itself
+    if (styler.innerHTML.includes("border")) {
+        styler.innerHTML = styler.innerHTML.split(';')[0] + "; }";
+    } else {
+        styler.innerHTML = styler.innerHTML.split(';')[0] + "; border: 1px solid black;}";
+    }
+}
+
+let showNumbers = true;
+const toggleNumbers = () => {
+    if (showNumbers) {
+        showNumbers = false;
+        grid.style.fontSize = 0;
+    } else {
+        showNumbers = true;
+        updateBackgroundImageSize()
+    }
+
 }
