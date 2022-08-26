@@ -1,17 +1,15 @@
 // UI ELEMENTS
 let dragSourceElement = undefined;
 let clickSourceElement = undefined;
-const dimensionInputContainer = document.getElementById("dimensionInputContainer");
-const editInputWrapper = document.getElementById("editInputWrapper");
+const editInputsContainer = document.getElementById("editInputsContainer");
 const imageUploadForm = document.getElementById("ImageUploadForm");
 const imageInputURL = document.getElementById("imageInputURL");
 let imageURL = undefined;
 const playButton = document.getElementById("playButton");
 
 const outputAreaContainer = document.getElementById('outputAreaContainer');
-let summaryOutput = undefined;
-let solutionOutput = undefined;
-let outputAreas = undefined;
+let summaryOutput = document.getElementById('summaryOutput');
+let solutionOutput = document.getElementById('solutionOutput');
 
 const grid = document.getElementById("grid");
 const gridContainer = document.getElementById("gridContainer");
@@ -67,11 +65,13 @@ const resetDragSourceElement = () => {
 
 
 const shuffleHtmlMatrix = () => {
+    solutionAnimating = false;
+
     // Unselect any tiles and stop animation before shuffling
     resetClickSourceElement();
     hideOutputTextAreas();
+    setPlayMode(false);
 
-    solutionAnimating = false;
 
     // Get all tile Values in 1D array, plus blank tile (0)
     let tileValue = 1;
@@ -135,25 +135,6 @@ const getBackgroundPositions = (rows, cols) => {
 }
 
 
-
-
-const resetPuzzleGridHTML = (htmlMatrix, puzzle) => {
-    for (let row = 0; row < puzzle.matrix.length; row++) {
-        for (let col = 0; col < puzzle.matrix[row].length; col++) {
-
-            // Make blank space actually blank
-            if (puzzle.matrix[row][col] === 0) {
-                htmlMatrix[row][col].innerHTML = " "
-            }
-            else {
-                htmlMatrix[row][col].innerHTML = puzzle.matrix[row][col];
-            }
-        }
-    }
-}
-
-
-// TODO: Make this less error prone/breakable to editing of elements
 const getPuzzleFromGridHTML = (htmlMatrix) => {
     const matrix = Array(puzzleRows).fill().map(() => Array(puzzleCols));
     for (let row = 0; row < puzzleRows; row++) {
@@ -208,7 +189,7 @@ const swapHtmlTiles = (tile1, tile2) => {
 }
 
 let playMode = false;
-const togglePlayMode = () => {
+const setPlayMode = (enable) => {
     // Stop animation if solution is playing out
     solutionAnimating = false;
 
@@ -216,7 +197,15 @@ const togglePlayMode = () => {
     getPuzzleFromGridHTML(htmlMatrix);
 
 
-    if (playMode) {
+    if (enable) {
+        playMode = true;
+        playButton.innerHTML = "Edit Puzzle";
+        playModeResetAllMovableTiles();
+        playModeSetMovableTiles();
+        hideEditElements();
+        hideOutputTextAreas();
+    }
+    else if (playMode) {
         playMode = false;
         playButton.innerHTML = "Play Puzzle";
         clickSourceElement = undefined;
@@ -229,24 +218,19 @@ const togglePlayMode = () => {
                 tile.style.opacity = isNaN(parseInt(tile.innerHTML)) ? '0' : '1';
             }
         }
-        addEditElements();
+        showEditElements();
         hideOutputTextAreas();
     }
-    else {
-        playMode = true;
-        playButton.innerHTML = "Edit Puzzle";
-        playModeResetAllMovableTiles();
-        playModeSetMovableTiles();
-        removeEditElements();
-    }
 }
 
-const removeEditElements = () => {
-    dimensionInputContainer.innerHTML = "";
+const hideEditElements = () => {
+    console.log("HIDE EDIT INPUT")
+    editInputsContainer.style.display = 'none';
 }
 
-const addEditElements = () => {
-    dimensionInputContainer.append(editInputWrapper);
+const showEditElements = () => {
+    console.log("SHOW EDIT INPUT", editInputsContainer, editInputsContainer.style.display);
+    editInputsContainer.style.display = 'flex';
 }
 
 const playModeResetAllMovableTiles = () => {
@@ -438,32 +422,17 @@ const toggleStrategicOnlyAlgorithm = (strategicOnly) => {
 
     // Remove all other algorithms since our puzzle space is too large
     if (strategicOnly) {
-        const childrenToRemove = [];
         for (const child of algorithmDropdown.children) {
             if (child.value !== "Strategic") {
-                childrenToRemove.push(child);
+                child.style.display = 'none';
             }
         }
 
-        for (const child of childrenToRemove) {
-            algorithmDropdown.removeChild(child);
-        }
-
-    } else if (algorithmDropdown.childElementCount <= 1) {
+    } else {
 
         // Add the other algorithms back in!
-        const algorithms = {
-            "IDA*": "Iterative Deepening A*",
-            "A*": "A* (with closed set)",
-            "BFS": "Breadth-First Search"
-        }
-
-        for (key in algorithms) {
-            console.log("ADDING", key, algorithms[key]);
-            const option = document.createElement("option");
-            option.value = key;
-            option.textContent = algorithms[key];
-            algorithmDropdown.appendChild(option);
+        for (const child of algorithmDropdown.children) {
+            child.style.display = 'flex';
         }
     }
 }
@@ -703,34 +672,17 @@ function handleImageUpload () {
 }
 
 const hideOutputTextAreas = () => {
-    if (outputAreaContainer.childElementCount >= 1) {
-        outputAreaContainer.removeChild(outputAreas);
-    }
+    outputAreaContainer.style.display = 'none';
 }
 
 const showOutputTextAreas = () => {
-    if (outputAreaContainer.childElementCount <= 0) {
-        if (!outputAreas) {
-            summaryOutput = document.createElement("textarea");
-            summaryOutput.className = "outputArea summaryOutput";
-            summaryOutput.readOnly = true;
-
-            solutionOutput = document.createElement("textarea");
-            solutionOutput.className = "outputArea moveOutput";
-            solutionOutput.readOnly = true;
-
-            outputAreas = document.createElement("div");
-            outputAreas.className = "centered outputAreaContainer"
-            outputAreas.append(summaryOutput, solutionOutput);
-        }
-
-        outputAreaContainer.appendChild(outputAreas);
-    }
+    outputAreaContainer.style.display = 'flex';
 }
 
     // Reset our tile background positions and number overlays/ids for the current dimensions
 const resetPuzzle = () => {
     solutionAnimating = false;
+    setPlayMode(false);
 
     value = 1;
     const colPercentStep = (100 / (puzzleCols - 1));

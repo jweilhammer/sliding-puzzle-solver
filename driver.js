@@ -44,9 +44,8 @@ const solvePuzzleForFunzies = async (htmlMatrix) => {
         return;
     }
 
-    if (!playMode) {
-        togglePlayMode();
-    } 
+    // Hide our input elements so the output is clear to see
+    setPlayMode(true);
 
     // Rows and cols tracked in UI utils to resize puzzle grid
     const goalState = Array(puzzleRows).fill().map(() => Array(puzzleCols));

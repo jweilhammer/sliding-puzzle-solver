@@ -72,7 +72,7 @@
                 font-size: 4vmin;
             }
 
-            .editInputWrapper {
+            .editInputsContainer {
                 flex-wrap: wrap;
             }
 
@@ -214,7 +214,7 @@
                 margin-right: 2%;
             }
 
-            .moveOutput {
+            .solutionOutput {
                 text-align: left;
                 overflow-y: scroll;
                 border: solid 1px;
@@ -255,15 +255,10 @@
         </div>
         
         <div class="centered">
-            <button id="playButton" class="buttons buttonsRow2" onclick="togglePlayMode()">Play Puzzle</button>
+            <button id="playButton" class="buttons buttonsRow2" onclick="setPlayMode(this.textContent === 'Play Puzzle' ? true : false)">Play Puzzle</button>
             <button id="playButton" class="buttons buttonsRow2" onclick="alert('coming soon!')">Edit Goal</button>
         </div>
 
-        <div class="centered">
-            <button id="flipHorizontally" class="buttons buttonsRow2" onclick="flipPuzzleHorizontally()">Flip horizontally</button>
-            <button id="flipVertically" class="buttons buttonsRow2" onclick="flipPuzzleVertically()">Flip vertically</button>
-            <button id="flipVertically" class="buttons buttonsRow2" onclick="rotatePuzzle()">Rotate Puzzle</button>
-        </div>
 
         <div class="centered">
             <button id="solveButton" class="buttons buttonsRow3" onclick="solvePuzzleForFunzies(htmlMatrix)">Solve</button>
@@ -275,35 +270,42 @@
             </select>
         </div>
 
-        <div id="dimensionInputContainer"">
-            <div id="editInputWrapper" class="centered editInputWrapper">
-                <div class ="centered" style="flex-basis: 100%;">
-                    <div class ="dimensionInput" style="margin-bottom: 3vmin;">
-                        <label class="inputs" for="rowInput">Rows:</label>
-                        <input id="rowInput" type="number" class="inputs numberInput" value="3"></input>
-                        <input type="range" min="2" max="25" value="3" class="slider" id="rowSlider">
-                    </div>
+        <div id="editInputsContainer" class="centered editInputsContainer">
+            <div class ="centered" style="flex-basis: 100%;">
+                <div class ="dimensionInput" style="margin-bottom: 3vmin;">
+                    <label class="inputs" for="rowInput">Rows:</label>
+                    <input id="rowInput" type="number" class="inputs numberInput" value="3"></input>
+                    <input type="range" min="2" max="25" value="3" class="slider" id="rowSlider">
                 </div>
-                
-                <div class ="centered" style="flex-basis: 100%;">
-                    <div class ="dimensionInput">
-                        <label class="inputs" for="colInput">Cols:</label>
-                        <input id="colInput" type="number" class="inputs numberInput" value="3"></input>
-                        <input type="range" min="2" max="25" value="3" class="slider" id="colSlider">
-                    </div>
+            </div>
+            
+            <div class ="centered" style="flex-basis: 100%;">
+                <div class ="dimensionInput">
+                    <label class="inputs" for="colInput">Cols:</label>
+                    <input id="colInput" type="number" class="inputs numberInput" value="3"></input>
+                    <input type="range" min="2" max="25" value="3" class="slider" id="colSlider">
                 </div>
-                
-                <div id="customImageInput" class="centered inputs customImageInput">
-                    <label for="imageInputURL">Image URL:</label>
-                    <input type="url" id="imageInputURL" name="imageInputURL" class="imageInputURL" onchange="handleImageURL()"></input>
-                    <input type="file" id="imageUpload" style="display: none;" onchange="handleImageUpload()"></input>
-                    <input type="button" value="Browse" class="buttons" onclick="document.getElementById('imageUpload').click();" />
-                </div>
+            </div>
+            
+            <div id="customImageInput" class="centered inputs customImageInput">
+                <label for="imageInputURL">Image URL:</label>
+                <input type="url" id="imageInputURL" name="imageInputURL" class="imageInputURL" onchange="handleImageURL()"></input>
+                <input type="file" id="imageUpload" style="display: none;" onchange="handleImageUpload()"></input>
+                <input type="button" value="Browse" class="buttons" onclick="document.getElementById('imageUpload').click();" />
+            </div>
+
+            <div class="centered">
+                <button id="flipHorizontally" class="buttons buttonsRow2" onclick="flipPuzzleHorizontally()">Flip horizontally</button>
+                <button id="flipVertically" class="buttons buttonsRow2" onclick="flipPuzzleVertically()">Flip vertically</button>
+                <button id="flipVertically" class="buttons buttonsRow2" onclick="rotatePuzzle()">Rotate Puzzle</button>
             </div>
         </div>
 
 
-        <div id="outputAreaContainer" style="width: 100%; height: 100%;"></div>
+        <div id="outputAreaContainer" class="centered outputAreaContainer" style="display: none;">
+            <textarea id="summaryOutput" class="outputArea summaryOutput" readonly></textarea>
+            <textarea id="solutionOutput" class="outputArea solutionOutput" readonly></textarea>
+        </div>
 
         <script src="strategicSolve.js" defer></script>
         <script src="driver.js" defer></script>
