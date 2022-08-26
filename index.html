@@ -12,16 +12,16 @@
 
             .gridContainer {
                 /* Some sort of CSS Magic to keep child grid centered */
-                margin: -1px auto 0 auto; 
-                padding: 1px 0 0 0;
+                margin: 0 auto 0 auto; 
+                padding: 0 0 0 0;
 
                 /* Use --vw --vh fallback for browsers that do not support Custom Properties */
                 height: 60vmin;
                 width: 60vmin;
 
                 margin-top: 1vh;
-                max-width: 45vh;
-                max-height: 45vh;
+                max-width: 60vh;
+                max-height: 60vh;
 
             }
             
@@ -29,15 +29,19 @@
                 display: grid;
                 grid-auto-columns: 1fr;
                 grid-auto-rows: 1fr;
-                aspect-ratio: 1/1;
                 flex: auto;
+                height: 100%;
+                margin: 0;
+                padding: 0;
             }
 
             .grid-item {
                 /* Make background same size as the grid container, and don't repeat the image */
                 background-size: inherit;
-                background-repeat: no-repeat;
-                
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                position: relative;
                 display: flex;
                 flex: auto;
                 text-align: center;
@@ -53,6 +57,24 @@
                 -webkit-user-select: none;
                 -ms-user-select: none;
                 user-select: none;
+            }
+
+
+            /* Pseudo element that displays our background image
+               Can be rotated without the main tile being rotated as well 
+            */
+            .grid-item::before {
+                /* Set an invisible border to stop issues with bg image having a small margin in it when zoomed */
+                border: 5px solid rgba(0, 0, 0, 0);
+                content: "";
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                z-index: -1;
+                background-position: inherit;
+                background-size: inherit;
+                margin: 0;
+                padding: 0;
             }
 
             .centered {
@@ -236,9 +258,11 @@
         </style>
         <!-- 
             For updating css classes dynmically with JS
-            Currently using to update background image via CSS for our grid items
+            Using to update all grid tiles with attributes that can't be inherited from the container
         -->
-        <style id="dynamicStyling"></style>
+        <style id="tileBackgroundCss"></style>
+        <style id="tileBackgroundflipCss"></style>
+        <style id="tileBorderCss"></style>
     </head>
     <body>
         <div class="centered title" id ="title">
@@ -294,9 +318,11 @@
             </div>
 
             <div class="centered">
-                <button id="flipHorizontally" class="buttons buttonsRow2" onclick="flipPuzzleHorizontally()">Flip horizontally</button>
-                <button id="flipVertically" class="buttons buttonsRow2" onclick="flipPuzzleVertically()">Flip vertically</button>
+                <button id="flipHorizontally" class="buttons buttonsRow2" onclick="flipPuzzleHorizontally()">Flip Puzzle Horizontally</button>
+                <button id="flipVertically" class="buttons buttonsRow2" onclick="flipPuzzleVertically()">Flip Puzzle Vertically</button>
                 <button id="flipVertically" class="buttons buttonsRow2" onclick="rotatePuzzle()">Rotate Puzzle</button>
+                <button id="flipVertically" class="buttons buttonsRow2" onclick="flipBackgroundVertically()">Flip Image vertically</button>
+                <button id="flipVertically" class="buttons buttonsRow2" onclick="flipBackgroundVertically()">Rotate Puzzle</button>
             </div>
 
             <div class="centered">

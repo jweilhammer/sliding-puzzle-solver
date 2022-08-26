@@ -13,7 +13,7 @@ let solutionOutput = document.getElementById('solutionOutput');
 
 const grid = document.getElementById("grid");
 const gridContainer = document.getElementById("gridContainer");
-const styler = document.getElementById("dynamicStyling");
+
 const algorithmDropdown =document.getElementById("algorithmsDropdown");
 let htmlMatrix = [[]];
 
@@ -22,6 +22,11 @@ let rowInput = document.getElementById("rowInput");
 let colInput = document.getElementById("colInput");
 let rowSlider = document.getElementById("rowSlider");
 let colSlider = document.getElementById("colSlider");
+
+// CSS stylesheets in doc that allow for dynamic styling
+const backgroundCss = document.getElementById("tileBackgroundCss");
+const backgroundFlipCss = document.getElementById("tileBackgroundflipCss"); 
+const borderCss = document.getElementById("tileBorderCss");
 
 
 // App state
@@ -88,50 +93,53 @@ const shuffleHtmlMatrix = () => {
     } 
     while (!Puzzle.isPuzzleSolvable1Darr(puzzle_arr, puzzleRows, puzzleCols));
 
-    const backgroundPositions = getBackgroundPositions(puzzleRows, puzzleCols);
-
+    const bgPositions = getBackgroundPositions(puzzleRows, puzzleCols);
     for(let row = 0; row < puzzleRows; row++) {
         for(let col = 0; col < puzzleCols; col++) {
             let value = puzzle_arr.shift();
-            if (value === 0) { 
-                htmlMatrix[row][col].innerHTML = " ";
-                htmlMatrix[row][col].style.opacity = '0';
+            const tile = htmlMatrix[row][col];
+            if (value === 0) {
+                tile.textContent = "";
+                tile.style.opacity = '0';
 
                 // TODO: Make blank space anywhere for images?  For now I'm taking out 100%, 100% here to use as the bottom right tile
-                htmlMatrix[row][col].style.backgroundPosition = '100% 100%';
+                tile.style.backgroundPosition = '100% 100%';
             }
             else {
-                htmlMatrix[row][col].innerHTML = value;
-                htmlMatrix[row][col].style.opacity = '1';
-                htmlMatrix[row][col].style.backgroundPosition = `${backgroundPositions[value]['colPercent']}% ${backgroundPositions[value]['rowPercent']}%`;
+                tile.textContent = value;
+                tile.style.opacity = '1';
+                tile.style.backgroundPosition = `${bgPositions[value].y}% ${bgPositions[value].x}%`;
             }
         }
     }
+
 }
 
 
+// Gets the position that each tile should be on the background image
 const getBackgroundPositions = (rows, cols) => {
-
-    
-    // Holds keys for the value the user sees for the puzzle
-    //  [1, 2, 3]
-    //  [4, 5, 6]
-    //  [7, 8  0]
-    const positionMatrix = {}
 
     // Step for the even values of percentages between 0-100% for the number of tiles
     // Ex. 3 tiles = [0, 50, 100].  4 tiles = [0, 33.3, 66.6, 100]
+    let value = 1;
+    const positionsPercentages = {};
     const rowPercentStep = (100 / (rows - 1));
     const colPercentStep = (100 / (cols - 1));
-    let value = 1;
-    for(let row = 0; row < rows; row++){
+    for(let row = 0; row < rows; row++) {
         for(let col = 0; col < cols; col++){
-            positionMatrix[value] = {rowPercent: rowPercentStep*row, colPercent: colPercentStep*col};
+            value = value === rows*cols ? '' : value;
+            console.log("VALUE", value);
+            positionsPercentages[value] = {
+                x: rowPercentStep*(backgroundVerticallyFlipped ? (puzzleRows - 1 - row) : row),
+                y: colPercentStep*col
+            };
+
             value++;
         }
     }
 
-    return positionMatrix
+    console.log(positionsPercentages);
+    return positionsPercentages
 }
 
 
@@ -139,10 +147,11 @@ const getPuzzleFromGridHTML = (htmlMatrix) => {
     const matrix = Array(puzzleRows).fill().map(() => Array(puzzleCols));
     for (let row = 0; row < puzzleRows; row++) {
         for (let col = 0; col < puzzleCols; col++) {
-            if (isNaN(parseInt(htmlMatrix[row][col].textContent))) {   
+            const tile = htmlMatrix[row][col];
+            if (isNaN(parseInt(tile.textContent))) {   
                 matrix[row][col] = 0;
             } else {
-                matrix[row][col] = parseInt(htmlMatrix[row][col].textContent);
+                matrix[row][col] = parseInt(tile.textContent);
             }
         }
     }
@@ -167,7 +176,8 @@ document.addEventListener('DOMContentLoaded', (e) => {
     updateBackgroundImageSize();
 
     // Set intial image and add borders so we can toggle on all items without adding one for the grid itself
-    styler.innerHTML = ".grid-item { background-image: url('test.jpg'); border: 1px solid black;}"
+    borderCss.innerHTML = ".grid-item-border { border: 1px solid black; }";
+    backgroundCss.innerHTML = `.grid-item::before { background-image: url('test.jpg'); background-repeat: no-repeat; }`;
 });
 
 
@@ -194,12 +204,10 @@ let playMode = false;
 const setPlayMode = (enable) => {
     // Stop animation if solution is playing out
     solutionAnimating = false;
-
-    // Convert to Puzzle to make sure it's solveable before letting user play it
-    getPuzzleFromGridHTML(htmlMatrix);
-
-
     if (enable) {
+        // Convert to Puzzle to make sure it's solveable before letting user play it
+        getPuzzleFromGridHTML(htmlMatrix);
+
         playMode = true;
         playButton.innerHTML = "Edit Puzzle";
         playModeResetAllMovableTiles();
@@ -246,36 +254,33 @@ const playModeResetAllMovableTiles = () => {
 }
 
 const playModeSetMovableTiles = () => {
-    // need indices for finding neigbhors
     for (let row = 0; row < htmlMatrix.length; row++) {
         for (let col = 0; col < htmlMatrix[row].length; col++) {
-
             // Make neighbors of blank space clickable if they're in bounds
-            if (isNaN(parseInt(htmlMatrix[row][col].innerHTML))) {
-
-                htmlMatrix[row][col].style.opacity = '0'; // highlight blank tile
-
+            if (isNaN(parseInt(htmlMatrix[row][col].textContent))) {
+                // Above
                 if (row - 1 >= 0) {
                     htmlMatrix[row-1][col].style.pointerEvents = 'auto';
                     htmlMatrix[row-1][col].style.cursor = 'pointer';
                 }
                 
+                // Below
                 if (row + 1 <= (htmlMatrix.length - 1)) {
                     htmlMatrix[row+1][col].style.pointerEvents = 'auto';
                     htmlMatrix[row+1][col].style.cursor = 'pointer';
                 }
 
+                // Left
                 if (col - 1 >= 0) {
                     htmlMatrix[row][col-1].style.pointerEvents = 'auto';
                     htmlMatrix[row][col-1].style.cursor = 'pointer';
                 }
 
+                // Right
                 if (col + 1 <= (htmlMatrix[row].length - 1)) {
                     htmlMatrix[row][col+1].style.pointerEvents = 'auto';
                     htmlMatrix[row][col+1].style.cursor = 'pointer';
                 }
-            } else {
-                htmlMatrix[row][col].style.opacity = '1'; // highlight blank tile
             }
         }
     }
@@ -382,19 +387,22 @@ const updatePuzzleDimensions = (newRow, newCol) => {
     // Reset our tile background positions and number overlays/ids
     // Add new tiles in if needed
     value = 1;
-    const colPercentStep = (100 / (newCol - 1));
-    const rowPercentStep = (100 / (newRow - 1));
+    const bgPositions = getBackgroundPositions(puzzleRows, puzzleCols);
     for(let row = 0; row < newRow; row++){ 
         for(let col = 0; col < newCol; col++) {
-            // This is a new row/col, add a new tile in
+            const tileNum = value === newCol*newRow ? '' : value; // Last tile is blank
+
             if (row >= oldRows || col >= oldCols) {
+                // This is a new row/col, create a new tile
                 const tile = document.createElement("div");
-                tile.className = `grid-item row${row} col${col}`;
-                tile.textContent = value === newCol*newRow ? " " : value; // last tile is blank
-                tile.id =  value === newRow*newCol ? 0 : value;
                 tile.draggable = true;
-                tile.style.backgroundPosition = `${col * colPercentStep}% ${row * rowPercentStep}%`;
-                tile.style.opacity = value === newRow*newCol ? '0' : '1';
+                tile.textContent = tileNum;
+                tile.style.opacity = tileNum ? '1' : '0';
+                tile.className = `grid-item grid-item-border`;
+                console.log("READING", tileNum);
+                tile.style.backgroundPosition = `${bgPositions[tileNum].y}% ${bgPositions[tileNum].x}%`;
+
+                // Insert tile into grid
                 grid.insertBefore(tile, grid.children[value-1]);
                 attachTileEventListeners(tile);
                 newHtmlMatrix[row][col] = tile;
@@ -402,11 +410,10 @@ const updatePuzzleDimensions = (newRow, newCol) => {
             else {
                 // We can re-use this tile, copy reference over to the new matrix
                 const tile = htmlMatrix[row][col];
-                tile.textContent = value === newCol*newRow ? " " : value; // last tile is blank
-                tile.id = value === newRow*newCol ? 0 : value;
                 tile.draggable = true;
-                tile.style.backgroundPosition = `${col * colPercentStep}% ${row * rowPercentStep}%`;
-                tile.style.opacity = value === newRow*newCol ? '0' : '1';
+                tile.textContent = tileNum;
+                tile.style.opacity = tileNum ? '1' : '0';
+                tile.style.backgroundPosition = `${bgPositions[tileNum].y}% ${bgPositions[tileNum].x}%`;
                 newHtmlMatrix[row][col] = tile;
             }
             value++;
@@ -639,7 +646,7 @@ function handleTileTouchAndCLick (e) {
 // Using form onsubmit for free URL validation from URL input tage
 function handleImageURL () {
     console.log("SETTING NEW IMAGE TO:", imageInputURL.value);
-    styler.innerHTML = `.grid-item { background-image: url('${imageInputURL.value}'); border: 1px solid black;}`;
+    backgroundCss.innerHTML = `.grid-item::before { background-image: url('${imageInputURL.value}'); background-repeat: no-repeat; }`;
 }
 
 function handleImageUpload () {
@@ -666,7 +673,7 @@ function handleImageUpload () {
                 }
 
                 imageURL = URL.createObjectURL(blob);
-                styler.innerHTML = `.grid-item { background-image: url('${imageURL}'); border: 1px solid black; }`;
+                backgroundCss.innerHTML = `.grid-item::before { background-image: url('${imageURL}'); background-repeat: no-repeat; }`;
                 console.log("resized URL: ", imageURL);
             });
         }
@@ -685,19 +692,16 @@ const showOutputTextAreas = () => {
 const resetPuzzle = () => {
     solutionAnimating = false;
     setPlayMode(false);
-
+    const bgPositions = getBackgroundPositions(puzzleRows, puzzleCols);
     value = 1;
-    const colPercentStep = (100 / (puzzleCols - 1));
-    const rowPercentStep = (100 / (puzzleRows - 1));
     for(let row = 0; row < puzzleRows; row++){ 
         for(let col = 0; col < puzzleCols; col++) {
-            // We can re-use this tile, copy reference over to the new matrix
             const tile = htmlMatrix[row][col];
-            tile.textContent = value === puzzleRows*puzzleCols ? " " : value; // last tile is blank
-            tile.id = value === puzzleRows*puzzleCols ? 0 : value;
+            const tileNum = value === puzzleRows*puzzleCols ? '' : value;
             tile.draggable = true;
-            tile.style.backgroundPosition = `${col * colPercentStep}% ${row * rowPercentStep}%`;
-            tile.style.opacity = value === puzzleRows*puzzleCols ? '0' : '1';
+            tile.textContent = tileNum 
+            tile.style.opacity = tileNum ? '1' : '0;'
+            tile.style.backgroundPosition = `${bgPositions[tileNum].y}% ${bgPositions[tileNum].x}%`;
             value++;
         }
     }
@@ -727,6 +731,45 @@ const flipPuzzleVertically = () => {
         for(let col = 0; col < puzzleCols; col++) {
             swapHtmlTiles(htmlMatrix[row][col], htmlMatrix[puzzleRows - 1 - row][col]);
         }
+    }
+}
+
+let backgroundVerticallyFlipped = false;
+const flipBackgroundVertically = () => {
+    if (backgroundVerticallyFlipped) {
+        // Original image
+        backgroundFlipCss.innerHTML = ".grid-item::before { transform: scaleY(1); }";
+        backgroundVerticallyFlipped = false;
+    } else {
+        // Upside down
+        backgroundFlipCss.innerHTML = ".grid-item::before { transform: scaleY(-1); }";
+        backgroundVerticallyFlipped = true;
+    }
+    resetBackgroundPositions();
+}
+
+const resetBackgroundPositions = () => {
+    const bgPositions = getBackgroundPositions(puzzleRows, puzzleCols);
+    htmlMatrix.forEach((r, row) => {
+        r.forEach((tile, col) => {
+            tile.style.backgroundPosition = `${bgPositions[tile.textContent].y}% ${bgPositions[tile.textContent].x}%`
+        });
+    });
+}
+
+
+const bgPositions = getBackgroundPositions(puzzleRows, puzzleCols);
+value = 1;
+for(let row = 0; row < puzzleRows; row++){ 
+    for(let col = 0; col < puzzleCols; col++) {
+        // We can re-use this tile, copy reference over to the new matrix
+        const tile = htmlMatrix[row][col];
+        const tileNum = 
+        tile.textContent = tileNum // last tile is blank
+        tile.draggable = true;
+        tile.style.backgroundPosition = `${bgPositions[row][col].y}% ${bgPositions[row][col].x}%`
+        tile.style.opacity = value === puzzleRows*puzzleCols ? '0' : '1';
+        value++;
     }
 }
 
@@ -791,12 +834,12 @@ const getRowTileValues = (row) => {
 }
 
 const toggleBorders = () => {
-    // Remove border from the dynamic css file
+    // Remove border from the dynamic css
     // Using this to set borders on just the tiles and not the grid itself
-    if (styler.innerHTML.includes("border")) {
-        styler.innerHTML = styler.innerHTML.split(';')[0] + "; }";
+    if (borderCss.innerHTML === "") {
+        borderCss.innerHTML = ".grid-item-border { border: 1px solid black; }";
     } else {
-        styler.innerHTML = styler.innerHTML.split(';')[0] + "; border: 1px solid black;}";
+        borderCss.innerHTML = "";
     }
 }
 
@@ -809,5 +852,5 @@ const toggleNumbers = () => {
         showNumbers = true;
         updateBackgroundImageSize()
     }
-
 }
+
