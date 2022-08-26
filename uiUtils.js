@@ -158,16 +158,14 @@ const getPuzzleFromGridHTML = (htmlMatrix) => {
     const matrix = Array(puzzleRows).fill().map(() => Array(puzzleCols));
     for (let row = 0; row < puzzleRows; row++) {
         for (let col = 0; col < puzzleCols; col++) {
-            if (isNaN(parseInt(htmlMatrix[row][col].innerHTML))) {   
+            if (isNaN(parseInt(htmlMatrix[row][col].textContent))) {   
                 matrix[row][col] = 0;
             } else {
-                // console.log("SETTING VALUE ON STARTING PUZZLE MATRIX:", parseInt(htmlMatrix[row][col].innerHTML));
-                matrix[row][col] = parseInt(htmlMatrix[row][col].innerHTML);
+                matrix[row][col] = parseInt(htmlMatrix[row][col].textContent);
             }
         }
     }
 
-    // console.log("MATRIX TO SOLVE:", matrix);
 
     let errorMessage = "Puzzle is not in a solveable state!\n\n";
     errorMessage += "Try to edit and swap a non-blank tile with another to the left or right of it to keep the rest of your state\n\n";
@@ -732,6 +730,8 @@ const showOutputTextAreas = () => {
 
     // Reset our tile background positions and number overlays/ids for the current dimensions
 const resetPuzzle = () => {
+    solutionAnimating = false;
+
     value = 1;
     const colPercentStep = (100 / (puzzleCols - 1));
     const rowPercentStep = (100 / (puzzleRows - 1));
@@ -756,4 +756,82 @@ const randomizePuzzle = () => {
     updatePuzzleDimensions(newRow, newCol);
     updateBackgroundImageSize();
     shuffleHtmlMatrix();
+}
+
+const flipPuzzleHorizontally = () => {
+    solutionAnimating = false;
+    for(let row = 0; row < puzzleRows; row++){ 
+        for(let col = 0; col < puzzleCols / 2; col++) {
+            swapHtmlTiles(htmlMatrix[row][col], htmlMatrix[row][puzzleCols - 1 - col]);
+        }
+    }
+}
+
+const flipPuzzleVertically = () => {
+    solutionAnimating = false;
+    for(let row = 0; row < puzzleRows / 2; row++){ 
+        for(let col = 0; col < puzzleCols; col++) {
+            swapHtmlTiles(htmlMatrix[row][col], htmlMatrix[puzzleRows - 1 - row][col]);
+        }
+    }
+}
+
+// Rotates the puzzle clockwise
+// IF puzzle is non-square (NxM), then new puzzle will be (MxN)
+const rotatePuzzle = () => {
+    solutionAnimating = false;
+    let tempMatrix = Array(puzzleCols).fill().map(() => Array(puzzleRows));
+    for (let row = 0; row < puzzleRows; row++){
+        for (let col = 0; col < puzzleCols; col++) {
+            const tile = htmlMatrix[row][col];
+            tempMatrix[col][puzzleRows - 1 - row] = { 
+                textContent: tile.textContent,
+                backgroundPosition: tile.style.backgroundPosition,
+                opacity: tile.style.opacity,
+            }
+        }
+    }
+
+    // Resize the puzzle on the page if needed
+    if (puzzleRows !== puzzleCols) { 
+        updatePuzzleDimensions(puzzleCols, puzzleRows);
+        updateBackgroundImageSize();
+    }
+
+    // Update matrix to have the original tile values and background positions
+    tempMatrix.forEach((row, rowIndex) => { 
+        row.forEach((originalTile, colIndex) => {
+            htmlMatrix[rowIndex][colIndex].textContent = originalTile.textContent;
+            htmlMatrix[rowIndex][colIndex].style.backgroundPosition = originalTile.backgroundPosition;
+            htmlMatrix[rowIndex][colIndex].style.opacity = originalTile.opacity;
+        });
+    });
+}
+
+const getColTileValues = (col) => {
+    const tempValues = []
+    for (let row = 0; row < puzzleRows; row++) {
+        tempValues.push(
+            {
+                textContent: htmlMatrix[row][col].textContent,
+                backgroundPosition: htmlMatrix[row][col].style.backgroundPosition
+            }
+        )
+    }
+
+    return tempValues;
+}
+
+const getRowTileValues = (row) => {
+    const tempValues = []
+    for (let col = 0; col < puzzleCols; col++) {
+        tempValues.push(
+            {
+                textContent: htmlMatrix[row][col].textContent,
+                backgroundPosition: htmlMatrix[row][col].style.backgroundPosition
+            }
+        )
+    }
+
+    return tempValues;
 }

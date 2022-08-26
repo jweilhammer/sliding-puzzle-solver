@@ -425,7 +425,6 @@ class Puzzle {
     }
 
     static isPuzzleSolvable2Darr(matrix) {
-        console.log("isPuzzleSolvable2Darr ")
         const arr = [];
 
         // Need blank row for determining solvable state
@@ -437,8 +436,6 @@ class Puzzle {
                 arr.push(matrix[row][col]);
             }
         }
-
-        console.log(arr, matrix.length, matrix[0].length);
 
         return Puzzle.isPuzzleSolvable1Darr(arr, matrix.length, matrix[0].length);
     }
