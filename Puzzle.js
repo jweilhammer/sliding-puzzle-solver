@@ -7,11 +7,28 @@ class Puzzle {
         "RIGHT": 4,
     }
 
-    constructor(rows, cols, genRandomPuzzle=true) {
+    constructor(rows, cols, genRandomPuzzle=true, solvable=true) {
         if (genRandomPuzzle) {
-            this.matrix = this.generateRandomPuzzle(rows, cols);
+            this.matrix = this.generateRandomPuzzle(rows, cols, solvable);
         } else {
+            // Fill matrix with default goal state (in order tiles)
             this.matrix = Array(rows).fill().map(() => Array(cols));
+            let value = 1;
+            for(let row = 0; row < rows; row++) {
+                for(let col=0; col < cols; col++) {
+                    this.matrix[row][col] = value === rows * cols ? 0 : value;
+                    value++;
+                }
+            }
+
+            // For custom goal states that aren't visually solvable
+            if (!solvable) {
+                // Swap last two tiles that aren't the blank space
+                // This will make the inversions even/odd making a solvable puzzle unsolvable
+                const tmp = this.matrix[rows - 3][col - 3];
+                this.matrix[rows - 3][col - 3] = this.matrix[rows - 2][col - 2];
+                this.matrix[rows - 2][col - 2] = tmp;
+            }
         }
         this.lastSlideDirection = 0;
         this.manhattanSum = 0; // No need to calculate manhatten sum on initial puzzle state
@@ -37,9 +54,7 @@ class Puzzle {
         return copy;
     }
 
-    // TODO: Only working for 3x3, maybe also validate this is a valid puzzle too :-)
     static fromMatrix(matrix) {
-        console.log("MAKING NEW PUZZLE", matrix.length, matrix[0].length, false)
         let puzzle = new Puzzle(matrix.length, matrix[0].length, false);
 
         for (let row = 0; row < matrix.length; row++) {
@@ -55,8 +70,7 @@ class Puzzle {
     }
 
     static fromArr(arr, rows, cols) {
-        let puzzle = new Puzzle(rows, cols, false);
-
+        const puzzle = new Puzzle(rows, cols, false);
 
         let arrIndex = 0;
         for (let row = 0; row < puzzle.matrix.length; row++) {
@@ -83,15 +97,28 @@ class Puzzle {
     }
 
     // Gives me a random, solveable puzzle
-    generateRandomPuzzle(row, col) {
+    generateRandomPuzzle(row, col, solvable) {
         // [1 ... N - 1, 0]
         const values = Array.from(Array((row*col)).keys()).slice(1);
         values.push(0);
         let puzzle_arr = [];
-        do {
-            puzzle_arr = Puzzle.shuffleArray(values);
-        } 
-        while (!Puzzle.isPuzzleSolvable1Darr(puzzle_arr, row, col));
+
+        // Default to generating a traditionally "solvable" puzzle, which is 1/2 total possible puzzle states
+        // Use flag to generate the other half for allowing custom goal states
+        // An "unsolvable" puzzle can be solved if the initial state is also "unsolvable"
+        // This allows for custom goal states and showing the solvability of the other half of the puzzle states
+        if (solvable) {
+            do {
+                puzzle_arr = Puzzle.shuffleArray(values);
+            } 
+            while (!Puzzle.isPuzzleSolvable1Darr(puzzle_arr, row, col));
+        } else {
+            do {
+                puzzle_arr = Puzzle.shuffleArray(values);
+            } 
+            while (Puzzle.isPuzzleSolvable1Darr(puzzle_arr, row, col));
+        }
+
 
         // Turn 1D array into our Puzzle Matrix from last to first to use arr.pop()
         let puzzle_matrix = Array(row).fill().map(() => Array(col));
@@ -211,7 +238,6 @@ class Puzzle {
     // Map our goal state's (row, col) for each tile value to quickly find distance in manhattan method without recalcuating the mapping for each state
     // Allows us to not assume a sqaure matrix (NxN) by accounting for NxP goal states
     // {1: {row: 0, col: 0}, ...}
-    // TODO: Make goal mapping static on Puzzle
     static getMatrixMapping(goal_state) {
         const map = {};
         for (let row = 0; row < goal_state.length; row++) {
@@ -411,6 +437,8 @@ class Puzzle {
                 arr.push(matrix[row][col]);
             }
         }
+
+        console.log(arr, matrix.length, matrix[0].length);
 
         return Puzzle.isPuzzleSolvable1Darr(arr, matrix.length, matrix[0].length);
     }
