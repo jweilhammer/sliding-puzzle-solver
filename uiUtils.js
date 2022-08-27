@@ -445,7 +445,7 @@ const toggleStrategicOnlyAlgorithm = (strategicOnly) => {
 
 const updateBackgroundImageSize = () => {
     // Keep our segmented tile background sizes the same as the grid container as window resizes
-    grid.style.backgroundSize = `${gridContainer.offsetWidth}px ${gridContainer.offsetHeight}px`
+    grid.style.backgroundSize = `${gridContainer.offsetWidth}px ${gridContainer.offsetHeight}px`;
 
     // At a certain point, we don't care about seeing the tiles
     if (puzzleCols * puzzleRows > 1000) {
@@ -783,32 +783,38 @@ for(let row = 0; row < puzzleRows; row++){
 // IF puzzle is non-square (NxM), then new puzzle will be (MxN)
 const rotatePuzzle = () => {
     solutionAnimating = false;
+
+    // Get original values
     let tempMatrix = Array(puzzleCols).fill().map(() => Array(puzzleRows));
     for (let row = 0; row < puzzleRows; row++){
         for (let col = 0; col < puzzleCols; col++) {
             const tile = htmlMatrix[row][col];
             tempMatrix[col][puzzleRows - 1 - row] = { 
                 textContent: tile.textContent,
-                backgroundPosition: tile.style.backgroundPosition,
                 opacity: tile.style.opacity,
             }
         }
     }
 
     // Resize the puzzle on the page if needed
+    let resized = false;
     if (puzzleRows !== puzzleCols) { 
         updatePuzzleDimensions(puzzleCols, puzzleRows);
         updateBackgroundImageSize();
+        resized = true;
     }
 
-    // Update matrix to have the original tile values and background positions
-    tempMatrix.forEach((row, rowIndex) => { 
-        row.forEach((originalTile, colIndex) => {
-            htmlMatrix[rowIndex][colIndex].textContent = originalTile.textContent;
-            htmlMatrix[rowIndex][colIndex].style.backgroundPosition = originalTile.backgroundPosition;
-            htmlMatrix[rowIndex][colIndex].style.opacity = originalTile.opacity;
+    // Update matrix to have the original tile values
+    htmlMatrix.forEach((row, rowIndex) => { 
+        row.forEach((tile, colIndex) => {
+            const originalTile = tempMatrix[rowIndex][colIndex];
+            tile.textContent = originalTile.textContent;
+            tile.style.opacity = originalTile.opacity;
         });
     });
+
+    // Get the correct background positions for our new tile layoud
+    resetBackgroundPositions();
 }
 
 const getColTileValues = (col) => {
