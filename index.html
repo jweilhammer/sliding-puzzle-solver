@@ -11,18 +11,14 @@
             }
 
             .gridContainer {
-                /* Some sort of CSS Magic to keep child grid centered */
+                /* Keep puzzle centered */
                 margin: 0 auto 0 auto; 
                 padding: 0 0 0 0;
-
-                /* Use --vw --vh fallback for browsers that do not support Custom Properties */
-                height: 60vmin;
-                width: 60vmin;
-
+                height: 40vmin;
+                width: 40vmin;
                 margin-top: 1vh;
                 max-width: 60vh;
                 max-height: 60vh;
-
             }
             
             .grid {
@@ -30,23 +26,23 @@
                 grid-auto-columns: 1fr;
                 grid-auto-rows: 1fr;
                 flex: auto;
+
+                /* Replaces aspect ratio to keep all tiles the same height */
                 height: 100%;
-                margin: 0;
-                padding: 0;
             }
 
             .grid-item {
-                /* Make background same size as the grid container, and don't repeat the image */
-                background-size: inherit;
-                margin: 0;
-                padding: 0;
-                overflow: hidden;
-                position: relative;
-                display: flex;
                 flex: auto;
+                display: flex;
                 text-align: center;
                 align-items: center;
                 justify-content: center;
+
+                /* Make background same size as the grid container, and don't repeat the image */
+                background-size: inherit;
+
+                /* Captures pseudo element background */
+                position: relative;
 
                 /* Make numbers not hightlightable/selectable in all browsers
                    Makes the play mode feel lots more natural if user decides to drag cursor
@@ -64,8 +60,7 @@
                Can be rotated without the main tile being rotated as well 
             */
             .grid-item::before {
-                /* Set an invisible border to stop issues with bg image having a small margin in it when zoomed */
-                border: 5px solid rgba(0, 0, 0, 0);
+                /* Display background as same size as tile */
                 content: "";
                 position: absolute;
                 width: 100%;
@@ -73,8 +68,14 @@
                 z-index: -1;
                 background-position: inherit;
                 background-size: inherit;
-                margin: 0;
-                padding: 0;
+
+                /* Don't repeat backgrounds to save space on large images
+                   TODO: use canvas instead?
+                */
+                background-repeat: no-repeat;
+
+                /* Fixes issues when flipping image and background somehow gets 1px smaller */
+                padding: 1px;
             }
 
             .centered {
@@ -100,8 +101,8 @@
 
             
             .buttons {
-                font-size: 5vmin;
-                padding: 0.9vh;
+                font-size: 3vmin;
+                padding: 0.5vh;
 
                 margin:1vmin 1vmin 1vw 1vw;
 
@@ -261,7 +262,7 @@
             Using to update all grid tiles with attributes that can't be inherited from the container
         -->
         <style id="tileBackgroundCss"></style>
-        <style id="tileBackgroundflipCss"></style>
+        <style id="backgroundflipCss"></style>
         <style id="tileBorderCss"></style>
     </head>
     <body>
@@ -321,10 +322,12 @@
                 <button id="flipHorizontally" class="buttons buttonsRow2" onclick="flipPuzzleHorizontally()">Flip Puzzle Horizontally</button>
                 <button id="flipVertically" class="buttons buttonsRow2" onclick="flipPuzzleVertically()">Flip Puzzle Vertically</button>
                 <button id="flipVertically" class="buttons buttonsRow2" onclick="rotatePuzzle()">Rotate Puzzle</button>
-                <button id="flipVertically" class="buttons buttonsRow2" onclick="flipBackgroundVertically()">Flip Image vertically</button>
-                <button id="flipVertically" class="buttons buttonsRow2" onclick="flipBackgroundVertically()">Rotate Puzzle</button>
             </div>
 
+            <div class="centered">
+                <button id="flipVertically" class="buttons buttonsRow2" onclick="flipBackgroundVertically()">Flip Image vertically</button>
+                <button id="flipVertically" class="buttons buttonsRow2" onclick="flipBackgroundHorizontally()">Flip Image Horizontally</button>
+            </div>
             <div class="centered">
                 <button id="toggleBorders" class="buttons buttonsRow1" onclick="toggleBorders()">Toggle Borders</button>
                 <button id="toggleNumbers" class="buttons buttonsRow1" onclick="toggleNumbers()">Toggle Numbers</button>

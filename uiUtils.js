@@ -24,9 +24,9 @@ let rowSlider = document.getElementById("rowSlider");
 let colSlider = document.getElementById("colSlider");
 
 // CSS stylesheets in doc that allow for dynamic styling
-const backgroundCss = document.getElementById("tileBackgroundCss");
-const backgroundFlipCss = document.getElementById("tileBackgroundflipCss"); 
 const borderCss = document.getElementById("tileBorderCss");
+const backgroundCss = document.getElementById("tileBackgroundCss");
+const backgroundflipCss = document.getElementById("backgroundflipCss");
 
 
 // App state
@@ -128,17 +128,15 @@ const getBackgroundPositions = (rows, cols) => {
     for(let row = 0; row < rows; row++) {
         for(let col = 0; col < cols; col++){
             value = value === rows*cols ? '' : value;
-            console.log("VALUE", value);
             positionsPercentages[value] = {
-                x: rowPercentStep*(backgroundVerticallyFlipped ? (puzzleRows - 1 - row) : row),
-                y: colPercentStep*col
+                x: (rowPercentStep)*(backgroundVerticallyFlipped ? (puzzleRows - 1 - row) : row),
+                y: (colPercentStep)*(backgroundHorizontallyFlipped ? (puzzleCols - 1 - col) : col),
             };
 
             value++;
         }
     }
 
-    console.log(positionsPercentages);
     return positionsPercentages
 }
 
@@ -177,7 +175,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
 
     // Set intial image and add borders so we can toggle on all items without adding one for the grid itself
     borderCss.innerHTML = ".grid-item-border { border: 1px solid black; }";
-    backgroundCss.innerHTML = `.grid-item::before { background-image: url('test.jpg'); background-repeat: no-repeat; }`;
+    backgroundCss.innerHTML = `.grid-item::before { background-image: url('test.jpg'); }`;
 });
 
 
@@ -186,6 +184,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
 // Do not have <img> tags that have abosulute positions updated.  Update the CSS class instead and let it handle it
 addEventListener('resize', (event) => {
     updateBackgroundImageSize();
+    resetBackgroundPositions();
 });
 
 
@@ -399,7 +398,6 @@ const updatePuzzleDimensions = (newRow, newCol) => {
                 tile.textContent = tileNum;
                 tile.style.opacity = tileNum ? '1' : '0';
                 tile.className = `grid-item grid-item-border`;
-                console.log("READING", tileNum);
                 tile.style.backgroundPosition = `${bgPositions[tileNum].y}% ${bgPositions[tileNum].x}%`;
 
                 // Insert tile into grid
@@ -454,7 +452,7 @@ const updateBackgroundImageSize = () => {
         grid.style.fontSize = 0;
     } else {
         if (showNumbers)
-            // Magic formula that will keep things looking nice and prevent grid from getting out of bounds due to the numbers
+            // Magic formula that will keep number font looking nice and prevent grid from getting out of bounds
             grid.style.fontSize = `${800 * ( 0.001 * gridContainer.offsetWidth) /  ( 2 * Math.max(puzzleCols, puzzleRows))}px`;
     }
 }
@@ -646,7 +644,7 @@ function handleTileTouchAndCLick (e) {
 // Using form onsubmit for free URL validation from URL input tage
 function handleImageURL () {
     console.log("SETTING NEW IMAGE TO:", imageInputURL.value);
-    backgroundCss.innerHTML = `.grid-item::before { background-image: url('${imageInputURL.value}'); background-repeat: no-repeat; }`;
+    backgroundCss.innerHTML = `.grid-item::before { background-image: url('${imageInputURL.value}'); }`;
 }
 
 function handleImageUpload () {
@@ -673,7 +671,7 @@ function handleImageUpload () {
                 }
 
                 imageURL = URL.createObjectURL(blob);
-                backgroundCss.innerHTML = `.grid-item::before { background-image: url('${imageURL}'); background-repeat: no-repeat; }`;
+                backgroundCss.innerHTML = `.grid-item::before { background-image: url('${imageURL}');}`;
                 console.log("resized URL: ", imageURL);
             });
         }
@@ -736,17 +734,25 @@ const flipPuzzleVertically = () => {
 
 let backgroundVerticallyFlipped = false;
 const flipBackgroundVertically = () => {
-    if (backgroundVerticallyFlipped) {
-        // Original image
-        backgroundFlipCss.innerHTML = ".grid-item::before { transform: scaleY(1); }";
-        backgroundVerticallyFlipped = false;
-    } else {
-        // Upside down
-        backgroundFlipCss.innerHTML = ".grid-item::before { transform: scaleY(-1); }";
-        backgroundVerticallyFlipped = true;
-    }
+    backgroundVerticallyFlipped = !backgroundVerticallyFlipped
+    flipBackground();
     resetBackgroundPositions();
 }
+
+let backgroundHorizontallyFlipped = false;
+const flipBackgroundHorizontally = () => {
+    backgroundHorizontallyFlipped = !backgroundHorizontallyFlipped;
+    flipBackground();
+    resetBackgroundPositions();
+}
+
+const flipBackground = () => {
+    backgroundflipCss.innerHTML = `
+    .grid-item::before {
+        transform: scale(${backgroundHorizontallyFlipped ? '-1,':'1,'}${backgroundVerticallyFlipped ? '-1' : '1'});
+    }`;
+}
+
 
 const resetBackgroundPositions = () => {
     const bgPositions = getBackgroundPositions(puzzleRows, puzzleCols);
