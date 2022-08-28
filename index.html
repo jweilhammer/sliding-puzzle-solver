@@ -32,6 +32,8 @@
             }
 
             .grid-item {
+                margin: 0 0 0 0;
+                padding: 0 0 0 0;
                 flex: auto;
                 display: flex;
                 text-align: center;
@@ -101,10 +103,10 @@
 
             
             .buttons {
-                font-size: 3vmin;
+                font-size: 3.5vmin;
                 padding: 0.5vh;
 
-                margin:1vmin 1vmin 1vw 1vw;
+                margin:2vmin 1vmin 1vw 1vw;
 
                 border-radius:0.30em;
                 box-sizing: border-box;
@@ -130,6 +132,7 @@
 
             .buttons:hover{
                 opacity: 0.9;
+                box-shadow: 0 0 8px black;
             }
 
             .buttonsRow1 {
@@ -279,9 +282,7 @@
         <style id="tileBorderCss"></style>
     </head>
     <body>
-        <div class="centered title" id ="title">
-            Edit Puzzle (click/drag to swap tiles)
-        </div>
+        <div class="centered title" id ="title">Editing Start</div>
         <div class="centered gridContainer" id ="gridContainer">
             <div id="grid" class="grid"></div>
         </div>
@@ -293,12 +294,12 @@
         
         <div class="centered">
             <button id="playButton" class="buttons buttonsRow2" onclick="setPlayMode(this.textContent === 'Play Puzzle' ? true : false)">Play Puzzle</button>
-            <button id="playButton" class="buttons buttonsRow2" onclick="alert('coming soon!')">Edit Goal</button>
+            <button id="editGoalButton" class="buttons buttonsRow2" onclick="setGoalEditMode(!editingGoalPuzzle)">Edit Goal</button>
         </div>
 
 
         <div class="centered">
-            <button id="solveButton" class="buttons buttonsRow3" onclick="solvePuzzleForFunzies(htmlMatrix)">Solve</button>
+            <button id="solveButton" class="buttons buttonsRow3" onclick="solvePuzzleForFunzies()">Solve</button>
             <select class="algorithmsDropdown" name="algorithms" id="algorithmsDropdown">
                 <option value="Strategic">Strategically</option>
                 <option value="IDA*">IDA*</option>

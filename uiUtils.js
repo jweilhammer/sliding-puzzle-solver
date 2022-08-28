@@ -28,6 +28,9 @@ const borderCss = document.getElementById("tileBorderCss");
 const backgroundCss = document.getElementById("tileBackgroundCss");
 const backgroundflipCss = document.getElementById("backgroundflipCss");
 
+const editGoalButton = document.getElementById('editGoalButton');
+const title = document.getElementById('title');
+
 
 // App state
 let puzzleRows = 0;
@@ -39,7 +42,7 @@ const resetClickSourceElement = () => {
     if (clickSourceElement) {
 
         // Leave sliding tile blank
-        if (isNaN(parseInt(clickSourceElement.innerHTML))) {
+        if (isNaN(parseInt(clickSourceElement.textContent))) {
             clickSourceElement.style.opacity = '0';
         }
         else {
@@ -56,7 +59,7 @@ const resetDragSourceElement = () => {
     if (dragSourceElement) {
 
         // Leave sliding tile blank
-        if (isNaN(parseInt(dragSourceElement.innerHTML))) {
+        if (isNaN(parseInt(dragSourceElement.textContent))) {
             dragSourceElement.style.opacity = '0';
         }
         else {
@@ -141,7 +144,7 @@ const getBackgroundPositions = (rows, cols) => {
 }
 
 
-const getPuzzleFromGridHTML = (htmlMatrix) => {
+const getPuzzleFromGridHTML = () => {
     const matrix = Array(puzzleRows).fill().map(() => Array(puzzleCols));
     for (let row = 0; row < puzzleRows; row++) {
         for (let col = 0; col < puzzleCols; col++) {
@@ -153,17 +156,7 @@ const getPuzzleFromGridHTML = (htmlMatrix) => {
             }
         }
     }
-
-
-    let errorMessage = "Puzzle is not in a solveable state!\n\n";
-    errorMessage += "Try to edit and swap a non-blank tile with another to the left or right of it to keep the rest of your state\n\n";
-    errorMessage += "You can also shuffle, reset, or resize the puzzle to get in a solvable state again :-)";
     
-    if (!Puzzle.isPuzzleSolvable2Darr(matrix)) {
-        alert(errorMessage);
-        return undefined;
-    }
-
     return Puzzle.fromMatrix(matrix);
 }
 
@@ -176,6 +169,9 @@ document.addEventListener('DOMContentLoaded', (e) => {
     // Set intial image and add borders so we can toggle on all items without adding one for the grid itself
     borderCss.innerHTML = ".grid-item-border { border: 1px solid black; }";
     backgroundCss.innerHTML = `.grid-item::before { background-image: url('test.jpg'); }`;
+
+    // Make goal puzzle a default goal state with current size;
+    goalPuzzle = new Puzzle(puzzleRows, puzzleCols, false);
 });
 
 
@@ -204,19 +200,40 @@ const setPlayMode = (enable) => {
     // Stop animation if solution is playing out
     solutionAnimating = false;
     if (enable) {
+        if (editingGoalPuzzle) {
+            setGoalEditMode(false);
+        }
+
         // Convert to Puzzle to make sure it's solveable before letting user play it
-        getPuzzleFromGridHTML(htmlMatrix);
+        const startingPuzzle = getPuzzleFromGridHTML();
+        if (Puzzle.isPuzzleSolvable2Darr(startingPuzzle.matrix) !== Puzzle.isPuzzleSolvable2Darr(goalPuzzle.matrix)) {
+            let errorMessage = "Puzzle is not solvable with current goal state!  Would you like to auto-fix it?\n\n";
+            errorMessage += "Auto-fix will swap two adjacent non-blank tiles on the bottom right";
+    
+            let answer = confirm(errorMessage);
+            if (answer) {
+                autoFixPuzzle();
+            }
+        }
 
         playMode = true;
-        playButton.innerHTML = "Edit Puzzle";
+        playButton.textContent = "Edit Puzzle";
+        title.textContent = '';
+
+
         playModeResetAllMovableTiles();
         playModeSetMovableTiles();
         hideEditElements();
         hideOutputTextAreas();
     }
-    else if (playMode) {
+    else {
         playMode = false;
-        playButton.innerHTML = "Play Puzzle";
+        playButton.textContent = "Play Puzzle";
+
+        if (!editingGoalPuzzle){
+            title.textContent = "Editing Start";
+        }
+
         clickSourceElement = undefined;
         dragSourceElement = undefined;
         for (row of htmlMatrix) {
@@ -224,7 +241,7 @@ const setPlayMode = (enable) => {
                 tile.setAttribute('draggable', true);
                 tile.style.pointerEvents = 'auto';
                 tile.style.cursor = 'move';
-                tile.style.opacity = isNaN(parseInt(tile.innerHTML)) ? '0' : '1';
+                tile.style.opacity = isNaN(parseInt(tile.textContent)) ? '0' : '1';
             }
         }
         showEditElements();
@@ -233,12 +250,10 @@ const setPlayMode = (enable) => {
 }
 
 const hideEditElements = () => {
-    console.log("HIDE EDIT INPUT")
     editInputsContainer.style.display = 'none';
 }
 
 const showEditElements = () => {
-    console.log("SHOW EDIT INPUT", editInputsContainer, editInputsContainer.style.display);
     editInputsContainer.style.display = 'flex';
 }
 
@@ -421,6 +436,7 @@ const updatePuzzleDimensions = (newRow, newCol) => {
     // Update our CSS grid rows + columns, set to have even size throughout
     grid.style.gridTemplateRows = `${'1fr '.repeat(newRow)}`;
     grid.style.gridTemplateColumns = `${'1fr '.repeat(newCol)}`;
+    goalPuzzle = new Puzzle(puzzleRows, puzzleCols, false);
     htmlMatrix = newHtmlMatrix;
 }
 
@@ -535,7 +551,7 @@ function handleTileDragEnd (e) {
     dragSourceElement = undefined; // reset without unselecting
   } 
   else {
-    if (isNaN(parseInt(this.innerHTML))) {
+    if (isNaN(parseInt(this.textContent))) {
         this.style.opacity = '0';
     } else {
         this.style.opacity = '1'
@@ -550,13 +566,13 @@ function handleTileDrop (e) {
 
     if (dragSourceElement !== this) {
         // Swap dragged tiles
-        temp = { text: this.innerHTML, bgPosition: this.style.backgroundPosition };
-        this.innerHTML = dragSourceElement.innerHTML;
+        temp = { text: this.textContent, bgPosition: this.style.backgroundPosition };
+        this.textContent = dragSourceElement.textContent;
         this.style.backgroundPosition = dragSourceElement.style.backgroundPosition;
-        dragSourceElement.innerHTML = temp.text;
+        dragSourceElement.textContent = temp.text;
         dragSourceElement.style.backgroundPosition = temp.bgPosition;
         
-        if (isNaN(parseInt(this.innerHTML))) {
+        if (isNaN(parseInt(this.textContent))) {
             this.style.opacity = '0';
         }
         else {
@@ -608,21 +624,21 @@ function handleTileTouchAndCLick (e) {
         
                     // Make neighbors of blank space clickable if they're in bounds
                     if (this === htmlMatrix[row][col]) {
-                        if (row - 1 >= 0 && isNaN(parseInt(htmlMatrix[row-1][col].innerHTML))) {
+                        if (row - 1 >= 0 && isNaN(parseInt(htmlMatrix[row-1][col].textContent))) {
                             swapHtmlTiles(htmlMatrix[row-1][col], this);
                         }
                         
-                        if (row + 1 <= (htmlMatrix.length - 1) && isNaN(parseInt(htmlMatrix[row+1][col].innerHTML))) {
+                        if (row + 1 <= (htmlMatrix.length - 1) && isNaN(parseInt(htmlMatrix[row+1][col].textContent))) {
                             swapHtmlTiles(htmlMatrix[row+1][col], this);
 
                         }
         
-                        if (col - 1 >= 0 && isNaN(parseInt(htmlMatrix[row][col-1].innerHTML))) {
+                        if (col - 1 >= 0 && isNaN(parseInt(htmlMatrix[row][col-1].textContent))) {
                             swapHtmlTiles(htmlMatrix[row][col-1], this);
 
                         }
         
-                        if (col + 1 <= (htmlMatrix[row].length - 1) && isNaN(parseInt(htmlMatrix[row][col+1].innerHTML))) {
+                        if (col + 1 <= (htmlMatrix[row].length - 1) && isNaN(parseInt(htmlMatrix[row][col+1].textContent))) {
                             swapHtmlTiles(htmlMatrix[row][col+1], this);
                         }
                     }
@@ -643,7 +659,6 @@ function handleTileTouchAndCLick (e) {
 // Prevent default and return false to prevent page reload
 // Using form onsubmit for free URL validation from URL input tage
 function handleImageURL () {
-    console.log("SETTING NEW IMAGE TO:", imageInputURL.value);
     backgroundCss.innerHTML = `.grid-item::before { background-image: url('${imageInputURL.value}'); }`;
 }
 
@@ -672,7 +687,6 @@ function handleImageUpload () {
 
                 imageURL = URL.createObjectURL(blob);
                 backgroundCss.innerHTML = `.grid-item::before { background-image: url('${imageURL}');}`;
-                console.log("resized URL: ", imageURL);
             });
         }
     }
@@ -686,23 +700,41 @@ const showOutputTextAreas = () => {
     outputAreaContainer.style.display = 'flex';
 }
 
-    // Reset our tile background positions and number overlays/ids for the current dimensions
+// Reset our tile background positions and number overlays/ids for the current dimensions
 const resetPuzzle = () => {
     solutionAnimating = false;
     setPlayMode(false);
     const bgPositions = getBackgroundPositions(puzzleRows, puzzleCols);
-    value = 1;
     for(let row = 0; row < puzzleRows; row++){ 
         for(let col = 0; col < puzzleCols; col++) {
             const tile = htmlMatrix[row][col];
-            const tileNum = value === puzzleRows*puzzleCols ? '' : value;
+            const tileNum = (row * puzzleCols + col + 1) === puzzleRows*puzzleCols ? '' : (row * puzzleCols + col + 1);
             tile.draggable = true;
             tile.textContent = tileNum 
-            tile.style.opacity = tileNum ? '1' : '0;'
+            tile.style.opacity = tileNum ? '1' : '0'
             tile.style.backgroundPosition = `${bgPositions[tileNum].y}% ${bgPositions[tileNum].x}%`;
-            value++;
         }
     }
+}
+
+
+// Resets current puzzle to match a new matrix state
+// Mostly for switching in between start and goal states
+const updatePuzzleState = (matrix) => {
+    if (matrix.length !== puzzleRows || matrix[0].length !== puzzleCols) {
+        resetPuzzle();
+    } else {
+        htmlMatrix.forEach((row, rowIndex) => {
+            row.forEach((tile, colIndex) => {
+                const tileNum = matrix[rowIndex][colIndex] ? matrix[rowIndex][colIndex] : '';
+                tile.draggable = true;
+                tile.textContent = tileNum
+                tile.style.opacity = tileNum ? '1' : '0';
+            });
+        });
+    }
+
+    resetBackgroundPositions();
 }
 
 // Set state to a random solvable puzzle from [2-25 x 2-25]
@@ -763,21 +795,6 @@ const resetBackgroundPositions = () => {
     });
 }
 
-
-const bgPositions = getBackgroundPositions(puzzleRows, puzzleCols);
-value = 1;
-for(let row = 0; row < puzzleRows; row++){ 
-    for(let col = 0; col < puzzleCols; col++) {
-        // We can re-use this tile, copy reference over to the new matrix
-        const tile = htmlMatrix[row][col];
-        const tileNum = 
-        tile.textContent = tileNum // last tile is blank
-        tile.draggable = true;
-        tile.style.backgroundPosition = `${bgPositions[row][col].y}% ${bgPositions[row][col].x}%`
-        tile.style.opacity = value === puzzleRows*puzzleCols ? '0' : '1';
-        value++;
-    }
-}
 
 // Rotates the puzzle clockwise
 // IF puzzle is non-square (NxM), then new puzzle will be (MxN)
@@ -866,3 +883,58 @@ const toggleNumbers = () => {
     }
 }
 
+    
+let editingGoalPuzzle = false;
+let goalPuzzle = undefined;
+let startingPuzzleState = undefined;
+const setGoalEditMode = (enable) => {
+    solutionAnimating = false;
+
+    if (enable && !editingGoalPuzzle) {
+        // Show editing options
+        if (playMode) {
+            setPlayMode(false);
+        }
+
+        // Store the current puzzle as our starting state
+        editingGoalPuzzle = true;
+        startingPuzzleState = {
+            puzzle: getPuzzleFromGridHTML()
+        }
+
+        updatePuzzleState(goalPuzzle.matrix);
+        editGoalButton.textContent = "Confirm Goal";
+        title.textContent = "Editing Goal";
+    } else if (!enable && editingGoalPuzzle) {
+        // Save current puzzle as our goal
+        editingGoalPuzzle = false;
+        goalPuzzle = getPuzzleFromGridHTML();
+
+        const startingPuzzle = startingPuzzleState.puzzle;
+        if (puzzleRows === startingPuzzle.rows && puzzleCols === startingPuzzle.cols) {
+            updatePuzzleState(startingPuzzle.matrix);
+        } else {
+            resetPuzzle();
+        }
+
+        editGoalButton.textContent = "Edit Goal";
+        title.textContent = "Editing Start";
+    }
+}
+
+
+// Swaps the two most bottom right non-blank tiles with each other (left/right)
+// This inverses the solvability of the puzzle to make things solvable or "unsolvable"
+// Allows for user to not have to think about fixing the puzzle after rotating/flipping/etc
+const autoFixPuzzle = () => {
+    for (let row = puzzleRows - 1; row >= 0; row--) {
+        for (let col = puzzleCols - 1; col >= 0; col--) {
+            if (col - 1 >= 0) {
+                if (htmlMatrix[row][col].textContent && htmlMatrix[row][col - 1].textContent) {
+                    swapHtmlTiles(htmlMatrix[row][col], htmlMatrix[row][col-1]);
+                    return;
+                }
+            }
+        }
+    }
+}

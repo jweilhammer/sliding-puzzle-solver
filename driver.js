@@ -4,18 +4,20 @@ const solvePuzzle = (algorithm, puzzle, goal_state) => {
 
     let solution = algorithm(puzzle, goal_state);
 
-    // let solution = algorithm(puzzle, goal_state, false);
-    let solutionPuzzle = solution['solutionPuzzle'];
-    let solutionMoves = [];
-    while (solutionPuzzle) {
-        solutionMoves.push(Object.keys(Puzzle.slideDirections)[Object.values(Puzzle.slideDirections).indexOf(solutionPuzzle.lastSlideDirection)]);
-        solutionPuzzle = solutionPuzzle.cameFrom;
-    }
 
-    if (solutionMoves.length === 1 && solution['solutionMoves']) {
-        console.log("I GOT MY SOLUTION MOVES ALREADY");
+    let solutionMoves = [];
+    if (solution['solutionMoves']) {
+        // Strategic algorithm keeps track of solution moves for us
         solutionMoves = solution['solutionMoves'];
     } else {
+        // Extract solution moves from the Puzzle states
+        let solutionPuzzle = solution['solutionPuzzle'];
+        while (solutionPuzzle) {
+            solutionMoves.push(Object.keys(Puzzle.slideDirections)[Object.values(Puzzle.slideDirections).indexOf(solutionPuzzle.lastSlideDirection)]);
+            solutionPuzzle = solutionPuzzle.cameFrom;
+        }
+
+        // Started from end to finish, so reverse moves
         solutionMoves = solutionMoves.reverse();
     }
 
@@ -29,37 +31,33 @@ const solvePuzzle = (algorithm, puzzle, goal_state) => {
 }
 
 
-const solvePuzzleForFunzies = async (htmlMatrix) => {
+const solvePuzzleForFunzies = async () => {
 
     // Don't do anything if user is spamming solve button
     if (solutionAnimating) {
         return;
     }
 
-    const startingPuzzle = getPuzzleFromGridHTML(htmlMatrix);
-
-    console.log("STARTING PUZZLE:", startingPuzzle);
-
-    if (!startingPuzzle) {
-        return;
-    }
-
     // Hide our input elements so the output is clear to see
+    setGoalEditMode(false);
     setPlayMode(true);
+    resetClickSourceElement();
+    hideOutputTextAreas();
 
-    // Rows and cols tracked in UI utils to resize puzzle grid
-    const goalState = Array(puzzleRows).fill().map(() => Array(puzzleCols));
-    let value = 1;
-    for(let row = 0; row < puzzleRows; row++) {
-        for(let col=0; col < puzzleCols; col++) {
-            goalState[row][col] = value === puzzleRows * puzzleCols ? 0 : value;
-            value++;
+    let startingPuzzle = getPuzzleFromGridHTML();
+    if (Puzzle.isPuzzleSolvable2Darr(startingPuzzle.matrix) !== Puzzle.isPuzzleSolvable2Darr(goalPuzzle.matrix)) {
+        let errorMessage = "Puzzle is not solvable with current goal state!  Would you like to auto-fix it?\n\n";
+        errorMessage += "Auto-fix will swap two adjacent non-blank tiles on the bottom right";
+
+        let answer = confirm(errorMessage);
+        if (answer) {
+            autoFixPuzzle();
+            startingPuzzle = getPuzzleFromGridHTML();
         }
     }
 
-    // Unselect any tiles before sorting
-    resetClickSourceElement();
-    hideOutputTextAreas();
+    // Default goal state, but also allows for custom
+    const goalState = goalPuzzle.matrix;
 
     const algorithmMappings = {
         "Strategic": solvePuzzleStrategically,
@@ -79,16 +77,12 @@ const solvePuzzleForFunzies = async (htmlMatrix) => {
     const solutionMoves = solution['solutionMoves'];
 
     console.log("RUNTIME:", solution['runtimeMs'], "ms. MAX PUZZLES IN MEM:", solution['maxPuzzlesInMemory']);
-    console.log("APPROXIMATE MEMORY USAGE", (solution['maxPuzzlesInMemory']*112 / (1024 * 1024)), "MB");
-
 
     // Get only first 3 decimal places for runtime
-    showOutputTextAreas();
     summaryOutput.value = '';
     summaryOutput.value += `Runtime: ${solution['runtimeMs'].toFixed(3)}ms\n`;
     summaryOutput.value += `Moves: ${solutionMoves.length} ${(selectedAlgorithm !== "Strategic" || solutionMoves.length === 0) ? "(optimal)" : "(nonoptimal)"}\n`;
     summaryOutput.value += `Max puzzles in memory: ${solution['maxPuzzlesInMemory']}`;
-
 
     let moveList = "Move list:\n";
     for(const [index, move] of solutionMoves.slice(0, 20000).entries()) {
@@ -96,10 +90,13 @@ const solvePuzzleForFunzies = async (htmlMatrix) => {
     }
 
     solutionOutput.value = moveList;
-    solutionOutput.value += solutionMoves.length > 20000 ? 'See console for full move list...\n' : ''
+    solutionOutput.value += solutionMoves.length > 20000 ? 'See console for full move list...\n' : '';
+
+    showOutputTextAreas();
                                   
     // 200 ms for 3x3 (9 tiles).  Get faster as the puzzle scales up
-    let moveDelayMs = 1800 / (puzzleRows * puzzleCols);
+    // Apparently 4ms will run slightly faster than 0 since the min timeout is 4ms by default
+    let moveDelayMs = Math.max(1800 / (puzzleRows * puzzleCols), 4);
     solutionAnimating = true;
     for(move of solution['solutionMoves']) {
 
