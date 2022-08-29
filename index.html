@@ -14,8 +14,8 @@
                 /* Keep puzzle centered */
                 margin: 0 auto 0 auto; 
                 padding: 0 0 0 0;
-                height: 40vmin;
-                width: 40vmin;
+                height: 60vmin;
+                width: 60vmin;
                 margin-top: 1vh;
                 max-width: 60vh;
                 max-height: 60vh;
@@ -111,6 +111,17 @@
                 text-align:center;
                 position:relative;
                 cursor: pointer;
+            }
+
+            .fontButtons {
+                font-size: 3.5vmin;
+                padding: 0.5vh;
+            }
+
+            .svgButtons {
+                padding: 0; 
+                width: 10vmin; 
+                height: 10vmin;
             }
 
             .buttons:active{
@@ -256,6 +267,8 @@
             }
 
 
+
+
         </style>
         <!-- 
             For updating css classes dynmically with JS
@@ -273,9 +286,9 @@
             <div id="grid" class="grid"></div>
         </div>
         <div class="centered">
-            <button id="shuffleButton" class="buttons buttonsRow1" onclick="shuffleHtmlMatrix()">Shuffle</button>
-            <button id="resetButton" class="buttons buttonsRow1" onclick="resetPuzzle()">Reset</button>
-            <button id="randomizeButton" class="buttons buttonsRow1" onclick="randomizePuzzle()">Randomize</button>
+            <button id="shuffleButton" class="buttons fontButtons buttonsRow1" onclick="shuffleHtmlMatrix()">Shuffle</button>
+            <button id="resetButton" class="buttons fontButtons buttonsRow1" onclick="resetPuzzle()">Reset</button>
+            <button id="randomizeButton" class="buttons fontButtons buttonsRow1" onclick="randomizePuzzle()">Randomize</button>
         </div>
         
         <div class="centered">
@@ -294,7 +307,34 @@
             </select>
         </div>
 
+
         <div id="editInputsContainer" class="centered editInputsContainer">
+            <div class="centered" style="flex-basis: 100%">CUSTOMIZE PUZZLE:</div>
+            <div class="centered">
+                <button id="toggleBorders" class="buttons fontButtons buttonsRow1" onclick="toggleBorders()">Borders</button>
+                <button id="toggleNumbers" class="buttons fontButtons buttonsRow1" onclick="toggleNumbers()">Numbers</button>
+                <button id="flipHorizontally" class="buttons svgButtons buttonsRow2" onclick="flipPuzzleHorizontally()">
+                    <svg viewbox="0 0 48 48">
+                        <path d="M24 6V42" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="mainIconPathAttribute" fill="#000000"></path>
+                        <path d="M4 34L16 12V34H4Z" fill="#000000" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                        <path d="M44 34H32V12L44 34Z" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                    </svg>
+                </button>
+                <button id="flipVertically" class="buttons svgButtons buttonsRow2" onclick="flipPuzzleVertically()">
+                    <svg viewBox="0 0 48 48">
+                        <path d="M42 24L6 24" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                        <path d="M14 4L36 16H14V4Z" fill="#000000" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                        <path d="M14 44V32H36L14 44Z" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                    </svg>
+                </button>
+                <button id="rotatePuzzle" class="buttons svgButtons buttonsRow2" onclick="rotatePuzzle()">
+                    <svg viewBox="0 0 16 16" transform="rotate(45)">
+                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z" id="mainIconPathAttribute" fill="#000000"></path>
+                        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z" id="mainIconPathAttribute" fill="#000000"></path>
+                    </svg>
+                </button>
+            </div>
+            
             <div class ="centered" style="flex-basis: 100%;">
                 <div class ="dimensionInput" style="margin-bottom: 3vmin;">
                     <label class="inputs" for="rowInput">Rows:</label>
@@ -311,26 +351,31 @@
                 </div>
             </div>
             
+            <div class="centered">CUSTOM IMAGE:</div>
             <div id="customImageInput" class="centered inputs customImageInput">
                 <label for="imageInputURL">Image URL:</label>
                 <input type="url" id="imageInputURL" name="imageInputURL" class="imageInputURL" onchange="handleImageURL()"></input>
                 <input type="file" id="imageUpload" style="display: none;" onchange="handleImageUpload()"></input>
-                <input type="button" value="Browse" class="buttons" onclick="document.getElementById('imageUpload').click();" />
+                <input type="button" value="Browse" class="buttons fontButtons" onclick="document.getElementById('imageUpload').click();" />
+                <button id="" class="buttons buttonsRow2 svgButtons" onclick="flipBackgroundHorizontally()">
+                    <svg viewbox="0 0 48 48">
+                        <path d="M24 6V42" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="mainIconPathAttribute" fill="#000000"></path>
+                        <path d="M4 34L16 12V34H4Z" fill="#000000" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                        <path d="M44 34H32V12L44 34Z" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                    </svg> 
+                </button>
+                <button id="flipVertically" class="buttons buttonsRow2 svgButtons" onclick="flipBackgroundVertically()">
+                    <svg viewBox="0 0 48 48">
+                        <path d="M42 24L6 24" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                        <path d="M14 4L36 16H14V4Z" fill="#000000" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                        <path d="M14 44V32H36L14 44Z" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                    </svg>
+                </button>
             </div>
 
-            <div class="centered">
-                <button id="flipHorizontally" class="buttons buttonsRow2" onclick="flipPuzzleHorizontally()">Flip Puzzle Horizontally</button>
-                <button id="flipVertically" class="buttons buttonsRow2" onclick="flipPuzzleVertically()">Flip Puzzle Vertically</button>
-                <button id="flipVertically" class="buttons buttonsRow2" onclick="rotatePuzzle()">Rotate Puzzle</button>
-            </div>
 
             <div class="centered">
-                <button id="flipVertically" class="buttons buttonsRow2" onclick="flipBackgroundVertically()">Flip Image vertically</button>
-                <button id="flipVertically" class="buttons buttonsRow2" onclick="flipBackgroundHorizontally()">Flip Image Horizontally</button>
-            </div>
-            <div class="centered">
-                <button id="toggleBorders" class="buttons buttonsRow1" onclick="toggleBorders()">Toggle Borders</button>
-                <button id="toggleNumbers" class="buttons buttonsRow1" onclick="toggleNumbers()">Toggle Numbers</button>
+
             </div>
         </div>
 
