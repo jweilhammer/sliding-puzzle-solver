@@ -72,7 +72,7 @@ const resetDragSourceElement = () => {
 
 
 
-const shuffleHtmlMatrix = () => {
+const shufflePuzzle = () => {
     solutionAnimating = false;
 
     // Unselect any tiles and stop animation before shuffling
@@ -740,15 +740,54 @@ const updatePuzzleState = (matrix) => {
 }
 
 // Set state to a random solvable puzzle from [2-25 x 2-25]
-const randomizePuzzle = () => {
-    const newRow = Math.floor(Math.random() * 25); + 2
-    const newCol = Math.floor(Math.random() * 25); + 2
-    updatePuzzleDimensions(newRow, newCol);
+const randomizePuzzle = async () => {
+    const newRow = Math.floor(Math.random() * 25) + 2;
+    const newCol = Math.floor(Math.random() * 25) + 2;
+
+    // Update puzzle size if needed
+    if (newRow !== puzzleRows || newCol !== puzzleCols) {
+        updatePuzzleDimensions(newRow, newCol);
+    } else {
+        resetClickSourceElement();
+
+        // Always set to default solvable goal when randomizing start
+        if (!editingGoalPuzzle)
+            goalPuzzle = new Puzzle(puzzleRows, puzzleCols, false);
+
+    }
+
+    if (Math.random() < 0.5)
+        toggleBorders();
+
+    if (Math.random() < 0.5)
+        toggleNumbers();
+
+    let randomizedPuzzle = null;
+    do {
+        // 10% chance to just shuffle puzzle, will always be solvable
+        if (Math.random() < 0.10) {
+            shufflePuzzle();
+        } else {
+            // Make a more visually interesting randomized puzzle by flipping and rotating
+            if (Math.random() < 0.5)
+                flipPuzzleHorizontally();
+
+            if (Math.random() < 0.5)
+                flipPuzzleVertically();
+
+            if (Math.random() < 0.7);
+                rotatePuzzle();
+        }
+
+        randomizedPuzzle = getPuzzleFromGridHTML();
+    }
+    while (!Puzzle.isPuzzleSolvable2Darr(randomizedPuzzle.matrix) || goalPuzzle.isEqualToPuzzle(randomizedPuzzle));
+
     updateBackgroundImageSize();
-    shuffleHtmlMatrix();
 }
 
 const flipPuzzleHorizontally = () => {
+    console.log("flipPuzzleHorizontally");
     solutionAnimating = false;
     for(let row = 0; row < puzzleRows; row++){ 
         for(let col = 0; col < puzzleCols / 2; col++) {
@@ -758,6 +797,7 @@ const flipPuzzleHorizontally = () => {
 }
 
 const flipPuzzleVertically = () => {
+    console.log("flipPuzzleVertically");
     solutionAnimating = false;
     for(let row = 0; row < puzzleRows / 2; row++){ 
         for(let col = 0; col < puzzleCols; col++) {
@@ -801,6 +841,7 @@ const resetBackgroundPositions = () => {
 // Rotates the puzzle clockwise
 // IF puzzle is non-square (NxM), then new puzzle will be (MxN)
 const rotatePuzzle = () => {
+    console.log("ROTATE PUZZLE");
     solutionAnimating = false;
 
     // Get original values
