@@ -100,19 +100,42 @@ const NOT_SOLVED = -1;
 // https://en.wikipedia.org/wiki/Iterative_deepening_A*#Pseudocode
 // Will recursively search and prune baths based on threshold sum of heuristic
 // Restarts at beginning node and chooses the best path each iteration
-const solvePuzzleIDAStar = (puzzle, goal_state, options=null) => {
+const solvePuzzleIDAStar = (puzzle, goalPuzzle, options=null) => {
+
+    let specialCustomGoal = false;
+
+    // If the goal state has odd rows and even cols
+    // Seems to be some bug around the heuristic for some custom goal states
+    // Likely some special cases where manahattan isn't admissible for the non-default goal state
+    // In this case, we let it re-explore previous neighbors for the threshold get high enough that it finds the optimal solution
+    // Need to make sure start and goal are both in either "solvable" or "unsolvable" states or this will infinite loop
+    // TODO: Look into this more, or get a better heuristic?
+    if ((puzzle.rows % 2) && !(puzzle.cols % 2)) {
+
+		// Get default goal state of starting puzzle with same solvability
+		const defaultGoalPuzzle = new Puzzle(puzzle.rows,
+			puzzle.cols,
+			false,
+			Puzzle.isPuzzleSolvable2Darr(puzzle.matrix)
+		);
+
+        if (!defaultGoalPuzzle.isEqualToPuzzle(goalPuzzle)) {
+			specialCustomGoal = true;
+        }
+    }
+
     const startTime = performance.now();
 
-    const goalMapping = Puzzle.getMatrixMapping(goal_state); // Mapping of goal tiles' (row,col) to quickly find heuristic distance
+    const goal_mapping = Puzzle.getMatrixMapping(goalPuzzle.matrix); // Mapping of goal tiles' (row,col) to quickly find heuristic distance
     let curPuzzle = puzzle;
-    curPuzzle.updateManhattanSum(goalMapping);
+    curPuzzle.updateManhattanSum(goal_mapping);
     let threshold = curPuzzle.manhattanSum;
     const solutionPath = [curPuzzle] // Stack of Puzzles up to our current state
     while (curPuzzle.manhattanSum !== 0) {
-        threshold = iterativeDeepeningSearch(solutionPath, 0, threshold, goalMapping);
+        threshold = iterativeDeepeningSearch(solutionPath, 0, threshold, goal_mapping, specialCustomGoal);
         if (threshold === Infinity) {
             console.log("unsolvable");
-            return;
+            return false;
         }
         curPuzzle = solutionPath[solutionPath.length-1]; // Get top of stack
     }
@@ -128,7 +151,9 @@ const solvePuzzleIDAStar = (puzzle, goal_state, options=null) => {
 
 // Recursively loop through neighboring paths and prune branches based on bounding threshold
 // Will return the minimum threshold from all neighboring state paths (sum of heuristsics + cost to traverse to neighbor)
-const iterativeDeepeningSearch = (solutionPath, costToCurPuzzle, boundingThreshold, goalMapping) => {
+const iterativeDeepeningSearch = (solutionPath, costToCurPuzzle, boundingThreshold, goal_mapping, specialCustomGoal) => {
+
+
     let curPuzzle = solutionPath[solutionPath.length-1]; // Get top of stack
     let costToSolution = costToCurPuzzle + curPuzzle.manhattanSum
 
@@ -141,14 +166,14 @@ const iterativeDeepeningSearch = (solutionPath, costToCurPuzzle, boundingThresho
     }
 
     minThreshold = Infinity;
-    for (neighbor of curPuzzle.generateNeighbors(goalMapping)) {
+    for (neighbor of curPuzzle.generateNeighbors(goal_mapping)) {
 
         // If neighbor is already on our solution path, don't re-explore to prevent loops
         const neighborSolutionIndex = solutionPath.findIndex(puzzle => puzzle.isEqualToPuzzle(neighbor));
-        if (neighborSolutionIndex === -1) {
+        if (neighborSolutionIndex === -1 || specialCustomGoal) {
             neighbor.cameFrom = curPuzzle;
             solutionPath.push(neighbor);
-            threshold = iterativeDeepeningSearch(solutionPath, costToCurPuzzle + 1 + neighbor.manhattanSum, boundingThreshold, goalMapping);
+            threshold = iterativeDeepeningSearch(solutionPath, costToCurPuzzle + 1 + neighbor.manhattanSum, boundingThreshold, goal_mapping, specialCustomGoal);
             if (threshold == SOLVED) return threshold;
             if (threshold < minThreshold) minThreshold = threshold;
             solutionPath.pop();
