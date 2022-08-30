@@ -4,11 +4,14 @@
 // If the puzzle is non-square, solve rows or columns first until remaining unsolved puzzle is square
 // Then alternate between solving rows and columns until it's a 2x2
 // Once a tile has been solved, never touch it again: each solved row/col reduces the effective problem space
-const solvePuzzleStrategically = (puzzle, goalState) => {
+const solvePuzzleStrategically = (puzzle, goalPuzzle, options=null) => {
 	const startTime = performance.now();
 
+	console.log(goalPuzzle)
+	goalPuzzle.printPuzzle();
+	console.log("ALREADY SOLVED", goalPuzzle.isEqualToPuzzle(puzzle));
+
 	// Check if our puzzle is already solved
-	const goalPuzzle = Puzzle.fromMatrix(goalState);
 	if (goalPuzzle.isEqualToPuzzle(puzzle)) {
 		return {
 			solutionPuzzle: puzzle,
@@ -18,9 +21,14 @@ const solvePuzzleStrategically = (puzzle, goalState) => {
 		};
 	}
 
+	const dumb = [[2, 5, 8],
+	[6, 0, 1],
+	[3, 4, 7]]
+
 	const solutionMoves = [];
 	puzzle.solutionMoves = solutionMoves;
-	const goalMapping = Puzzle.getMatrixMapping(goalState); // {0: {row: 2, col: 2}}
+	const goalMatrix = goalPuzzle.matrix;
+	const goalMapping = Puzzle.getMatrixMapping(goalMatrix); // {0: {row: 2, col: 2}}
 
 	// Set state for our effective bounds of the unsolved puzzle
 	// If we've solved a row/col, then we will never move into it again
@@ -76,7 +84,7 @@ const solvePuzzleStrategically = (puzzle, goalState) => {
 				}
 
 				let rowIteration = 0;
-				targetValue = goalState[puzzle.rowInProgress][puzzle.rowProgressCol];
+				targetValue = goalMatrix[puzzle.rowInProgress][puzzle.rowProgressCol];
 				while (!Puzzle.isRowEqual(goalPuzzle, puzzle, puzzle.rowInProgress)) {
 
 					// Guard against infinite loops if they may occur
@@ -92,16 +100,16 @@ const solvePuzzleStrategically = (puzzle, goalState) => {
 					}
 
 					// We are not on the last two tiles of the row, solve normally and increment across the row
-					if (targetValue !== goalState[puzzle.rowInProgress][puzzle.rightColProgress - 1]) {
+					if (targetValue !== goalMatrix[puzzle.rowInProgress][puzzle.rightColProgress - 1]) {
 						moveTile(puzzle, targetValue, goalMapping[targetValue].row, goalMapping[targetValue].col);
 						puzzle.rowProgressCol++;
-						targetValue = goalState[puzzle.rowInProgress][puzzle.rowProgressCol];
+						targetValue = goalMatrix[puzzle.rowInProgress][puzzle.rowProgressCol];
 					} else {
 						/*
 						  We are on the last two values of the row
 						  These are special and need to be moved together
 						*/
-						const lastValue = goalState[puzzle.rowInProgress][puzzle.rightColProgress];
+						const lastValue = goalMatrix[puzzle.rowInProgress][puzzle.rightColProgress];
 						if (puzzle.solvingRowTopDown) {
 							/*
 							  1. Move last value two row below its goal
@@ -129,7 +137,7 @@ const solvePuzzleStrategically = (puzzle, goalState) => {
 							// Reset the target in case we somehow got into a bad state
 							rowIteration++;
 							puzzle.rowProgressCol = 0;
-							targetValue = goalState[puzzle.rowInProgress][puzzle.rowProgressCol];
+							targetValue = goalMatrix[puzzle.rowInProgress][puzzle.rowProgressCol];
 						} else {
 
 							// We're solving a row on the bottom.  Same logic as top, but flipped
@@ -146,7 +154,7 @@ const solvePuzzleStrategically = (puzzle, goalState) => {
 							// Reset the target in case we somehow got into a bad state
 							rowIteration++;
 							puzzle.rowProgressCol = 0;
-							targetValue = goalState[puzzle.rowInProgress][puzzle.rowProgressCol];
+							targetValue = goalMatrix[puzzle.rowInProgress][puzzle.rowProgressCol];
 						}
 					}
 				}
@@ -186,7 +194,7 @@ const solvePuzzleStrategically = (puzzle, goalState) => {
 				}
 
 				let colIteration = 0;
-				targetValue = goalState[puzzle.topRowProgress][puzzle.colInProgress];
+				targetValue = goalMatrix[puzzle.topRowProgress][puzzle.colInProgress];
 				while (!Puzzle.isColEqual(goalPuzzle, puzzle, puzzle.colInProgress)) {
 
 					// Guard against infinite loops if they may occur
@@ -202,16 +210,16 @@ const solvePuzzleStrategically = (puzzle, goalState) => {
 					}
 
 					// We are not moving the last two tiles of the column, solve normally and increment down the col
-					if (targetValue !== goalState[puzzle.botRowProgress - 1][puzzle.colInProgress]) {
+					if (targetValue !== goalMatrix[puzzle.botRowProgress - 1][puzzle.colInProgress]) {
 						moveTile(puzzle, targetValue, goalMapping[targetValue].row, goalMapping[targetValue].col);
 						puzzle.colProgressRow++;
-						targetValue = goalState[puzzle.colProgressRow][puzzle.colInProgress];
+						targetValue = goalMatrix[puzzle.colProgressRow][puzzle.colInProgress];
 					} else {
 						/*
 						  We are on the last two values of the column
 						  These are special and need to be moved together
 						*/
-						const lastValue = goalState[puzzle.botRowProgress][puzzle.colInProgress];
+						const lastValue = goalMatrix[puzzle.botRowProgress][puzzle.colInProgress];
 						if (puzzle.solvingColLeftRight) {
 							/*                          
 							  1. Move last value two cols right of its goal
@@ -239,7 +247,7 @@ const solvePuzzleStrategically = (puzzle, goalState) => {
 							// Reset the target in case we somehow got into a bad state
 							colIteration++;
 							puzzle.colProgressRow = 0;
-							targetValue = goalState[puzzle.colProgressRow][puzzle.colInProgress];
+							targetValue = goalMatrix[puzzle.colProgressRow][puzzle.colInProgress];
 						} else {
 
 							// We're solving a column on the right.  Same logic as left, but flipped
@@ -256,7 +264,7 @@ const solvePuzzleStrategically = (puzzle, goalState) => {
 							// Reset the target in case we somehow got into a bad state
 							colIteration++;
 							puzzle.colProgressRow = 0;
-							targetValue = goalState[puzzle.colProgressRow][puzzle.colInProgress];
+							targetValue = goalMatrix[puzzle.colProgressRow][puzzle.colInProgress];
 						}
 					}
 				}

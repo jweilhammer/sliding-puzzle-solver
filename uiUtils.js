@@ -450,6 +450,8 @@ const toggleStrategicOnlyAlgorithm = (strategicOnly) => {
             }
         }
 
+        // Select strategic algorithm in case selection was on another during resizing
+        algorithmDropdown.value="Strategic"
     } else {
 
         // Add the other algorithms back in!

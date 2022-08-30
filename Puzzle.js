@@ -29,6 +29,9 @@ class Puzzle {
                 this.matrix[rows - 3][col - 3] = this.matrix[rows - 2][col - 2];
                 this.matrix[rows - 2][col - 2] = tmp;
             }
+
+            this.blankRow = rows - 1;
+            this.blankCol = cols - 1;
         }
         this.lastSlideDirection = 0;
         this.manhattanSum = 0; // No need to calculate manhatten sum on initial puzzle state
@@ -287,10 +290,6 @@ class Puzzle {
         }
 
         return neighboringPuzzleStates;
-    }
-
-    isInGoalState(goalState) {
-        return this.isEqualToPuzzle()
     }
 
     isEqualToPuzzle(puzzle) {

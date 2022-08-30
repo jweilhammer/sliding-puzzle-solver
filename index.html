@@ -14,9 +14,11 @@
                 /* Keep puzzle centered */
                 margin: 0 auto 0 auto; 
                 padding: 0 0 0 0;
-                height: 60vmin;
-                width: 60vmin;
+                height: calc(40vh - 20vw);
+                width: calc(40vh - 20vw);
                 margin-top: 1vh;
+                min-width: 35vh;
+                min-height: 35vh;
                 max-width: 60vh;
                 max-height: 60vh;
             }
@@ -93,7 +95,7 @@
             }
 
             .inputs {
-                font-size: 4vmin;
+                font-size: calc(min(4vh, 4vmin) - 1vw);
             }
 
             .editInputsContainer {
@@ -103,10 +105,9 @@
 
             
             .buttons {
-                font-size: 3.5vmin;
                 padding: 0.5vh;
 
-                margin:2vmin 1vmin 1vw 1vw;
+                margin:1vmin 1vmin 1vw 1vw;
 
                 border-radius:0.30em;
                 box-sizing: border-box;
@@ -116,14 +117,14 @@
             }
 
             .fontButtons {
-                font-size: 3.5vmin;
+                font-size: calc(4vh - 0.5vw);
                 padding: 0.5vh;
             }
 
             .svgButtons {
                 padding: 0; 
-                width: 10vmin; 
-                height: 10vmin;
+                width: 8vmin; 
+                height: 8vmin;
             }
 
             .buttons:active{
@@ -303,14 +304,15 @@
             <select class="algorithmsDropdown" name="algorithms" id="algorithmsDropdown">
                 <option value="Strategic">Strategically</option>
                 <option value="IDA*">IDA*</option>
-                <option value="A*">A* (closed set)</option>
+                <option value="A*">A*</option>
+                <option value="A*closedSet">A* (closed set)</option>
                 <option value="BFS">BFS</option>
             </select>
         </div>
 
 
         <div id="editInputsContainer" class="centered editInputsContainer">
-            <div class="centered" style="flex-basis: 100%">CUSTOMIZE PUZZLE:</div>
+            <div class="centered" style="flex-basis: 100%; margin-top: 1vmin;">CUSTOMIZE PUZZLE:</div>
             <div class="centered">
                 <button id="toggleBorders" class="buttons fontButtons buttonsRow1" onclick="toggleBorders()">Borders</button>
                 <button id="toggleNumbers" class="buttons fontButtons buttonsRow1" onclick="toggleNumbers()">Numbers</button>

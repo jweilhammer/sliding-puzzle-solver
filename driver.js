@@ -1,8 +1,8 @@
-const solvePuzzle = (algorithm, puzzle, goal_state) => {
+const solvePuzzle = (algorithm, startPuzzle, goalPuzzle, options=null) => {
     // Stop animation of previous solution if user clicks solve again mid-way through
     solutionAnimating = false;
 
-    let solution = algorithm(puzzle, goal_state);
+    let solution = algorithm(startPuzzle, goalPuzzle, options);
 
 
     let solutionMoves = [];
@@ -56,13 +56,11 @@ const solvePuzzleForFunzies = async () => {
         }
     }
 
-    // Default goal state, but also allows for custom
-    const goalState = goalPuzzle.matrix;
-
     const algorithmMappings = {
         "Strategic": solvePuzzleStrategically,
         "IDA*": solvePuzzleIDAStar,
         "A*": solvePuzzleAStar,
+        "A*closedSet": solvePuzzleAStar,
         "BFS": solvePuzzleBFS
     }
 
@@ -73,7 +71,17 @@ const solvePuzzleForFunzies = async () => {
     let sliderCol = sliderPosition[1];
 
     htmlMatrix[sliderRow][sliderCol].style.opacity = '0';
-    const solution = solvePuzzle(algorithm, startingPuzzle, goalState);
+
+    goalPuzzle.printPuzzle();
+    console.log(goalPuzzle.blankRow);
+    console.log(goalPuzzle.blankCol);
+
+    let options = null;
+    if (selectedAlgorithm === "A*closedSet") {
+        options = { closedSet: true }
+    }
+    
+    const solution = solvePuzzle(algorithm, startingPuzzle, goalPuzzle, options);
     const solutionMoves = solution['solutionMoves'];
 
     console.log("RUNTIME:", solution['runtimeMs'], "ms. MAX PUZZLES IN MEM:", solution['maxPuzzlesInMemory']);
@@ -81,7 +89,8 @@ const solvePuzzleForFunzies = async () => {
     // Get only first 3 decimal places for runtime
     summaryOutput.value = '';
     summaryOutput.value += `Runtime: ${solution['runtimeMs'].toFixed(3)}ms\n`;
-    summaryOutput.value += `Moves: ${solutionMoves.length} ${(selectedAlgorithm !== "Strategic" || solutionMoves.length === 0) ? "(optimal)" : "(nonoptimal)"}\n`;
+    summaryOutput.value += `Moves: ${solutionMoves.length} ${(selectedAlgorithm !== "Strategic" ||
+     (solutionMoves.length === 0 || solutionMoves.length===1) ) ? "(optimal)" : "(nonoptimal)"}\n`;
     summaryOutput.value += `Max puzzles in memory: ${solution['maxPuzzlesInMemory']}`;
 
     let moveList = "Move list:\n";
