@@ -38,12 +38,6 @@ const solvePuzzleForFunzies = async () => {
         return;
     }
 
-    // Hide our input elements so the output is clear to see
-    setGoalEditMode(false);
-    setPlayMode(true);
-    resetClickSourceElement();
-    hideOutputTextAreas();
-
     let startingPuzzle = getPuzzleFromGridHTML();
     if (Puzzle.isPuzzleSolvable2Darr(startingPuzzle.matrix) !== Puzzle.isPuzzleSolvable2Darr(goalPuzzle.matrix)) {
         let errorMessage = "Puzzle is not solvable with current goal state!  Would you like to auto-fix it?\n\n";
@@ -53,8 +47,17 @@ const solvePuzzleForFunzies = async () => {
         if (answer) {
             autoFixPuzzle();
             startingPuzzle = getPuzzleFromGridHTML();
+        } else {
+            setPlayMode(false);
+            return;
         }
     }
+
+    // Hide our input elements so the output is clear to see
+    setGoalEditMode(false);
+    setPlayMode(true);
+    resetClickSourceElement();
+    hideOutputTextAreas();
 
     const algorithmMappings = {
         "Strategic": solvePuzzleStrategically,
