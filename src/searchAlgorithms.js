@@ -1,3 +1,8 @@
+import { Puzzle } from './Puzzle.js';
+import { PriorityQueue } from './PriorityQueue.js';
+
+export { solvePuzzleBFS, solvePuzzleAStar, solvePuzzleIDAStar }
+
 // Breadth first search
 const solvePuzzleBFS = (puzzle, goalPuzzle, options=null) => {
     const startTime = performance.now();
@@ -6,8 +11,8 @@ const solvePuzzleBFS = (puzzle, goalPuzzle, options=null) => {
     const closedSet = {}; // Previously visited states
     let curPuzzle = puzzle;
     while (!goalPuzzle.isEqualToPuzzle(curPuzzle)) {
-        neighboringPuzzleStates = curPuzzle.generateNeighbors();
-        for(neighbor of neighboringPuzzleStates) {
+        const neighboringPuzzleStates = curPuzzle.generateNeighbors();
+        for (const neighbor of neighboringPuzzleStates) {
             // Only explore new states, if we've already explored then don't add to open list
             if (!closedSet[JSON.stringify(neighbor.matrix)]) {
                 neighbor.cameFrom = curPuzzle;
@@ -52,7 +57,7 @@ const solvePuzzleAStar = (puzzle, goalPuzzle, options=null) => {
 
         const neighboringPuzzleStates = curPuzzle.generateNeighbors(goalMapping);
         const costToNeighbor = curPuzzle.costFromStart + 1;
-        for(neighbor of neighboringPuzzleStates) {
+        for (const neighbor of neighboringPuzzleStates) {
 
             // If on the closed list, don't explore that path again
             if (closedSet && closedSet[JSON.stringify(neighbor.matrix)]) {
@@ -165,15 +170,15 @@ const iterativeDeepeningSearch = (solutionPath, costToCurPuzzle, boundingThresho
         return SOLVED;
     }
 
-    minThreshold = Infinity;
-    for (neighbor of curPuzzle.generateNeighbors(goal_mapping)) {
+    let minThreshold = Infinity;
+    for (const neighbor of curPuzzle.generateNeighbors(goal_mapping)) {
 
         // If neighbor is already on our solution path, don't re-explore to prevent loops
         const neighborSolutionIndex = solutionPath.findIndex(puzzle => puzzle.isEqualToPuzzle(neighbor));
         if (neighborSolutionIndex === -1 || specialCustomGoal) {
             neighbor.cameFrom = curPuzzle;
             solutionPath.push(neighbor);
-            threshold = iterativeDeepeningSearch(solutionPath, costToCurPuzzle + 1 + neighbor.manhattanSum, boundingThreshold, goal_mapping, specialCustomGoal);
+            const threshold = iterativeDeepeningSearch(solutionPath, costToCurPuzzle + 1 + neighbor.manhattanSum, boundingThreshold, goal_mapping, specialCustomGoal);
             if (threshold == SOLVED) return threshold;
             if (threshold < minThreshold) minThreshold = threshold;
             solutionPath.pop();

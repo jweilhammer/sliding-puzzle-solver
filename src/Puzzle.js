@@ -1,3 +1,6 @@
+import { PriorityQueue } from "./PriorityQueue.js";
+export { Puzzle };
+
 class Puzzle {
     static slideDirections = {
         "INITIAL": 0,

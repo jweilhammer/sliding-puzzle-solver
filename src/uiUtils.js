@@ -1,11 +1,31 @@
+
+import { Puzzle } from './Puzzle.js';
+import { solvePuzzle } from './index.js';
+import { State } from './State.js';
+
+export {
+    getPuzzleFromGrid,
+    resetClickSourceElement,
+    hideEditElements,
+    hideOutputTextAreas,
+    showOutputTextAreas,
+    animateMoveList,
+    autoFixPuzzle,
+ };
+
+
+
+// Shareable state between modules
+const state = State.get();
+
+
 // UI ELEMENTS
 let dragSourceElement = undefined;
 let clickSourceElement = undefined;
 const editInputsContainer = document.getElementById("editInputsContainer");
-const imageUploadForm = document.getElementById("ImageUploadForm");
+const imageUploadInput = document.getElementById('imageUploadInput');
 const imageInputURL = document.getElementById("imageInputURL");
-let imageURL = undefined;
-const playButton = document.getElementById("playButton");
+const playButton = document.getElementById("playBtn");
 
 const outputAreaContainer = document.getElementById('outputAreaContainer');
 let summaryOutput = document.getElementById('summaryOutput');
@@ -28,7 +48,7 @@ const borderCss = document.getElementById("tileBorderCss");
 const backgroundCss = document.getElementById("tileBackgroundCss");
 const backgroundflipCss = document.getElementById("backgroundflipCss");
 
-const editGoalButton = document.getElementById('editGoalButton');
+const editGoalButton = document.getElementById('editGoalBtn');
 const title = document.getElementById('title');
 
 // Toggling SVG icons
@@ -38,11 +58,6 @@ const hideBorderSvg = document.getElementById('hideBorderSvg');
 const showBorderSvg = document.getElementById('showBorderSvg');
 
 
-
-// App state
-let puzzleRows = 0;
-let puzzleCols = 0;
-let solutionAnimating = false;
 
 const resetClickSourceElement = () => {
     // Unselect any tiles before shuffling
@@ -80,7 +95,7 @@ const resetDragSourceElement = () => {
 
 
 const shufflePuzzle = () => {
-    solutionAnimating = false;
+    state.solutionAnimating = false;
 
     // Unselect any tiles and stop animation before shuffling
     resetClickSourceElement();
@@ -91,7 +106,7 @@ const shufflePuzzle = () => {
     // Get all tile Values in 1D array, plus blank tile (0)
     let tileValue = 1;
     const values = [];
-    while (tileValue < (puzzleRows*puzzleCols)) {
+    while (tileValue < (state.puzzleRows*state.puzzleCols)) {
         values.push(tileValue);
         tileValue++;
     }
@@ -101,11 +116,11 @@ const shufflePuzzle = () => {
     do {
         puzzle_arr = Puzzle.shuffleArray(values);
     } 
-    while (!Puzzle.isPuzzleSolvable1Darr(puzzle_arr, puzzleRows, puzzleCols));
+    while (!Puzzle.isPuzzleSolvable1Darr(puzzle_arr, state.puzzleRows, state.puzzleCols));
 
-    const bgPositions = getBackgroundPositions(puzzleRows, puzzleCols);
-    for(let row = 0; row < puzzleRows; row++) {
-        for(let col = 0; col < puzzleCols; col++) {
+    const bgPositions = getBackgroundPositions(state.puzzleRows, state.puzzleCols);
+    for(let row = 0; row < state.puzzleRows; row++) {
+        for(let col = 0; col < state.puzzleCols; col++) {
             let value = puzzle_arr.shift();
             const tile = htmlMatrix[row][col];
             if (value === 0) {
@@ -139,8 +154,8 @@ const getBackgroundPositions = (rows, cols) => {
         for(let col = 0; col < cols; col++){
             value = value === rows*cols ? '' : value;
             positionsPercentages[value] = {
-                x: (rowPercentStep)*(backgroundVerticallyFlipped ? (puzzleRows - 1 - row) : row),
-                y: (colPercentStep)*(backgroundHorizontallyFlipped ? (puzzleCols - 1 - col) : col),
+                x: (rowPercentStep)*(backgroundVerticallyFlipped ? (state.puzzleRows - 1 - row) : row),
+                y: (colPercentStep)*(backgroundHorizontallyFlipped ? (state.puzzleCols - 1 - col) : col),
             };
 
             value++;
@@ -151,10 +166,10 @@ const getBackgroundPositions = (rows, cols) => {
 }
 
 
-const getPuzzleFromGridHTML = () => {
-    const matrix = Array(puzzleRows).fill().map(() => Array(puzzleCols));
-    for (let row = 0; row < puzzleRows; row++) {
-        for (let col = 0; col < puzzleCols; col++) {
+const getPuzzleFromGrid = () => {
+    const matrix = Array(state.puzzleRows).fill().map(() => Array(state.puzzleCols));
+    for (let row = 0; row < state.puzzleRows; row++) {
+        for (let col = 0; col < state.puzzleCols; col++) {
             const tile = htmlMatrix[row][col];
             if (isNaN(parseInt(tile.textContent))) {   
                 matrix[row][col] = 0;
@@ -170,6 +185,11 @@ const getPuzzleFromGridHTML = () => {
 
 // https://web.dev/drag-and-drop/
 document.addEventListener('DOMContentLoaded', (e) => {
+    // Initialize shared state
+    const sharedState = new State();
+    const state = State.get();
+
+    // Initialize Puzzle
     updatePuzzleDimensions(parseInt(rowInput.value), parseInt(colInput.value));
     updateBackgroundImageSize();
 
@@ -178,7 +198,27 @@ document.addEventListener('DOMContentLoaded', (e) => {
     backgroundCss.innerHTML = `.grid-item::before { background-image: url('test.jpg'); }`;
 
     // Make goal puzzle a default goal state with current size;
-    goalPuzzle = new Puzzle(puzzleRows, puzzleCols, false);
+    state.goalPuzzle = new Puzzle(state.puzzleRows, state.puzzleCols, false);
+
+    // Button onclicks
+    document.getElementById('shuffleBtn').addEventListener("click", shufflePuzzle);
+    document.getElementById('resetBtn').addEventListener("click", resetPuzzle);
+    document.getElementById('randomizeBtn').addEventListener("click", randomizePuzzle);
+    playButton.addEventListener("click", () => {setPlayMode(playButton.textContent === 'Play Puzzle' ? true : false)});
+    document.getElementById('editGoalBtn').addEventListener("click", () => {setGoalEditMode(!state.editingGoalPuzzle)});
+    document.getElementById('solveBtn').addEventListener("click", solvePuzzle);
+    document.getElementById('toggleBordersBtn').addEventListener("click", toggleBorders);
+    document.getElementById('toggleNumbersBtn').addEventListener("click", toggleNumbers);
+    document.getElementById('flipPuzzleHorizontalBtn').addEventListener("click", flipPuzzleHorizontally);
+    document.getElementById('flipPuzzleVerticalBtn').addEventListener("click", flipPuzzleVertically);
+    document.getElementById('rotatePuzzleBtn').addEventListener("click", rotatePuzzle);
+    document.getElementById('flipImageHorizontalBtn').addEventListener("click", flipBackgroundHorizontally);
+    document.getElementById('flipImageVerticalBtn').addEventListener("click", flipBackgroundVertically);
+     
+    document.getElementById('imageUploadInput').addEventListener("change", handleImageUpload);
+    document.getElementById('imageInputURL').addEventListener("change", handleImageURL);
+
+    
 });
 
 
@@ -202,18 +242,19 @@ const swapHtmlTiles = (tile1, tile2) => {
     tile2.style.opacity = isNaN(parseInt(tile2.textContent)) ? "0" : "1";
 }
 
-let playMode = false;
 const setPlayMode = (enable) => {
+
+    console.log("SET PLAY MODE", enable);
     // Stop animation if solution is playing out
-    solutionAnimating = false;
+    state.solutionAnimating = false;
     if (enable) {
-        if (editingGoalPuzzle) {
+        if (state.editingGoalPuzzle) {
             setGoalEditMode(false);
         }
 
         // Convert to Puzzle to make sure it's solveable before letting user play it
-        const startingPuzzle = getPuzzleFromGridHTML();
-        if (Puzzle.isPuzzleSolvable2Darr(startingPuzzle.matrix) !== Puzzle.isPuzzleSolvable2Darr(goalPuzzle.matrix)) {
+        const startingPuzzle = getPuzzleFromGrid();
+        if (Puzzle.isPuzzleSolvable2Darr(startingPuzzle.matrix) !== Puzzle.isPuzzleSolvable2Darr(state.goalPuzzle.matrix)) {
             let errorMessage = "Puzzle is not solvable with current goal state!  Would you like to auto-fix it?\n\n";
             errorMessage += "Auto-fix will swap two adjacent non-blank tiles on the bottom right";
     
@@ -223,7 +264,7 @@ const setPlayMode = (enable) => {
             }
         }
 
-        playMode = true;
+        state.playMode = true;
         playButton.textContent = "Edit Puzzle";
         title.textContent = '';
 
@@ -234,17 +275,17 @@ const setPlayMode = (enable) => {
         hideOutputTextAreas();
     }
     else {
-        playMode = false;
+        state.playMode = false;
         playButton.textContent = "Play Puzzle";
 
-        if (!editingGoalPuzzle){
+        if (!state.editingGoalPuzzle){
             title.textContent = "Editing Start";
         }
 
         clickSourceElement = undefined;
         dragSourceElement = undefined;
-        for (row of htmlMatrix) {
-            for (tile of row) {
+        for (const row of htmlMatrix) {
+            for (const tile of row) {
                 tile.setAttribute('draggable', true);
                 tile.style.pointerEvents = 'auto';
                 tile.style.cursor = 'move';
@@ -265,8 +306,8 @@ const showEditElements = () => {
 }
 
 const playModeResetAllMovableTiles = () => {
-    for (row of htmlMatrix) {
-        for (tile of row) {
+    for (const row of htmlMatrix) {
+        for (const tile of row) {
             tile.setAttribute('draggable', false);
             tile.style.pointerEvents = 'none';
             tile.style.cursor = 'default';
@@ -309,7 +350,7 @@ const playModeSetMovableTiles = () => {
 
 
 const updatePuzzleDimensions = (newRow, newCol) => {
-    solutionAnimating = false;
+    state.solutionAnimating = false;
 
     if (isNaN(newRow) || isNaN(newCol)) {
         return false;
@@ -359,13 +400,13 @@ const updatePuzzleDimensions = (newRow, newCol) => {
 
 
     // Set these new rows/cols to our UI state
-    const oldRows = puzzleRows;
-    const oldCols = puzzleCols; 
-    if (newRow === puzzleRows && newCol === puzzleCols) {
+    const oldRows = state.puzzleRows;
+    const oldCols = state.puzzleCols; 
+    if (newRow === state.puzzleRows && newCol === state.puzzleCols) {
         return false;
     } else {
-        puzzleRows = newRow;
-        puzzleCols = newCol;
+        state.puzzleRows = newRow;
+        state.puzzleCols = newCol;
         rowInput.value = newRow;
         colInput.value = newCol;
         rowSlider.value = newRow;
@@ -380,8 +421,8 @@ const updatePuzzleDimensions = (newRow, newCol) => {
     // Remove extra tiles if are rows/cols are smaller
     // Need to actually call remove child for each element or it will stay in the Puzzle/Grid/UI
     const newHtmlMatrix = Array(newRow).fill().map(() => Array(newCol));
-    let rowDiff = puzzleRows - oldRows;
-    let colDiff = puzzleCols - oldCols;
+    let rowDiff = state.puzzleRows - oldRows;
+    let colDiff = state.puzzleCols - oldCols;
 
     // Remove whole rows first
     if (rowDiff < 0) {
@@ -407,8 +448,8 @@ const updatePuzzleDimensions = (newRow, newCol) => {
 
     // Reset our tile background positions and number overlays/ids
     // Add new tiles in if needed
-    value = 1;
-    const bgPositions = getBackgroundPositions(puzzleRows, puzzleCols);
+    let value = 1;
+    const bgPositions = getBackgroundPositions(state.puzzleRows, state.puzzleCols);
     for(let row = 0; row < newRow; row++){ 
         for(let col = 0; col < newCol; col++) {
             const tileNum = value === newCol*newRow ? '' : value; // Last tile is blank
@@ -443,7 +484,7 @@ const updatePuzzleDimensions = (newRow, newCol) => {
     // Update our CSS grid rows + columns, set to have even size throughout
     grid.style.gridTemplateRows = `${'1fr '.repeat(newRow)}`;
     grid.style.gridTemplateColumns = `${'1fr '.repeat(newCol)}`;
-    goalPuzzle = new Puzzle(puzzleRows, puzzleCols, false);
+    state.goalPuzzle = new Puzzle(state.puzzleRows, state.puzzleCols, false);
     htmlMatrix = newHtmlMatrix;
 }
 
@@ -473,12 +514,12 @@ const updateBackgroundImageSize = () => {
     grid.style.backgroundSize = `${gridContainer.offsetWidth}px ${gridContainer.offsetHeight}px`;
 
     // At a certain point, we don't care about seeing the tiles
-    if (puzzleCols * puzzleRows > 1000) {
+    if (state.puzzleCols * state.puzzleRows > 1000) {
         grid.style.fontSize = 0;
     } else {
         if (showNumbers)
             // Magic formula that will keep number font looking nice and prevent grid from getting out of bounds
-            grid.style.fontSize = `${800 * ( 0.001 * gridContainer.offsetWidth) /  ( 2 * Math.max(puzzleCols, puzzleRows))}px`;
+            grid.style.fontSize = `${800 * ( 0.001 * gridContainer.offsetWidth) /  ( 2 * Math.max(state.puzzleCols, state.puzzleRows))}px`;
     }
 }
 
@@ -536,7 +577,7 @@ function handleTileDragOver (e) {
 }
 
 function handleTileDragStart (e) {
-    if (playMode || solutionAnimating) {
+    if (state.playMode || state.solutionAnimating) {
         return;
     }
 
@@ -569,7 +610,7 @@ function handleTileDragEnd (e) {
 }
 
 function handleTileDrop (e) {
-    if (playMode || solutionAnimating) {
+    if (state.playMode || state.solutionAnimating) {
         return;
     }
 
@@ -609,24 +650,24 @@ function handleTileTouchAndCLick (e) {
     // Stop zooming when double clicking tiles on mobile
     e.preventDefault();
 
-    if (solutionAnimating) {
+    if (state.solutionAnimating) {
         return;
     }
 
-    if (clickSourceElement && !playMode) {
+    if (clickSourceElement && !state.playMode) {
         // Unselect same tile after double click
         if (clickSourceElement === this) {
             resetClickSourceElement();
         }
         else {
             // Swap the two different tiles
-            if (!playMode) {
+            if (!state.playMode) {
                 swapHtmlTiles(clickSourceElement, this);
                 resetClickSourceElement();
             }
         }
     } else {
-        if (playMode) {
+        if (state.playMode) {
             // need indices for checking neighbors
             for (let row = 0; row < htmlMatrix.length; row++) {
                 for (let col = 0; col < htmlMatrix[row].length; col++) {
@@ -671,9 +712,8 @@ function handleImageURL () {
     backgroundCss.innerHTML = `.grid-item::before { background-image: url('${imageInputURL.value}'); }`;
 }
 
-function handleImageUpload () {
-    const fileInput = document.getElementById('imageUpload');
-    const file = fileInput.files[0];
+const handleImageUpload = () => {
+    const file = imageUploadInput.files[0];
     if (file && file['type'].split('/')[0] === 'image') {
         const tempImageUrl = URL.createObjectURL(file);
         const img = new Image();
@@ -687,15 +727,18 @@ function handleImageUpload () {
             canvas.height = imgElement.target.height * scaleResize;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(imgElement.target, 0, 0, canvas.width, canvas.height);
+
+            // Convert canvas to object URL to use in css background attribute
             ctx.canvas.toBlob((blob) => {
+
                 // Reclaim any used space by the browser after uploading more than one image
                 URL.revokeObjectURL(tempImageUrl);
-                if (imageURL) {
-                    URL.revokeObjectURL(imageURL);
+                if (state.imageURL) {
+                    URL.revokeObjectURL(state.imageURL);
                 }
 
-                imageURL = URL.createObjectURL(blob);
-                backgroundCss.innerHTML = `.grid-item::before { background-image: url('${imageURL}');}`;
+                state.imageURL = URL.createObjectURL(blob);
+                backgroundCss.innerHTML = `.grid-item::before { background-image: url('${state.imageURL}');}`;
             });
         }
     }
@@ -707,17 +750,18 @@ const hideOutputTextAreas = () => {
 
 const showOutputTextAreas = () => {
     outputAreaContainer.style.display = null;
+    playButton.textContent = "Edit Puzzle";
 }
 
 // Reset our tile background positions and number overlays/ids for the current dimensions
 const resetPuzzle = () => {
-    solutionAnimating = false;
+    state.solutionAnimating = false;
     setPlayMode(false);
-    const bgPositions = getBackgroundPositions(puzzleRows, puzzleCols);
-    for(let row = 0; row < puzzleRows; row++){ 
-        for(let col = 0; col < puzzleCols; col++) {
+    const bgPositions = getBackgroundPositions(state.puzzleRows, state.puzzleCols);
+    for(let row = 0; row < state.puzzleRows; row++){ 
+        for(let col = 0; col < state.puzzleCols; col++) {
             const tile = htmlMatrix[row][col];
-            const tileNum = (row * puzzleCols + col + 1) === puzzleRows*puzzleCols ? '' : (row * puzzleCols + col + 1);
+            const tileNum = (row * state.puzzleCols + col + 1) === state.puzzleRows*state.puzzleCols ? '' : (row * state.puzzleCols + col + 1);
             tile.draggable = true;
             tile.textContent = tileNum 
             tile.style.opacity = tileNum ? '1' : '0'
@@ -730,7 +774,7 @@ const resetPuzzle = () => {
 // Resets current puzzle to match a new matrix state
 // Mostly for switching in between start and goal states
 const updatePuzzleState = (matrix) => {
-    if (matrix.length !== puzzleRows || matrix[0].length !== puzzleCols) {
+    if (matrix.length !== state.puzzleRows || matrix[0].length !== state.puzzleCols) {
         resetPuzzle();
     } else {
         htmlMatrix.forEach((row, rowIndex) => {
@@ -752,14 +796,14 @@ const randomizePuzzle = async () => {
     const newCol = Math.floor(Math.random() * 25) + 2;
 
     // Update puzzle size if needed
-    if (newRow !== puzzleRows || newCol !== puzzleCols) {
+    if (newRow !== state.puzzleRows || newCol !== state.puzzleCols) {
         updatePuzzleDimensions(newRow, newCol);
     } else {
         resetClickSourceElement();
 
         // Always set to default solvable goal when randomizing start
-        if (!editingGoalPuzzle)
-            goalPuzzle = new Puzzle(puzzleRows, puzzleCols, false);
+        if (!state.editingGoalPuzzle)
+            state.goalPuzzle = new Puzzle(state.puzzleRows, state.puzzleCols, false);
 
     }
 
@@ -786,29 +830,29 @@ const randomizePuzzle = async () => {
                 rotatePuzzle();
         }
 
-        randomizedPuzzle = getPuzzleFromGridHTML();
+        randomizedPuzzle = getPuzzleFromGrid();
     }
-    while (!Puzzle.isPuzzleSolvable2Darr(randomizedPuzzle.matrix) || goalPuzzle.isEqualToPuzzle(randomizedPuzzle));
+    while (!Puzzle.isPuzzleSolvable2Darr(randomizedPuzzle.matrix) || state.goalPuzzle.isEqualToPuzzle(randomizedPuzzle));
 
     updateBackgroundImageSize();
 }
 
 const flipPuzzleHorizontally = () => {
     console.log("flipPuzzleHorizontally");
-    solutionAnimating = false;
-    for(let row = 0; row < puzzleRows; row++){ 
-        for(let col = 0; col < puzzleCols / 2; col++) {
-            swapHtmlTiles(htmlMatrix[row][col], htmlMatrix[row][puzzleCols - 1 - col]);
+    state.solutionAnimating = false;
+    for(let row = 0; row < state.puzzleRows; row++){ 
+        for(let col = 0; col < state.puzzleCols / 2; col++) {
+            swapHtmlTiles(htmlMatrix[row][col], htmlMatrix[row][state.puzzleCols - 1 - col]);
         }
     }
 }
 
 const flipPuzzleVertically = () => {
     console.log("flipPuzzleVertically");
-    solutionAnimating = false;
-    for(let row = 0; row < puzzleRows / 2; row++){ 
-        for(let col = 0; col < puzzleCols; col++) {
-            swapHtmlTiles(htmlMatrix[row][col], htmlMatrix[puzzleRows - 1 - row][col]);
+    state.solutionAnimating = false;
+    for(let row = 0; row < state.puzzleRows / 2; row++){ 
+        for(let col = 0; col < state.puzzleCols; col++) {
+            swapHtmlTiles(htmlMatrix[row][col], htmlMatrix[state.puzzleRows - 1 - row][col]);
         }
     }
 }
@@ -836,7 +880,7 @@ const flipBackground = () => {
 
 
 const resetBackgroundPositions = () => {
-    const bgPositions = getBackgroundPositions(puzzleRows, puzzleCols);
+    const bgPositions = getBackgroundPositions(state.puzzleRows, state.puzzleCols);
     htmlMatrix.forEach((r, row) => {
         r.forEach((tile, col) => {
             tile.style.backgroundPosition = `${bgPositions[tile.textContent].y}% ${bgPositions[tile.textContent].x}%`
@@ -849,14 +893,14 @@ const resetBackgroundPositions = () => {
 // IF puzzle is non-square (NxM), then new puzzle will be (MxN)
 const rotatePuzzle = () => {
     console.log("ROTATE PUZZLE");
-    solutionAnimating = false;
+    state.solutionAnimating = false;
 
     // Get original values
-    let tempMatrix = Array(puzzleCols).fill().map(() => Array(puzzleRows));
-    for (let row = 0; row < puzzleRows; row++){
-        for (let col = 0; col < puzzleCols; col++) {
+    let tempMatrix = Array(state.puzzleCols).fill().map(() => Array(state.puzzleRows));
+    for (let row = 0; row < state.puzzleRows; row++){
+        for (let col = 0; col < state.puzzleCols; col++) {
             const tile = htmlMatrix[row][col];
-            tempMatrix[col][puzzleRows - 1 - row] = { 
+            tempMatrix[col][state.puzzleRows - 1 - row] = { 
                 textContent: tile.textContent,
                 opacity: tile.style.opacity,
             }
@@ -865,8 +909,8 @@ const rotatePuzzle = () => {
 
     // Resize the puzzle on the page if needed
     let resized = false;
-    if (puzzleRows !== puzzleCols) { 
-        updatePuzzleDimensions(puzzleCols, puzzleRows);
+    if (state.puzzleRows !== state.puzzleCols) { 
+        updatePuzzleDimensions(state.puzzleCols, state.puzzleRows);
         updateBackgroundImageSize();
         resized = true;
     }
@@ -886,7 +930,7 @@ const rotatePuzzle = () => {
 
 const getColTileValues = (col) => {
     const tempValues = []
-    for (let row = 0; row < puzzleRows; row++) {
+    for (let row = 0; row < state.puzzleRows; row++) {
         tempValues.push(
             {
                 textContent: htmlMatrix[row][col].textContent,
@@ -900,7 +944,7 @@ const getColTileValues = (col) => {
 
 const getRowTileValues = (row) => {
     const tempValues = []
-    for (let col = 0; col < puzzleCols; col++) {
+    for (let col = 0; col < state.puzzleCols; col++) {
         tempValues.push(
             {
                 textContent: htmlMatrix[row][col].textContent,
@@ -942,36 +986,30 @@ const toggleNumbers = () => {
 }
 
     
-let editingGoalPuzzle = false;
-let goalPuzzle = undefined;
-let startingPuzzleState = undefined;
 const setGoalEditMode = (enable) => {
-    solutionAnimating = false;
+    console.log("SET GOAL EDIT MODE", enable);
+    state.solutionAnimating = false;
 
-    if (enable && !editingGoalPuzzle) {
+    if (enable && !state.editingGoalPuzzle) {
         // Show editing options
-        if (playMode) {
+        if (state.playMode) {
             setPlayMode(false);
         }
 
-        // Store the current puzzle as our starting state
-        editingGoalPuzzle = true;
-        startingPuzzleState = {
-            puzzle: getPuzzleFromGridHTML()
-        }
-
-        updatePuzzleState(goalPuzzle.matrix);
+        state.editingGoalPuzzle = true;
+        state.startingPuzzle = getPuzzleFromGrid();
+        updatePuzzleState(state.goalPuzzle.matrix);
         editGoalButton.textContent = "Confirm Goal";
         title.textContent = "Editing Goal";
-    } else if (!enable && editingGoalPuzzle) {
+    } else if (!enable && state.editingGoalPuzzle) {
         // Save current puzzle as our goal
-        editingGoalPuzzle = false;
-        goalPuzzle = getPuzzleFromGridHTML();
+        state.editingGoalPuzzle = false;
+        state.goalPuzzle = getPuzzleFromGrid();
 
-        const startingPuzzle = startingPuzzleState.puzzle;
-        if (puzzleRows === startingPuzzle.rows && puzzleCols === startingPuzzle.cols) {
-            updatePuzzleState(startingPuzzle.matrix);
+        if (state.puzzleRows === state.startingPuzzle.rows && state.puzzleCols === state.startingPuzzle.cols) {
+            updatePuzzleState(state.startingPuzzle.matrix);
         } else {
+            state.startingPuzzle = null;
             resetPuzzle();
         }
 
@@ -985,8 +1023,8 @@ const setGoalEditMode = (enable) => {
 // This inverses the solvability of the puzzle to make things solvable or "unsolvable"
 // Allows for user to not have to think about fixing the puzzle after rotating/flipping/etc
 const autoFixPuzzle = () => {
-    for (let row = puzzleRows - 1; row >= 0; row--) {
-        for (let col = puzzleCols - 1; col >= 0; col--) {
+    for (let row = state.puzzleRows - 1; row >= 0; row--) {
+        for (let col = state.puzzleCols - 1; col >= 0; col--) {
             if (col - 1 >= 0) {
                 if (htmlMatrix[row][col].textContent && htmlMatrix[row][col - 1].textContent) {
                     swapHtmlTiles(htmlMatrix[row][col], htmlMatrix[row][col-1]);
@@ -995,4 +1033,41 @@ const autoFixPuzzle = () => {
             }
         }
     }
+}
+
+
+const animateMoveList = async (startingPuzzle, moveList) => {
+    state.solutionAnimating = true;
+    let blankRow = startingPuzzle.blankRow;
+    let blankCol = startingPuzzle.blankCol;
+
+
+    // 200 ms for 3x3 (9 tiles).  Get faster as the puzzle scales up
+    // Apparently 4ms will run slightly faster than 0 since the min timeout is 4ms by default
+    let moveDelayMs = Math.max(1800 / (state.puzzleRows * state.puzzleCols), 4);
+    for (const move of moveList) {
+
+        // Only move tiles if our solution is allowed to animate
+        if (!state.solutionAnimating) {
+            return;
+        }
+
+        if (move === "RIGHT") {
+            swapHtmlTiles(htmlMatrix[blankRow][blankCol], htmlMatrix[blankRow][blankCol+1]);
+            blankCol++;
+        } else if (move === "LEFT") {
+            swapHtmlTiles(htmlMatrix[blankRow][blankCol], htmlMatrix[blankRow][blankCol-1]);
+            blankCol--;
+        } else if (move === "UP") {
+            swapHtmlTiles(htmlMatrix[blankRow][blankCol], htmlMatrix[blankRow-1][blankCol]);
+            blankRow--;
+        } else if (move === "DOWN") {
+            swapHtmlTiles(htmlMatrix[blankRow][blankCol], htmlMatrix[blankRow+1][blankCol]);
+            blankRow++;
+        }
+
+        await new Promise(r => setTimeout(r, moveDelayMs));
+    }
+
+    state.solutionAnimating = false;
 }

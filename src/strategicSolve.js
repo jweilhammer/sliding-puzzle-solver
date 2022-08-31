@@ -1,3 +1,6 @@
+import { Puzzle } from './Puzzle.js';
+export { solvePuzzleStrategically };
+
 // Overall strategy derived from: https://www.wikihow.com/Solve-Slide-Puzzles
 // Actual algorithm needs to check lots of things when moving tiles that a human could just "see"
 //
@@ -84,7 +87,7 @@ const solvePuzzleStrategically = (puzzle, goalPuzzle, options=null) => {
 				}
 
 				let rowIteration = 0;
-				targetValue = goalMatrix[puzzle.rowInProgress][puzzle.rowProgressCol];
+				let targetValue = goalMatrix[puzzle.rowInProgress][puzzle.rowProgressCol];
 				while (!Puzzle.isRowEqual(goalPuzzle, puzzle, puzzle.rowInProgress)) {
 
 					// Guard against infinite loops if they may occur
@@ -194,7 +197,7 @@ const solvePuzzleStrategically = (puzzle, goalPuzzle, options=null) => {
 				}
 
 				let colIteration = 0;
-				targetValue = goalMatrix[puzzle.topRowProgress][puzzle.colInProgress];
+				let targetValue = goalMatrix[puzzle.topRowProgress][puzzle.colInProgress];
 				while (!Puzzle.isColEqual(goalPuzzle, puzzle, puzzle.colInProgress)) {
 
 					// Guard against infinite loops if they may occur
@@ -328,8 +331,8 @@ const solvePuzzleStrategically = (puzzle, goalPuzzle, options=null) => {
 // Prevents cases where moving tile displaces already solved tiles
 const moveTile = (puzzle, value, goalRow, goalCol) => {
 	const matrixMapping = Puzzle.getMatrixMapping(puzzle.matrix);
-	valueRow = matrixMapping[value].row;
-	valueCol = matrixMapping[value].col;
+	let valueRow = matrixMapping[value].row;
+	let valueCol = matrixMapping[value].col;
 
 	// Tile already in it's correct position
 	if (valueRow === goalRow && valueCol === goalCol) {

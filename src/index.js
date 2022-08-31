@@ -1,6 +1,23 @@
-const solvePuzzle = (algorithm, startPuzzle, goalPuzzle, options=null) => {
+import { Puzzle } from "./Puzzle.js";
+import { State } from "./State.js";
+import {
+    getPuzzleFromGrid,
+    resetClickSourceElement,
+    hideEditElements,
+    hideOutputTextAreas,
+    showOutputTextAreas,
+    animateMoveList,
+    autoFixPuzzle } from "./uiUtils.js";
+
+import { solvePuzzleBFS, solvePuzzleAStar, solvePuzzleIDAStar } from './searchAlgorithms.js';
+import { solvePuzzleStrategically } from './strategicSolve.js';
+export { solvePuzzle };
+
+const state = State.get();
+
+const solve = (algorithm, startPuzzle, goalPuzzle, options=null) => {
     // Stop animation of previous solution if user clicks solve again mid-way through
-    solutionAnimating = false;
+    state.solutionAnimating = false;
 
     let solution = algorithm(startPuzzle, goalPuzzle, options);
 
@@ -31,32 +48,34 @@ const solvePuzzle = (algorithm, startPuzzle, goalPuzzle, options=null) => {
 }
 
 
-const solvePuzzleForFunzies = async () => {
+const solvePuzzle = async () => {
 
     // Don't do anything if user is spamming solve button
-    if (solutionAnimating) {
+    if (state.solutionAnimating) {
         return;
     }
 
-    if (editingGoalPuzzle) {
+    if (state.editingGoalPuzzle) {
         setGoalEditMode(false);
     }
     
 
-    let startingPuzzle = getPuzzleFromGridHTML();
-    if (Puzzle.isPuzzleSolvable2Darr(startingPuzzle.matrix) !== Puzzle.isPuzzleSolvable2Darr(goalPuzzle.matrix)) {
+    let startingPuzzle = getPuzzleFromGrid();
+    if (Puzzle.isPuzzleSolvable2Darr(startingPuzzle.matrix) !== Puzzle.isPuzzleSolvable2Darr(state.goalPuzzle.matrix)) {
         let errorMessage = "Puzzle is not solvable with current goal state!  Would you like to auto-fix it?\n\n";
         errorMessage += "Auto-fix will swap two adjacent non-blank tiles on the bottom right";
 
         let answer = confirm(errorMessage);
         if (answer) {
             autoFixPuzzle();
-            startingPuzzle = getPuzzleFromGridHTML();
+            startingPuzzle = getPuzzleFromGrid();
         } else {
             setPlayMode(false);
             return;
         }
     }
+
+    const originalPuzzle = Puzzle.fromPuzzle(startingPuzzle);
 
     // Hide our input elements so the output is clear to see
     resetClickSourceElement();
@@ -73,18 +92,13 @@ const solvePuzzleForFunzies = async () => {
 
     const selectedAlgorithm = document.getElementById("algorithmsDropdown").value
     const algorithm = algorithmMappings[selectedAlgorithm];
-    let sliderPosition = Puzzle.getBlankTilePosition(startingPuzzle);
-    let sliderRow = sliderPosition[0];
-    let sliderCol = sliderPosition[1];
-
-    htmlMatrix[sliderRow][sliderCol].style.opacity = '0';
 
     let options = null;
     if (selectedAlgorithm === "A*closedSet") {
         options = { closedSet: true }
     }
     
-    const solution = solvePuzzle(algorithm, startingPuzzle, goalPuzzle, options);
+    const solution = solve(algorithm, startingPuzzle, state.goalPuzzle, options);
     const solutionMoves = solution['solutionMoves'];
 
     console.log("RUNTIME:", solution['runtimeMs'], "ms. MAX PUZZLES IN MEM:", solution['maxPuzzlesInMemory']);
@@ -105,35 +119,5 @@ const solvePuzzleForFunzies = async () => {
     solutionOutput.value += solutionMoves.length > 20000 ? 'See console for full move list...\n' : '';
 
     showOutputTextAreas();
-    playButton.textContent = "Edit Puzzle";
-                                  
-    // 200 ms for 3x3 (9 tiles).  Get faster as the puzzle scales up
-    // Apparently 4ms will run slightly faster than 0 since the min timeout is 4ms by default
-    let moveDelayMs = Math.max(1800 / (puzzleRows * puzzleCols), 4);
-    solutionAnimating = true;
-    for(move of solution['solutionMoves']) {
-
-        // Only move tiles if our solution is allowed to animate
-        if (!solutionAnimating) {
-            return;
-        }
-
-        if (move === "RIGHT") {
-            swapHtmlTiles(htmlMatrix[sliderRow][sliderCol], htmlMatrix[sliderRow][sliderCol+1]);
-            sliderCol++;
-        } else if (move === "LEFT") {
-            swapHtmlTiles(htmlMatrix[sliderRow][sliderCol], htmlMatrix[sliderRow][sliderCol-1]);
-            sliderCol--;
-        } else if (move === "UP") {
-            swapHtmlTiles(htmlMatrix[sliderRow][sliderCol], htmlMatrix[sliderRow-1][sliderCol]);
-            sliderRow--;
-        } else if (move === "DOWN") {
-            swapHtmlTiles(htmlMatrix[sliderRow][sliderCol], htmlMatrix[sliderRow+1][sliderCol]);
-            sliderRow++;
-        }
-
-        await new Promise(r => setTimeout(r, moveDelayMs));
-    }
-
-    solutionAnimating = false;
+    await animateMoveList(originalPuzzle, solution['solutionMoves']);
 }

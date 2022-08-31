@@ -3,7 +3,7 @@
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <head>
-        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="src/style.css">
         <!-- 
             For updating css classes dynmically with JS
             Using to update all grid tiles with attributes that can't be inherited from the container
@@ -18,19 +18,19 @@
             <div id="grid" class="grid"></div>
         </div>
         <div class="centered">
-            <button id="shuffleButton" class="buttons fontButtons buttonsRow1" onclick="shufflePuzzle()">Shuffle</button>
-            <button id="resetButton" class="buttons fontButtons buttonsRow1" onclick="resetPuzzle()">Reset</button>
-            <button id="randomizeButton" class="buttons fontButtons buttonsRow1" onclick="randomizePuzzle()">Randomize</button>
+            <button id="shuffleBtn" class="buttons fontButtons buttonsRow1">Shuffle</button>
+            <button id="resetBtn" class="buttons fontButtons buttonsRow1">Reset</button>
+            <button id="randomizeBtn" class="buttons fontButtons buttonsRow1">Randomize</button>
         </div>
         
         <div class="centered">
-            <button id="playButton" class="buttons fontButtons buttonsRow2" onclick="setPlayMode(this.textContent === 'Play Puzzle' ? true : false)">Play Puzzle</button>
-            <button id="editGoalButton" class="buttons fontButtons buttonsRow2" onclick="setGoalEditMode(!editingGoalPuzzle)">Edit Goal</button>
+            <button id="playBtn" class="buttons fontButtons buttonsRow2">Play Puzzle</button>
+            <button id="editGoalBtn" class="buttons fontButtons buttonsRow2"">Edit Goal</button>
         </div>
 
 
         <div class="centered">
-            <button id="solveButton" class="buttons fontButtons buttonsRow3" onclick="solvePuzzleForFunzies()">Solve</button>
+            <button id="solveBtn" class="buttons fontButtons buttonsRow3">Solve</button>
             <select class="algorithmsDropdown" name="algorithms" id="algorithmsDropdown">
                 <option value="Strategic">Strategically</option>
                 <option value="IDA*">IDA*</option>
@@ -47,7 +47,7 @@
                 <div class="editTitle" >Customize Puzzle:</div>
 
                 <div style="display: flex; align-items: center; justify-content: center; flex-basis: 100%;">
-                    <button id="toggleBorders" class="buttons svgButtons buttonsRow1" onclick="toggleBorders()">
+                    <button id="toggleBordersBtn" class="buttons svgButtons buttonsRow1">
                         <svg id="hideBorderSvg" viewBox="0 0 16 16">
                             <path d="M0 0h.969v.5H1v.469H.969V1H.5V.969H0V0zm2.844 1h-.938V0h.938v1zm1.875 0H3.78V0h.938v1zm1.875 0h-.938V0h.938v1zm.937 0V.969H7.5V.5h.031V0h.938v.5H8.5v.469h-.031V1H7.53zm2.813
                             0h-.938V0h.938v1zm1.875 0h-.938V0h.938v1zm1.875 0h-.938V0h.938v1zM15.5 1h-.469V.969H15V.5h.031V0H16v.969h-.5V1zM1 1.906v.938H0v-.938h1zm6.5.938v-.938h1v.938h-1zm7.5 0v-.938h1v.938h-1zM1
@@ -65,7 +65,7 @@
                             <path d="M0 0h16v16H0V0zm1 1v6.5h6.5V1H1zm7.5 0v6.5H15V1H8.5zM15 8.5H8.5V15H15V8.5zM7.5 15V8.5H1V15h6.5z" id="mainIconPathAttribute"/> </svg>
                     </button>
                     
-                    <button class="buttons svgButtons buttonsRow1" onclick="toggleNumbers()">
+                    <button id="toggleNumbersBtn" class="buttons svgButtons buttonsRow1">
                         <svg id="hideNumberSvg" viewBox="0 0 256 256">
                             <rect width="380.221" height="381.956" fill="none" x="-63.329" y="-35.778" style=""/>
                             <rect width="220.948" height="203.71" fill="none" x="8.909" y="57.166" style=""/>
@@ -81,21 +81,21 @@
                             <polyline points="182.805 224.062 77.751 224.577" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="14" style=""/>
                         </svg>
                     </button>
-                    <button id="flipHorizontally" class="buttons svgButtons buttonsRow2" onclick="flipPuzzleHorizontally()">
+                    <button id="flipPuzzleHorizontalBtn" class="buttons svgButtons buttonsRow2">
                         <svg viewbox="0 0 48 48">
                             <path d="M24 6V42" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="mainIconPathAttribute" fill="#000000"></path>
                             <path d="M4 34L16 12V34H4Z" fill="#000000" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
                             <path d="M44 34H32V12L44 34Z" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
                         </svg>
                     </button>
-                    <button id="flipVertically" class="buttons svgButtons buttonsRow2" onclick="flipPuzzleVertically()">
+                    <button id="flipPuzzleVerticalBtn" class="buttons svgButtons buttonsRow2">
                         <svg viewBox="0 0 48 48">
                             <path d="M42 24L6 24" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="mainIconPathAttribute"></path>
                             <path d="M14 4L36 16H14V4Z" fill="#000000" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
                             <path d="M14 44V32H36L14 44Z" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
                         </svg>
                     </button>
-                    <button id="rotatePuzzle" class="buttons svgButtons buttonsRow2" onclick="rotatePuzzle()">
+                    <button id="rotatePuzzleBtn" class="buttons svgButtons buttonsRow2">
                         <svg viewBox="0 0 16 16" transform="rotate(45)">
                             <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z" id="mainIconPathAttribute" fill="#000000"></path>
                             <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z" id="mainIconPathAttribute" fill="#000000"></path>
@@ -129,17 +129,17 @@
                     <div class="editTitle" style="margin-top: 1vh;">Customize Image:</div>
                     <div class="centered">
                         <label for="imageInputURL">URL:</label>
-                        <input type="url" id="imageInputURL" name="imageInputURL" class="imageInputURL" onchange="handleImageURL()"></input>
-                        <input type="file" id="imageUpload" style="display: none;" onchange="handleImageUpload()"></input>
-                        <input type="button" value="Browse" class="buttons fontButtons" onclick="document.getElementById('imageUpload').click();" />
-                        <button id="flipHorizontally" class="buttons buttonsRow2 svgButtons" onclick="flipBackgroundHorizontally()">
+                        <input type="url" id="imageInputURL" name="imageInputURL" class="imageInputURL"></input>
+                        <input type="file" id="imageUploadInput" style="display: none;""></input>
+                        <input type="button" value="Browse" class="buttons fontButtons" onclick="document.getElementById('imageUploadInput').click();" />
+                        <button id="flipImageHorizontalBtn" class="buttons buttonsRow2 svgButtons">
                             <svg viewbox="0 0 48 48">
                                 <path d="M24 6V42" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="mainIconPathAttribute" fill="#000000"></path>
                                 <path d="M4 34L16 12V34H4Z" fill="#000000" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
                                 <path d="M44 34H32V12L44 34Z" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
                             </svg> 
                         </button>
-                        <button id="flipVertically" class="buttons buttonsRow2 svgButtons" onclick="flipBackgroundVertically()">
+                        <button id="flipImageVerticalBtn" class="buttons buttonsRow2 svgButtons">
                             <svg viewBox="0 0 48 48">
                                 <path d="M42 24L6 24" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="mainIconPathAttribute"></path>
                                 <path d="M14 4L36 16H14V4Z" fill="#000000" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
@@ -158,12 +158,9 @@
             <textarea id="solutionOutput" class="outputArea solutionOutput" readonly></textarea>
         </div>
 
-        <script src="strategicSolve.js" defer></script>
-        <script src="driver.js" defer></script>
-        <script src="Puzzle.js" defer></script>
-        <script src="PriorityQueue.js" defer></script>
-        <script src="searchAlgorithms.js" defer></script>
-        <script src="uiUtils.js" defer></script>
+        <!-- <script type="module" src="src/index.js"></script> -->
+        <!-- <script type="module" src="src/uiUtils.js"></script> -->
+        <script type="module" src="src/index.js"></script>
     </body>
 </html>
 

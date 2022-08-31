@@ -1,3 +1,5 @@
+export { PriorityQueue };
+ 
 // Credit to https://www.geeksforgeeks.org/implementation-priority-queue-javascript/
 // Suprised there is not a built in or common library for a sorted queue/min heap in javscript
 
