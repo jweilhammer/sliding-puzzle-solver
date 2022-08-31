@@ -31,6 +31,13 @@ const backgroundflipCss = document.getElementById("backgroundflipCss");
 const editGoalButton = document.getElementById('editGoalButton');
 const title = document.getElementById('title');
 
+// Toggling SVG icons
+const hideNumberSvg = document.getElementById('hideNumberSvg');
+const showNumberSvg = document.getElementById('showNumberSvg');
+const hideBorderSvg = document.getElementById('hideBorderSvg');
+const showBorderSvg = document.getElementById('showBorderSvg');
+
+
 
 // App state
 let puzzleRows = 0;
@@ -910,8 +917,12 @@ const toggleBorders = () => {
     // Using this to set borders on just the tiles and not the grid itself
     if (borderCss.innerHTML === "") {
         borderCss.innerHTML = ".grid-item-border { border: 1px solid black; }";
+        hideBorderSvg.style.display = null;
+        showBorderSvg.style.display = 'none';
     } else {
         borderCss.innerHTML = "";
+        hideBorderSvg.style.display = 'none';
+        showBorderSvg.style.display = null;
     }
 }
 
@@ -920,8 +931,12 @@ const toggleNumbers = () => {
     if (showNumbers) {
         showNumbers = false;
         grid.style.fontSize = 0;
+        showNumberSvg.style.display = null;
+        hideNumberSvg.style.display = 'none';
     } else {
         showNumbers = true;
+        showNumberSvg.style.display = 'none';
+        hideNumberSvg.style.display = null;
         updateBackgroundImageSize()
     }
 }
