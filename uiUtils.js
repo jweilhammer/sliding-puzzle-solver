@@ -254,7 +254,7 @@ const hideEditElements = () => {
 }
 
 const showEditElements = () => {
-    editInputsContainer.style.display = 'flex';
+    editInputsContainer.style.display = null;
 }
 
 const playModeResetAllMovableTiles = () => {
@@ -699,7 +699,7 @@ const hideOutputTextAreas = () => {
 }
 
 const showOutputTextAreas = () => {
-    outputAreaContainer.style.display = 'flex';
+    outputAreaContainer.style.display = null;
 }
 
 // Reset our tile background positions and number overlays/ids for the current dimensions

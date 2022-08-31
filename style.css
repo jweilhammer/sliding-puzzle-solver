@@ -1,0 +1,274 @@
+
+.title {
+    font-size: 3.5vh;
+    padding-top: 1vh;
+}
+
+.editTitle {
+    font-size: 3.5vh;
+    flex-basis: 100%;
+}
+
+.gridContainer {
+    /* Keep puzzle centered */
+    margin: 0 auto 0 auto; 
+    padding: 0 0 0 0;
+    height: calc(40vh - 20vw);
+    width: calc(40vh - 20vw);
+    margin-top: 1vh;
+    min-width: 40vh;
+    min-height: 40vh;
+}
+
+.grid {
+    display: grid;
+    grid-auto-columns: 1fr;
+    grid-auto-rows: 1fr;
+    flex: auto;
+
+    /* Replaces aspect ratio to keep all tiles the same height */
+    height: 100%;
+}
+
+.grid-item {
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+    flex: auto;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+
+    /* Make background same size as the grid container, and don't repeat the image */
+    background-size: inherit;
+
+    /* Captures pseudo element background */
+    position: relative;
+
+    /* Make numbers not hightlightable/selectable in all browsers
+        Makes the play mode feel lots more natural if user decides to drag cursor
+        Also includes an 'unselectable=on' attribute set via js
+    */
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+
+/* Pseudo element that displays our background image
+    Can be rotated without the main tile being rotated as well 
+*/
+.grid-item::before {
+    /* Display background as same size as tile */
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-position: inherit;
+    background-size: inherit;
+
+    /* Don't repeat backgrounds to save space on large images
+        TODO: use canvas instead?
+    */
+    background-repeat: no-repeat;
+
+    /* Fixes issues when flipping image and background somehow gets 1px smaller */
+    padding: 1px;
+}
+
+.centered {
+    display: flex;
+    flex: auto;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.break {
+    flex-basis: 100%;
+    height: 0;
+}
+
+.inputs {
+    font-size: calc(min(4vh, 4vmin) - 1vw);
+}
+
+.editInputsContainer {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: fit-content;
+    flex-wrap: wrap;
+    border: 1px solid black;
+    border-radius:0.80em;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.buttons {
+    margin:min(1vh, 1.5vw) min(1vh, 1.5vw) min(1vh, 1.5vw) min(1vh, 1.5vw);
+
+    border-radius:0.30em;
+    box-sizing: border-box;
+    text-align:center;
+    position:relative;
+    cursor: pointer;
+}
+
+.fontButtons {
+    font-size: max(2.5vh, 1vw);
+    padding: 0.4rem;
+}
+
+.svgButtons {
+    padding: 0; 
+    width: max(3.8vh, 1vw);
+    height: max(3.8vh, 1vw);
+}
+
+.buttons:active{
+    top:0.1em;
+}
+
+.buttons:hover{
+    opacity: 0.9;
+    box-shadow: 0 0 8px black;
+}
+
+.buttonsRow1 {
+    background-color:#EAECEE;
+}
+
+.buttonsRow2 {
+    background-color:#D5D8DC;
+}
+
+.buttonsRow3 {
+    background-color:#ABB2B9;
+}
+
+.algorithmsDropdown {
+    font-size: 2vh;
+    padding: 0.9vh;
+}
+
+
+.dimensionInput {
+    margin-top: 1vh;
+    /* Keep things centered and a little to the left since we justify flex-end */
+    font-family: "Fira Mono", monospace;
+    width: 60vmin;
+    display: inline-flex;
+    align-items: center;
+    
+    /* Line up the sliders with each other */
+    justify-content: flex-end;
+}
+
+.numberInput {
+    width: 8vmin;
+}
+
+.customImageInput {
+}
+
+.imageInputURL {
+    width: 30vmin;
+    line-height:150%;
+}
+
+.slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: max(1vh, 0.5vw);
+    border-radius: 5px;  
+    background: #d3d3d3;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+    flex-basis: 100%;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: max(3.5vh, 2vw);
+    height: max(3.5vh, 2vw);
+    border-radius: 50%; 
+    background: rgb(0, 81, 255);
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 6vmin;
+    height: 6vmin;
+    border-radius: 50%;
+    background: rgb(0, 81, 255);
+    cursor: pointer;
+}
+
+input[type=range]:focus {
+    opacity: 1;
+    background: #c7c7c7;
+}
+
+
+/* Lets you see the up/down arrows for dimension inputs at least on chrome */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button {  
+    -webkit-appearance: textfield;
+    -moz-appearance: textfield;
+    appearance: textfield;
+    opacity: 1;
+
+}
+
+/* to make the page fill the entire screen */
+html {
+    margin: 0px;
+    height: 100%;
+}
+
+body {
+    margin: 0px;
+    min-height: 100%;
+}
+
+.outputAreaContainer {
+    width: 100%;
+    margin: 3vh auto 0 auto;
+    height: 15vh;
+}
+
+.summaryOutput {
+    text-align: right;
+    border: none;
+    width: 40%;
+    margin-left: 10%;
+    margin-right: 1vw;
+}
+
+.solutionOutput {
+    text-align: left;
+    overflow-y: scroll;
+    border: solid 1px;
+    border-radius: 5px;
+    width: 25%;
+    max-width: 50vh;
+    margin-right: 15%;
+}
+
+.outputArea {
+    height: 100%;
+    font-size: 3vmin;
+    font-family: "Fira Mono", monospace;
+    background-color: transparent;
+    outline: none;
+    resize: none;
+    cursor: default;
+}

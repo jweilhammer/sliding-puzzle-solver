@@ -38,6 +38,11 @@ const solvePuzzleForFunzies = async () => {
         return;
     }
 
+    if (editingGoalPuzzle) {
+        setGoalEditMode(false);
+    }
+    
+
     let startingPuzzle = getPuzzleFromGridHTML();
     if (Puzzle.isPuzzleSolvable2Darr(startingPuzzle.matrix) !== Puzzle.isPuzzleSolvable2Darr(goalPuzzle.matrix)) {
         let errorMessage = "Puzzle is not solvable with current goal state!  Would you like to auto-fix it?\n\n";
@@ -54,9 +59,8 @@ const solvePuzzleForFunzies = async () => {
     }
 
     // Hide our input elements so the output is clear to see
-    setGoalEditMode(false);
-    setPlayMode(true);
     resetClickSourceElement();
+    hideEditElements();
     hideOutputTextAreas();
 
     const algorithmMappings = {
@@ -74,10 +78,6 @@ const solvePuzzleForFunzies = async () => {
     let sliderCol = sliderPosition[1];
 
     htmlMatrix[sliderRow][sliderCol].style.opacity = '0';
-
-    goalPuzzle.printPuzzle();
-    console.log(goalPuzzle.blankRow);
-    console.log(goalPuzzle.blankCol);
 
     let options = null;
     if (selectedAlgorithm === "A*closedSet") {
@@ -105,6 +105,7 @@ const solvePuzzleForFunzies = async () => {
     solutionOutput.value += solutionMoves.length > 20000 ? 'See console for full move list...\n' : '';
 
     showOutputTextAreas();
+    playButton.textContent = "Edit Puzzle";
                                   
     // 200 ms for 3x3 (9 tiles).  Get faster as the puzzle scales up
     // Apparently 4ms will run slightly faster than 0 since the min timeout is 4ms by default
