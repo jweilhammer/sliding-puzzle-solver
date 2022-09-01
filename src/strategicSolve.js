@@ -6,13 +6,11 @@ export { solvePuzzleStrategically };
 //
 // If the puzzle is non-square, solve rows or columns first until remaining unsolved puzzle is square
 // Then alternate between solving rows and columns until it's a 2x2
+// Start by solving rows Top/down & columns Left/Right until reaching the goal's blank row/col
+// If on the goal's blank row, start solving Bottom/Up.  If on the blank col, start solving Right/Left
 // Once a tile has been solved, never touch it again: each solved row/col reduces the effective problem space
 const solvePuzzleStrategically = (puzzle, goalPuzzle, options=null) => {
 	const startTime = performance.now();
-
-	console.log(goalPuzzle)
-	goalPuzzle.printPuzzle();
-	console.log("ALREADY SOLVED", goalPuzzle.isEqualToPuzzle(puzzle));
 
 	// Check if our puzzle is already solved
 	if (goalPuzzle.isEqualToPuzzle(puzzle)) {
@@ -23,10 +21,6 @@ const solvePuzzleStrategically = (puzzle, goalPuzzle, options=null) => {
 			maxPuzzlesInMemory: 1,
 		};
 	}
-
-	const dumb = [[2, 5, 8],
-	[6, 0, 1],
-	[3, 4, 7]]
 
 	const solutionMoves = [];
 	puzzle.solutionMoves = solutionMoves;
@@ -48,6 +42,7 @@ const solvePuzzleStrategically = (puzzle, goalPuzzle, options=null) => {
 	puzzle.solvingRowTopDown = true;
 	puzzle.solvingColLeftRight = true;
 	while (!goalPuzzle.isEqualToPuzzle(puzzle)) {
+
 		// While we have more than 2 unsolved rows (stopping at 2x2)
 		// If there are more or equal unsolved rows than columns, solve rows
 		while (moreThanTwoUnsolvedRows(puzzle) && moreUnsolvedRowsThanCols(puzzle)) {
