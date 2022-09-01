@@ -3,21 +3,9 @@ import { Puzzle } from './Puzzle.js';
 import { solvePuzzle } from './index.js';
 import { State } from './State.js';
 
-export {
-    getPuzzleFromGrid,
-    resetClickSourceElement,
-    hideEditElements,
-    hideOutputTextAreas,
-    showOutputTextAreas,
-    animateMoveList,
-    autoFixPuzzle,
- };
-
-// Webpack injects this into our HTML
+// Inject assets into HTML via webpack
 import './style.css';
 import Background from '../images/default.jpg';
-
-
 
 // Shareable state between modules
 const state = State.get();
@@ -32,9 +20,6 @@ const imageInputURL = document.getElementById("imageInputURL");
 const playButton = document.getElementById("playBtn");
 
 const outputAreaContainer = document.getElementById('outputAreaContainer');
-let summaryOutput = document.getElementById('summaryOutput');
-let solutionOutput = document.getElementById('solutionOutput');
-
 const grid = document.getElementById("grid");
 const gridContainer = document.getElementById("gridContainer");
 
@@ -187,11 +172,22 @@ const getPuzzleFromGrid = () => {
 }
 
 
-// https://web.dev/drag-and-drop/
-document.addEventListener('DOMContentLoaded', (e) => {
-    // Initialize shared state
-    const sharedState = new State();
-    const state = State.get();
+// Adds onclick listeners, sets initial puzzle state, adds initial CSS style toggles
+const initializeUiElements = () => {
+    document.getElementById('shuffleBtn').addEventListener("click", shufflePuzzle);
+    document.getElementById('resetBtn').addEventListener("click", resetPuzzle);
+    document.getElementById('randomizeBtn').addEventListener("click", randomizePuzzle);
+    playButton.addEventListener("click", () => {setPlayMode(playButton.textContent === 'Play Puzzle' ? true : false)});
+    document.getElementById('editGoalBtn').addEventListener("click", () => {setGoalEditMode(!state.editingGoalPuzzle)});
+    document.getElementById('toggleBordersBtn').addEventListener("click", toggleBorders);
+    document.getElementById('toggleNumbersBtn').addEventListener("click", toggleNumbers);
+    document.getElementById('flipPuzzleHorizontalBtn').addEventListener("click", flipPuzzleHorizontally);
+    document.getElementById('flipPuzzleVerticalBtn').addEventListener("click", flipPuzzleVertically);
+    document.getElementById('rotatePuzzleBtn').addEventListener("click", rotatePuzzle);
+    document.getElementById('flipImageHorizontalBtn').addEventListener("click", flipBackgroundHorizontally);
+    document.getElementById('flipImageVerticalBtn').addEventListener("click", flipBackgroundVertically);
+    document.getElementById('imageUploadInput').addEventListener("change", handleImageUpload);
+    document.getElementById('imageInputURL').addEventListener("change", handleImageURL);
 
     // Initialize Puzzle
     updatePuzzleDimensions(parseInt(rowInput.value), parseInt(colInput.value));
@@ -203,29 +199,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
 
     // Make goal puzzle a default goal state with current size;
     state.goalPuzzle = new Puzzle(state.puzzleRows, state.puzzleCols, false);
-
-    // Button onclicks
-    document.getElementById('shuffleBtn').addEventListener("click", shufflePuzzle);
-    document.getElementById('resetBtn').addEventListener("click", resetPuzzle);
-    document.getElementById('randomizeBtn').addEventListener("click", randomizePuzzle);
-    playButton.addEventListener("click", () => {setPlayMode(playButton.textContent === 'Play Puzzle' ? true : false)});
-    document.getElementById('editGoalBtn').addEventListener("click", () => {setGoalEditMode(!state.editingGoalPuzzle)});
-    document.getElementById('solveBtn').addEventListener("click", solvePuzzle);
-    document.getElementById('toggleBordersBtn').addEventListener("click", toggleBorders);
-    document.getElementById('toggleNumbersBtn').addEventListener("click", toggleNumbers);
-    document.getElementById('flipPuzzleHorizontalBtn').addEventListener("click", flipPuzzleHorizontally);
-    document.getElementById('flipPuzzleVerticalBtn').addEventListener("click", flipPuzzleVertically);
-    document.getElementById('rotatePuzzleBtn').addEventListener("click", rotatePuzzle);
-    document.getElementById('flipImageHorizontalBtn').addEventListener("click", flipBackgroundHorizontally);
-    document.getElementById('flipImageVerticalBtn').addEventListener("click", flipBackgroundVertically);
-     
-    document.getElementById('imageUploadInput').addEventListener("change", handleImageUpload);
-    document.getElementById('imageInputURL').addEventListener("change", handleImageURL);
-
-    
-});
-
-
+}
 
 // Workaround for keeping the background image the correct size on window resizes
 // Do not have <img> tags that have abosulute positions updated.  Update the CSS class instead and let it handle it
@@ -1041,6 +1015,9 @@ const autoFixPuzzle = () => {
 
 
 const animateMoveList = async (startingPuzzle, moveList) => {
+    // Show output area before starting animation
+    showOutputTextAreas();
+
     state.solutionAnimating = true;
     let blankRow = startingPuzzle.blankRow;
     let blankCol = startingPuzzle.blankCol;
@@ -1075,3 +1052,41 @@ const animateMoveList = async (startingPuzzle, moveList) => {
 
     state.solutionAnimating = false;
 }
+
+
+const checkPuzzleBeforeAnimating = () => {
+    // Set state back to starting puzzle if looking at goal
+    if (state.editingGoalPuzzle) {
+        setGoalEditMode(false);
+    }
+
+    let startingPuzzle = getPuzzleFromGrid();
+    if (Puzzle.isPuzzleSolvable2Darr(startingPuzzle.matrix) !== Puzzle.isPuzzleSolvable2Darr(state.goalPuzzle.matrix)) {
+        let errorMessage = "Puzzle is not solvable with current goal state!\n\nWould you like to auto-fix it?\n\n";
+        errorMessage += "Auto-fix will swap two adjacent non-blank tiles on the bottom right";
+
+        let answer = confirm(errorMessage);
+        if (answer) {
+            autoFixPuzzle();
+            startingPuzzle = getPuzzleFromGrid();
+        } else {
+            setPlayMode(false);
+            return null;
+        }
+    }
+
+
+    // Hide our input elements so the output is clear to see when animating
+    resetClickSourceElement();
+    hideEditElements();
+    hideOutputTextAreas();
+
+    return startingPuzzle;
+}
+
+
+export {
+    animateMoveList,
+    checkPuzzleBeforeAnimating,
+    initializeUiElements
+ };
