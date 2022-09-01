@@ -1,5 +1,4 @@
 import { Puzzle } from "./Puzzle.js";
-import { PriorityQueue } from "./PriorityQueue.js";
 
 // Breadth first search
 // Search all possible states until we find the solution
@@ -44,11 +43,11 @@ const solvePuzzleAStar = (puzzle, goalPuzzle, options = null) => {
 		closedSet = {};
 	}
 
-    // Un-explored states as a priority queue
-	const openList = new PriorityQueue();
+    // Un-explored states as an array, insertions treat it as a priority queue
+	const openList = []
 	const goalMapping = Puzzle.getMatrixMapping(goalPuzzle.matrix);
 	puzzle.updateManhattanSum(goalMapping);
-	openList.enqueue(puzzle, puzzle.manhattanSum);
+    priorityEnqueue(openList, puzzle, puzzle.manhattanSum)
 	let curPuzzle = puzzle;
 	while (!goalPuzzle.isEqualToPuzzle(curPuzzle)) {
 
@@ -64,34 +63,37 @@ const solvePuzzleAStar = (puzzle, goalPuzzle, options = null) => {
 			}
 
 			// If on the open list, check if we found a better way
-			const openNeighorIndex = openList.items.findIndex((puzzle) => puzzle.element.isEqualToPuzzle(neighbor));
+			const openNeighorIndex = openList.findIndex((element) => element.puzzle.isEqualToPuzzle(neighbor));
 			if (openNeighorIndex !== -1) {
-				const puzzleToMaybeUpdate = openList.items[openNeighorIndex];
-				if (puzzleToMaybeUpdate.element.costFromStart > costToNeighbor) {
-                    // Remove from queue to re-sort with new cost
-					let removed = openList.items.splice(openNeighorIndex, 1)[0];
+				const puzzleToMaybeUpdate = openList[openNeighorIndex].puzzle;
+				if (puzzleToMaybeUpdate.costFromStart > costToNeighbor) {
+
+                    // Remove from queue to re-enqueue with new cost
+					openList.splice(openNeighorIndex, 1);
+
 					neighbor.cameFrom = curPuzzle;
 					neighbor.updateManhattanSum(goalMapping);
 					neighbor.costFromStart = costToNeighbor;
-					openList.enqueue(neighbor, neighbor.manhattanSum + neighbor.costFromStart);
+                    priorityEnqueue(openList, neighbor, neighbor.manhattanSum + neighbor.costFromStart)
 				}
 			} else {
 				// Add to open list for further exploration
 				neighbor.cameFrom = curPuzzle;
 				neighbor.updateManhattanSum(goalMapping);
 				neighbor.costFromStart = costToNeighbor;
-				openList.enqueue(neighbor, neighbor.manhattanSum + neighbor.costFromStart);
+                priorityEnqueue(openList, neighbor, neighbor.manhattanSum + neighbor.costFromStart)
 			}
 		}
 
-		curPuzzle = openList.dequeue();
+        // Get front of queue/lowest cost un-explored puzzle state
+		curPuzzle = openList.shift().puzzle;
 	}
 
 	const endTime = performance.now();
 
 	const maxPuzzlesInMemory = closedSet
-		? Object.keys(closedSet).length + openList.items.length
-		: openList.items.length;
+		? Object.keys(closedSet).length + openList.length
+		: openList.length;
 
 	return {
 		solutionPuzzle: curPuzzle,
@@ -99,6 +101,19 @@ const solvePuzzleAStar = (puzzle, goalPuzzle, options = null) => {
 		maxPuzzlesInMemory: maxPuzzlesInMemory,
 	};
 };
+
+const priorityEnqueue = (openList, puzzle, cost) => {
+    // Make open list a priority queue by inserting elements in order
+    for (var i = 0; i < openList.length; i++) {
+        if (openList[i].cost > cost) {
+            openList.splice(i, 0, { puzzle, cost });
+            return;
+        }
+    }
+
+    // Puzzle cost is greater than all others, add to end of queue
+    openList.push({ puzzle, cost });
+}
 
 // Will recursively search and prune baths based on cost threshold
 // Restarts at beginning node and explores paths that don't cost more than our highest estimate

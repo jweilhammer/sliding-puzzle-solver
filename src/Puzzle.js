@@ -1,4 +1,3 @@
-import { PriorityQueue } from "./PriorityQueue.js";
 export { Puzzle };
 
 class Puzzle {
