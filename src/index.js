@@ -8,7 +8,6 @@ import {
     showOutputTextAreas,
     animateMoveList,
     autoFixPuzzle } from "./uiUtils.js";
-
 import { solvePuzzleBFS, solvePuzzleAStar, solvePuzzleIDAStar } from './searchAlgorithms.js';
 import { solvePuzzleStrategically } from './strategicSolve.js';
 export { solvePuzzle };

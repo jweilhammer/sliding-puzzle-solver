@@ -13,6 +13,10 @@ export {
     autoFixPuzzle,
  };
 
+// Webpack injects this into our HTML
+import './style.css';
+import Background from '../images/default.jpg';
+
 
 
 // Shareable state between modules
@@ -195,7 +199,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
 
     // Set intial image and add borders so we can toggle on all items without adding one for the grid itself
     borderCss.innerHTML = ".grid-item-border { border: 1px solid black; }";
-    backgroundCss.innerHTML = `.grid-item::before { background-image: url('test.jpg'); }`;
+    backgroundCss.innerHTML = `.grid-item::before { background-image: url('${Background}'); }`;
 
     // Make goal puzzle a default goal state with current size;
     state.goalPuzzle = new Puzzle(state.puzzleRows, state.puzzleCols, false);

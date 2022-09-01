@@ -30,3 +30,23 @@ Different rules must be followed for square vs non-square puzzles [3x3] vs [2x3]
 
 https://www.cs.mcgill.ca/~newborn/nxp_puzzleOct9.htm
 > An NxP-puzzle with an odd number of columns can be solved only if NI is an even number.  An NxP-puzzle with an even number of columns and an even number of rows can be solved only if (NI + Row of the blank) is an even number. An NxP-puzzle with an even number of columns and an odd number of rows can be solved only if (NI + Row of the blank) is an odd number.
+
+
+
+# Setup
+This project has no external depedencies, and only webpack is used as a dev dependency to minify assets and give a local web server for the dev environment.
+
+## Webpack Setup
+Install the dev dependencies with:
+```
+npm install
+```
+
+You can then run these commands from our package.json scripts
+```
+# Run local web server to auto-refresh after making changes to files
+npm start
+
+# Output assets for production
+npm run build
+```
