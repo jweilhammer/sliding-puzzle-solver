@@ -14,8 +14,10 @@ const colInput = document.getElementById("colInput");
 const playButton = document.getElementById("playBtn");
 const rowSlider = document.getElementById("rowSlider");
 const colSlider = document.getElementById("colSlider");
+const editStartBtn = document.getElementById('editStartBtn');
 const imageInputURL = document.getElementById("imageInputURL");
 const imageUploadInput = document.getElementById("imageUploadInput");
+const quickEditButtons = document.getElementById("quickEditButtons");
 const algorithmDropdown = document.getElementById("algorithmsDropdown");
 const editInputsContainer = document.getElementById("editInputsContainer");
 
@@ -59,7 +61,9 @@ const shufflePuzzle = () => {
 	// Unselect any tiles and stop animation before shuffling
 	resetClickSourceTile();
 	hideOutputTextAreas();
-	setPlayMode(false);
+
+	if (!state.editingGoalPuzzle)
+		setPlayMode(false);
 
 	// Get all tile Values in 1D array, plus blank tile (0)
 	let tileValue = 1;
@@ -156,9 +160,8 @@ const initializeUiElements = () => {
 	document.getElementById("editGoalBtn").addEventListener("click", () => {
 		setGoalEditMode(!state.editingGoalPuzzle);
 	});
-	playButton.addEventListener("click", () => {
-		setPlayMode(playButton.textContent === "Play Puzzle" ? true : false);
-	});
+	playButton.addEventListener("click", () => { setPlayMode(true) });
+	editStartBtn.addEventListener("click", () => { setPlayMode(false) });
 
 
 	// Keep puzzle the same dimensions as our row/col inputs
@@ -237,8 +240,8 @@ const setPlayMode = (enable) => {
 		const goalSolvability = Puzzle.isPuzzleSolvable2Darr(state.goalPuzzle.matrix);
 		const puzzleSolvability = Puzzle.isPuzzleSolvable2Darr(startingPuzzle.matrix);
 		if ( puzzleSolvability !== goalSolvability) {
-			let errorMessage = "Puzzle is not solvable with current goal state!  Would you like to auto-fix it?\n\n";
-			errorMessage += "Auto-fix will swap two adjacent non-blank tiles on the bottom right";
+			let errorMessage = "Puzzle is not solvable with current goal state!\n\nWould you like to auto-fix it?\n\n";
+			errorMessage += "(Auto-fix will swap two adjacent non-blank tiles on the bottom right)";
 
 			let answer = confirm(errorMessage);
 			if (answer) {
@@ -247,37 +250,34 @@ const setPlayMode = (enable) => {
 		}
 
 		state.playMode = true;
-		playButton.textContent = "Edit Puzzle";
-		title.style.visibility = "hidden";
+		title.textContent = "Slide Blank to Solve";
+		title.style.visibility = null;
 
-		playModeResetAllMovableTiles();
+		disableGridTileDragging();
 		playModeSetMovableTiles();
 		hideEditElements();
+		hideQuickEditButtons();
 		hideOutputTextAreas();
 	} else {
-		state.playMode = false;
-		playButton.textContent = "Play Puzzle";
+		if (state.editingGoalPuzzle) {
+			setGoalEditMode(false);
+		}
 
+		state.playMode = false;
 		if (!state.editingGoalPuzzle) {
 			title.textContent = "Editing Start";
 		}
 
 		title.style.visibility = null;
 		resetClickSourceTile()
-		for (const row of state.grid) {
-			for (const tile of row) {
-				tile.setAttribute("draggable", true);
-				tile.style.pointerEvents = "auto";
-				tile.style.cursor = "move";
-				tile.style.opacity = isNaN(parseInt(tile.textContent)) ? "0" : "1";
-			}
-		}
+		enableGridTileDragging();
 		showEditElements();
+		showQuickEditButtons();
 		hideOutputTextAreas();
 	}
 };
 
-// Hide/show the edit Puzzle controls by changing container's display style
+// Hide/show the edit start controls by changing container's display style
 const hideEditElements = () => {
 	editInputsContainer.style.display = "none";
 };
@@ -286,8 +286,17 @@ const showEditElements = () => {
 	editInputsContainer.style.display = null;
 };
 
+const hideQuickEditButtons = () => {
+	quickEditButtons.style.visibility = 'hidden';
+}
+
+const showQuickEditButtons = () => {
+	quickEditButtons.style.visibility = null;
+}
+
+
 // Set things up for play mode, where user can't drag any tiles
-const playModeResetAllMovableTiles = () => {
+const disableGridTileDragging = () => {
 	for (const row of state.grid) {
 		for (const tile of row) {
 			tile.setAttribute("draggable", false);
@@ -296,6 +305,18 @@ const playModeResetAllMovableTiles = () => {
 		}
 	}
 };
+
+// Set things up for edit mode, where user can click/drag any tiles
+const enableGridTileDragging = () => {
+	for (const row of state.grid) {
+		for (const tile of row) {
+			tile.setAttribute("draggable", true);
+			tile.style.pointerEvents = "auto";
+			tile.style.cursor = "move";
+			tile.style.opacity = isNaN(parseInt(tile.textContent)) ? "0" : "1";
+		}
+	}
+}
 
 // Set only neighbors of blank space to be clickable so user can slide the puzzle normally
 const playModeSetMovableTiles = () => {
@@ -557,7 +578,6 @@ const hideOutputTextAreas = () => {
 
 const showOutputTextAreas = () => {
 	outputAreaContainer.style.display = null;
-	playButton.textContent = "Edit Puzzle";
 };
 
 // Reset our tile background positions and number overlays/ids for the current dimensions
@@ -778,7 +798,7 @@ const setGoalEditMode = (enable) => {
 		state.editingGoalPuzzle = true;
 		state.startingPuzzle = getPuzzleFromGrid();
 		updatePuzzleState(state.goalPuzzle.matrix);
-		editGoalButton.textContent = "Confirm Goal";
+		editGoalButton.textContent = "Confirm";
 		title.textContent = "Editing Goal";
 		title.style.visibility = null;
 	} else if (!enable && state.editingGoalPuzzle) {
@@ -818,6 +838,7 @@ const autoFixPuzzle = () => {
 const animateMoveList = async (startingPuzzle, moveList) => {
 	// Show output area before starting animation
 	showOutputTextAreas();
+	showQuickEditButtons();
 	title.style.visibility = "hidden";
 
 	state.solutionAnimating = true;
@@ -851,10 +872,16 @@ const animateMoveList = async (startingPuzzle, moveList) => {
 	}
 
 	state.solutionAnimating = false;
+
+	// Let user click around after finishing solving as we're not really in play or edit mode
+	disableGridTileDragging();
+	playModeSetMovableTiles();
+	state.playMode = true;
 };
 
 const checkPuzzleBeforeAnimating = () => {
 	// Set state back to starting puzzle if looking at goal
+	showQuickEditButtons();
 	if (state.editingGoalPuzzle) {
 		setGoalEditMode(false);
 	}
@@ -862,7 +889,7 @@ const checkPuzzleBeforeAnimating = () => {
 	let startingPuzzle = getPuzzleFromGrid();
 	if (Puzzle.isPuzzleSolvable2Darr(startingPuzzle.matrix) !== Puzzle.isPuzzleSolvable2Darr(state.goalPuzzle.matrix)) {
 		let errorMessage = "Puzzle is not solvable with current goal state!\n\nWould you like to auto-fix it?\n\n";
-		errorMessage += "Auto-fix will swap two adjacent non-blank tiles on the bottom right";
+		errorMessage += "(Auto-fix will swap two adjacent non-blank tiles on the bottom right)";
 
 		let answer = confirm(errorMessage);
 		if (answer) {
@@ -1019,7 +1046,7 @@ function handleTileTouchAndCLick(e) {
 				}
 			}
 			resetClickSourceTile();
-			playModeResetAllMovableTiles();
+			disableGridTileDragging();
 			playModeSetMovableTiles();
 		} else {
 			// Visually select this tile
