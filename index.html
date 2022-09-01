@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-</meta>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
 <head>
     <!-- 
-        For updating css classes dynmically with JS
-        Using to update all grid tiles with attributes that can't be inherited from the container
-    -->
+            For updating css classes dynmically with JS
+            Using to update all grid tiles with attributes that can't be inherited from the container
+        -->
     <style id="tileBackgroundCss"></style>
     <style id="backgroundflipCss"></style>
     <style id="tileBorderCss"></style>
@@ -28,109 +27,89 @@
     <div class="centered">
         <button id="playBtn" class="buttons fontButtons buttonsRow2">Play Puzzle</button>
         <button id="editGoalBtn" class="buttons fontButtons buttonsRow2"">Edit Goal</button>
-    </div>
-    <div class=" centered">
-        <button id="solveBtn" class="buttons fontButtons buttonsRow3">Solve</button>
-        <select class="algorithmsDropdown" name="algorithms" id="algorithmsDropdown">
-            <option value="Strategic">Strategically</option>
-            <option value="IDA*">IDA*</option>
-            <option value="A*">A*</option>
-            <option value="A*closedSet">A* (closed set)</option>
-            <option value="BFS">BFS</option>
-        </select>
+        </div>
+
+
+        <div class=" centered">
+            <button id="solveBtn" class="buttons fontButtons buttonsRow3">Solve</button>
+            <select class="algorithmsDropdown" name="algorithms" id="algorithmsDropdown">
+                <option value="Strategic">Strategically</option>
+                <option value="IDA*">IDA*</option>
+                <option value="A*">A*</option>
+                <option value="A*closedSet">A* (closed set)</option>
+                <option value="BFS">BFS</option>
+            </select>
     </div>
 
 
     <div id="editInputsContainer" class="editInputsContainer">
         <div>
-            <div class="editTitle">Customize Puzzle:</div>
+            <div class="editTitle" >Customize Puzzle:</div>
             <div style="display: flex; align-items: center; justify-content: center; flex-basis: 100%;">
                 <button id="toggleBordersBtn" class="buttons svgButtons buttonsRow1">
                     <svg id="hideBorderSvg" viewBox="0 0 16 16">
                         <path d="M0 0h.969v.5H1v.469H.969V1H.5V.969H0V0zm2.844 1h-.938V0h.938v1zm1.875 0H3.78V0h.938v1zm1.875 0h-.938V0h.938v1zm.937 0V.969H7.5V.5h.031V0h.938v.5H8.5v.469h-.031V1H7.53zm2.813
-                            0h-.938V0h.938v1zm1.875 0h-.938V0h.938v1zm1.875 0h-.938V0h.938v1zM15.5 1h-.469V.969H15V.5h.031V0H16v.969h-.5V1zM1 1.906v.938H0v-.938h1zm6.5.938v-.938h1v.938h-1zm7.5 0v-.938h1v.938h-1zM1
-                            3.78v.938H0V3.78h1zm6.5.938V3.78h1v.938h-1zm7.5 0V3.78h1v.938h-1zM1 5.656v.938H0v-.938h1zm6.5.938v-.938h1v.938h-1zm7.5 0v-.938h1v.938h-1zM.969
-                            8.5H.5v-.031H0V7.53h.5V7.5h.469v.031H1v.938H.969V8.5zm1.875 0h-.938v-1h.938v1zm1.875 0H3.78v-1h.938v1zm1.875
-                            0h-.938v-1h.938v1zm1.875-.031V8.5H7.53v-.031H7.5V7.53h.031V7.5h.938v.031H8.5v.938h-.031zm1.875.031h-.938v-1h.938v1zm1.875 0h-.938v-1h.938v1zm1.875 0h-.938v-1h.938v1zm1.406
-                            0h-.469v-.031H15V7.53h.031V7.5h.469v.031h.5v.938h-.5V8.5zM0 10.344v-.938h1v.938H0zm7.5 0v-.938h1v.938h-1zm8.5-.938v.938h-1v-.938h1zM0 12.22v-.938h1v.938H0zm7.5
-                            0v-.938h1v.938h-1zm8.5-.938v.938h-1v-.938h1zM0 14.094v-.938h1v.938H0zm7.5 0v-.938h1v.938h-1zm8.5-.938v.938h-1v-.938h1zM.969 16H0v-.969h.5V15h.469v.031H1v.469H.969v.5zm1.875
-                            0h-.938v-1h.938v1zm1.875 0H3.78v-1h.938v1zm1.875 0h-.938v-1h.938v1zm.937 0v-.5H7.5v-.469h.031V15h.938v.031H8.5v.469h-.031v.5H7.53zm2.813 0h-.938v-1h.938v1zm1.875 0h-.938v-1h.938v1zm1.875
-                            0h-.938v-1h.938v1zm.937 0v-.5H15v-.469h.031V15h.469v.031h.5V16h-.969z"
-                            id="mainIconPathAttribute">
+                        0h-.938V0h.938v1zm1.875 0h-.938V0h.938v1zm1.875 0h-.938V0h.938v1zM15.5 1h-.469V.969H15V.5h.031V0H16v.969h-.5V1zM1 1.906v.938H0v-.938h1zm6.5.938v-.938h1v.938h-1zm7.5 0v-.938h1v.938h-1zM1
+                        3.78v.938H0V3.78h1zm6.5.938V3.78h1v.938h-1zm7.5 0V3.78h1v.938h-1zM1 5.656v.938H0v-.938h1zm6.5.938v-.938h1v.938h-1zm7.5 0v-.938h1v.938h-1zM.969
+                        8.5H.5v-.031H0V7.53h.5V7.5h.469v.031H1v.938H.969V8.5zm1.875 0h-.938v-1h.938v1zm1.875 0H3.78v-1h.938v1zm1.875
+                        0h-.938v-1h.938v1zm1.875-.031V8.5H7.53v-.031H7.5V7.53h.031V7.5h.938v.031H8.5v.938h-.031zm1.875.031h-.938v-1h.938v1zm1.875 0h-.938v-1h.938v1zm1.875 0h-.938v-1h.938v1zm1.406
+                        0h-.469v-.031H15V7.53h.031V7.5h.469v.031h.5v.938h-.5V8.5zM0 10.344v-.938h1v.938H0zm7.5 0v-.938h1v.938h-1zm8.5-.938v.938h-1v-.938h1zM0 12.22v-.938h1v.938H0zm7.5
+                        0v-.938h1v.938h-1zm8.5-.938v.938h-1v-.938h1zM0 14.094v-.938h1v.938H0zm7.5 0v-.938h1v.938h-1zm8.5-.938v.938h-1v-.938h1zM.969 16H0v-.969h.5V15h.469v.031H1v.469H.969v.5zm1.875
+                        0h-.938v-1h.938v1zm1.875 0H3.78v-1h.938v1zm1.875 0h-.938v-1h.938v1zm.937 0v-.5H7.5v-.469h.031V15h.938v.031H8.5v.469h-.031v.5H7.53zm2.813 0h-.938v-1h.938v1zm1.875 0h-.938v-1h.938v1zm1.875
+                        0h-.938v-1h.938v1zm.937 0v-.5H15v-.469h.031V15h.469v.031h.5V16h-.969z" id="mainIconPathAttribute">
                         </path>
                     </svg>
-
                     <svg id="showBorderSvg" viewBox="0 0 16 16" style="display: none;">
-                        <path
-                            d="M0 0h16v16H0V0zm1 1v6.5h6.5V1H1zm7.5 0v6.5H15V1H8.5zM15 8.5H8.5V15H15V8.5zM7.5 15V8.5H1V15h6.5z"
-                            id="mainIconPathAttribute" />
-                    </svg>
+                        <path d="M0 0h16v16H0V0zm1 1v6.5h6.5V1H1zm7.5 0v6.5H15V1H8.5zM15 8.5H8.5V15H15V8.5zM7.5 15V8.5H1V15h6.5z" id="mainIconPathAttribute"/> </svg>
                 </button>
-
                 <button id="toggleNumbersBtn" class="buttons svgButtons buttonsRow1">
                     <svg id="hideNumberSvg" viewBox="0 0 256 256">
-                        <rect width="380.221" height="381.956" fill="none" x="-63.329" y="-35.778" style="" />
-                        <rect width="220.948" height="203.71" fill="none" x="8.909" y="57.166" style="" />
-                        <polyline points="91.35 69.146 129.737 24.908 129.737 222.058" fill="none" stroke="#000"
-                            stroke-linecap="round" stroke-linejoin="round" stroke-width="14" style="" />
-                        <polyline points="182.805 224.062 77.751 224.577" fill="none" stroke="#000"
-                            stroke-linecap="round" stroke-linejoin="round" stroke-width="14" style="" />
-                        <path
-                            d="M 127.586 121.195 L 245.041 4.374 L 253.11 12.396 L 135.655 129.218 L 251.806 246.036 L 245.041 254.062 L 127.586 137.24 L 10.128 254.062 L 2.06 246.036 L 119.515 129.218 L 2.06 12.396 L 10.128 4.374 L 127.586 121.195 Z"
-                            style="" />
+                        <rect width="380.221" height="381.956" fill="none" x="-63.329" y="-35.778" style=""/>
+                        <rect width="220.948" height="203.71" fill="none" x="8.909" y="57.166" style=""/>
+                        <polyline points="91.35 69.146 129.737 24.908 129.737 222.058" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="14" style=""/>
+                        <polyline points="182.805 224.062 77.751 224.577" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="14" style=""/>
+                        <path d="M 127.586 121.195 L 245.041 4.374 L 253.11 12.396 L 135.655 129.218 L 251.806 246.036 L 245.041 254.062 L 127.586 137.24 L 10.128 254.062 L 2.06 246.036 L 119.515 129.218 L 2.06 12.396 L 10.128 4.374 L 127.586 121.195 Z" style=""/>
                     </svg>
-
                     <svg id="showNumberSvg" viewBox="0 0 256 256" style="display: none;">
-                        <rect width="380.221" height="381.956" fill="none" x="-63.329" y="-35.778" style="" />
-                        <rect width="220.948" height="203.71" fill="none" x="8.909" y="57.166" style="" />
-                        <polyline points="91.35 69.146 129.737 24.908 129.737 222.058" fill="none" stroke="#000"
-                            stroke-linecap="round" stroke-linejoin="round" stroke-width="14" style="" />
-                        <polyline points="182.805 224.062 77.751 224.577" fill="none" stroke="#000"
-                            stroke-linecap="round" stroke-linejoin="round" stroke-width="14" style="" />
+                        <rect width="380.221" height="381.956" fill="none" x="-63.329" y="-35.778" style=""/>
+                        <rect width="220.948" height="203.71" fill="none" x="8.909" y="57.166" style=""/>
+                        <polyline points="91.35 69.146 129.737 24.908 129.737 222.058" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="14" style=""/>
+                        <polyline points="182.805 224.062 77.751 224.577" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="14" style=""/>
                     </svg>
                 </button>
                 <button id="flipPuzzleHorizontalBtn" class="buttons svgButtons buttonsRow2">
                     <svg viewbox="0 0 48 48">
-                        <path d="M24 6V42" stroke="#000000" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" id="mainIconPathAttribute" fill="#000000"></path>
-                        <path d="M4 34L16 12V34H4Z" fill="#000000" stroke="#000000" stroke-width="1"
-                            stroke-linejoin="round" id="mainIconPathAttribute"></path>
-                        <path d="M44 34H32V12L44 34Z" fill="none" stroke="#000000" stroke-width="1"
-                            stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                        <path d="M24 6V42" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="mainIconPathAttribute" fill="#000000"></path>
+                        <path d="M4 34L16 12V34H4Z" fill="#000000" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                        <path d="M44 34H32V12L44 34Z" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
                     </svg>
                 </button>
                 <button id="flipPuzzleVerticalBtn" class="buttons svgButtons buttonsRow2">
                     <svg viewBox="0 0 48 48">
-                        <path d="M42 24L6 24" stroke="#000000" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" id="mainIconPathAttribute"></path>
-                        <path d="M14 4L36 16H14V4Z" fill="#000000" stroke="#000000" stroke-width="1"
-                            stroke-linejoin="round" id="mainIconPathAttribute"></path>
-                        <path d="M14 44V32H36L14 44Z" fill="none" stroke="#000000" stroke-width="1"
-                            stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                        <path d="M42 24L6 24" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                        <path d="M14 4L36 16H14V4Z" fill="#000000" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                        <path d="M14 44V32H36L14 44Z" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
                     </svg>
                 </button>
                 <button id="rotatePuzzleBtn" class="buttons svgButtons buttonsRow2">
                     <svg viewBox="0 0 16 16" transform="rotate(45)">
-                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"
-                            id="mainIconPathAttribute" fill="#000000"></path>
-                        <path
-                            d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"
-                            id="mainIconPathAttribute" fill="#000000"></path>
+                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z" id="mainIconPathAttribute" fill="#000000"></path>
+                        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z" id="mainIconPathAttribute" fill="#000000"></path>
                     </svg>
                 </button>
             </div>
 
             <div style="align-items: center; justify-content: center; flex-wrap: wrap;">
-                <div class="centered" style="flex-basis: 100%;">
-                    <div class="dimensionInput" style="margin-bottom: 3vmin;">
+                <div class ="centered" style="flex-basis: 100%;">
+                    <div class ="dimensionInput" style="margin-bottom: 3vmin;">
                         <label class="inputs" for="rowInput">Rows:</label>
                         <input id="rowInput" type="number" class="inputs numberInput" value="3"></input>
                         <input type="range" min="2" max="25" value="3" class="slider" id="rowSlider">
                     </div>
                 </div>
-
-                <div class="centered" style="flex-basis: 100%;">
-                    <div class="dimensionInput">
+                
+                <div class ="centered" style="flex-basis: 100%;">
+                    <div class ="dimensionInput">
                         <label class="inputs" for="colInput">Cols:</label>
                         <input id="colInput" type="number" class="inputs numberInput" value="3"></input>
                         <input type="range" min="2" max="25" value="3" class="slider" id="colSlider">
@@ -140,45 +119,35 @@
         </div>
 
         <div>
-            <div id="customImageInput" class="inputs"
-                style="align-items: center; justify-content: center; flex-wrap: wrap; flex-basis: 100%;">
+            <div id="customImageInput" class="inputs" style="align-items: center; justify-content: center; flex-wrap: wrap; flex-basis: 100%;">
                 <div class="editTitle" style="margin-top: 1vh;">Customize Image:</div>
                 <div class="centered">
                     <label for="imageInputURL">URL:</label>
                     <input type="url" id="imageInputURL" name="imageInputURL" class="imageInputURL"></input>
                     <input type="file" id="imageUploadInput" style="display: none;""></input>
-                        <input type=" button" value="Browse" class="buttons fontButtons"
-                        onclick="document.getElementById('imageUploadInput').click();" />
+                    <input type="button" value="Browse" class="buttons fontButtons" onclick="document.getElementById('imageUploadInput').click();" />
                     <button id="flipImageHorizontalBtn" class="buttons buttonsRow2 svgButtons">
                         <svg viewbox="0 0 48 48">
-                            <path d="M24 6V42" stroke="#000000" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" id="mainIconPathAttribute" fill="#000000"></path>
-                            <path d="M4 34L16 12V34H4Z" fill="#000000" stroke="#000000" stroke-width="1"
-                                stroke-linejoin="round" id="mainIconPathAttribute"></path>
-                            <path d="M44 34H32V12L44 34Z" fill="none" stroke="#000000" stroke-width="1"
-                                stroke-linejoin="round" id="mainIconPathAttribute"></path>
-                        </svg>
+                            <path d="M24 6V42" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="mainIconPathAttribute" fill="#000000"></path>
+                            <path d="M4 34L16 12V34H4Z" fill="#000000" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                            <path d="M44 34H32V12L44 34Z" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                        </svg> 
                     </button>
                     <button id="flipImageVerticalBtn" class="buttons buttonsRow2 svgButtons">
                         <svg viewBox="0 0 48 48">
-                            <path d="M42 24L6 24" stroke="#000000" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" id="mainIconPathAttribute"></path>
-                            <path d="M14 4L36 16H14V4Z" fill="#000000" stroke="#000000" stroke-width="1"
-                                stroke-linejoin="round" id="mainIconPathAttribute"></path>
-                            <path d="M14 44V32H36L14 44Z" fill="none" stroke="#000000" stroke-width="1"
-                                stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                            <path d="M42 24L6 24" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                            <path d="M14 4L36 16H14V4Z" fill="#000000" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
+                            <path d="M14 44V32H36L14 44Z" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round" id="mainIconPathAttribute"></path>
                         </svg>
                     </button>
                 </div>
             </div>
         </div>
     </div>
-
     <div id="outputAreaContainer" class="outputAreaContainer" style="display: none;">
         <textarea id="summaryOutput" class="outputArea summaryOutput" readonly></textarea>
         <textarea id="solutionOutput" class="outputArea solutionOutput" readonly></textarea>
     </div>
-
 </body>
 
 </html>

@@ -4,7 +4,7 @@
 }
 
 .editTitle {
-    font-size: 3.5vh;
+    font-size: 3vh;
     flex-basis: 100%;
 }
 
@@ -12,11 +12,13 @@
     /* Keep puzzle centered */
     margin: 0 auto 0 auto; 
     padding: 0 0 0 0;
-    height: calc(40vh - 20vw);
-    width: calc(40vh - 20vw);
+    height: calc(50vh - 10vw);
+    width: calc(50vh - 10vw);
     margin-top: 1vh;
-    min-width: 40vh;
-    min-height: 40vh;
+    min-width: 35vh;
+    min-height: 35vh;
+    max-height: 40vw;
+    max-width: 40vw;
 }
 
 .grid {
@@ -94,7 +96,7 @@
 }
 
 .inputs {
-    font-size: calc(min(4vh, 4vmin) - 1vw);
+    font-size: calc(4.5vmin - 0.5vw);
 }
 
 .editInputsContainer {
@@ -248,8 +250,8 @@ body {
 .summaryOutput {
     text-align: right;
     border: none;
-    width: 40%;
-    margin-left: 10%;
+    width: 50%;
+    margin-left: 0%;
     margin-right: 1vw;
 }
 
@@ -258,14 +260,14 @@ body {
     overflow-y: scroll;
     border: solid 1px;
     border-radius: 5px;
-    width: 25%;
-    max-width: 50vh;
-    margin-right: 15%;
+    width: 20%;
+    max-width: 30%;
+    margin-right: 10%;
 }
 
 .outputArea {
     height: 100%;
-    font-size: 3vmin;
+    font-size: 2.5vmin;
     font-family: "Fira Mono", monospace;
     background-color: transparent;
     outline: none;

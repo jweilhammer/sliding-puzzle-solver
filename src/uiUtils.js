@@ -650,7 +650,6 @@ const randomizePuzzle = async () => {
 
 // Flips the puzzle grid tiles horizontally, inverts on x axists
 const flipPuzzleHorizontally = () => {
-	console.log("flipPuzzleHorizontally");
 	state.solutionAnimating = false;
 	for (let row = 0; row < state.puzzleRows; row++) {
 		for (let col = 0; col < state.puzzleCols / 2; col++) {
@@ -661,7 +660,6 @@ const flipPuzzleHorizontally = () => {
 
 // Flips the puzzle grid tiles vertically, inverts on y axists
 const flipPuzzleVertically = () => {
-	console.log("flipPuzzleVertically");
 	state.solutionAnimating = false;
 	for (let row = 0; row < state.puzzleRows / 2; row++) {
 		for (let col = 0; col < state.puzzleCols; col++) {
@@ -704,7 +702,6 @@ const resetBackgroundPositions = () => {
 // Rotates the puzzle clockwise
 // IF puzzle is non-square (NxM), then new puzzle will be (MxN)
 const rotatePuzzle = () => {
-	console.log("ROTATE PUZZLE");
 	state.solutionAnimating = false;
 
 	// Get original values
@@ -772,7 +769,6 @@ const toggleNumbers = () => {
 };
 
 const setGoalEditMode = (enable) => {
-	console.log("SET GOAL EDIT MODE", enable);
 	state.solutionAnimating = false;
 
 	if (enable && !state.editingGoalPuzzle) {
