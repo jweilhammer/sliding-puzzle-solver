@@ -1,5 +1,4 @@
 import { Puzzle } from './Puzzle.js';
-export { solvePuzzleStrategically };
 
 // Overall strategy derived from: https://www.wikihow.com/Solve-Slide-Puzzles
 // Actual algorithm needs to check lots of things when moving tiles that a human could just "see"
@@ -705,3 +704,5 @@ const rowFinishedAndNotInGoalRow = (goalPuzzle, puzzle) => {
 const unsolvedPuzzleIsTwoByTwo = (puzzle) => {
     return puzzle.botRowProgress + 1 - puzzle.topRowProgress === 2 && puzzle.rightColProgress + 1 - puzzle.leftColProgress === 2;
 }
+
+export { solvePuzzleStrategically };

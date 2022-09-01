@@ -1027,4 +1027,5 @@ function handleTileTouchAndCLick(e) {
 	}
 }
 
+
 export { animateMoveList, checkPuzzleBeforeAnimating, initializeUiElements };

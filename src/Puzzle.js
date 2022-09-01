@@ -1,5 +1,3 @@
-export { Puzzle };
-
 class Puzzle {
 	static slideDirections = {
 		INITIAL: 0,
@@ -450,3 +448,5 @@ class Puzzle {
 		console.log(string);
 	}
 }
+
+export { Puzzle };

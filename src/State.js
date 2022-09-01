@@ -1,8 +1,6 @@
 import { Puzzle } from "./Puzzle.js";
-export { State };
 
-
-// Shareable Singelton object between modules for keeping track of UI state
+// Shareable Singleton object between modules for keeping track of UI state
 const state = {};
 
 class State {
@@ -30,8 +28,6 @@ class State {
         state.puzzleRows = 0;
         state.puzzleCols = 0;
 
-
-
         // When swapping tiles, the currently selected tile by clicking or dragging
         state.dragSourceTile = null;
         state.clickSourceTile = null;
@@ -48,3 +44,6 @@ class State {
         return state;
     }
 }
+
+
+export { State };
