@@ -71,9 +71,10 @@ const shufflePuzzle = () => {
 	values.push(0);
 
 	let puzzle_arr = [];
+    const goalSolvability = Puzzle.isPuzzleSolvable2Darr(state.goalPuzzle.matrix);
 	do {
 		puzzle_arr = Puzzle.shuffleArray(values);
-	} while (!Puzzle.isPuzzleSolvable1Darr(puzzle_arr, state.puzzleRows, state.puzzleCols));
+	} while (Puzzle.isPuzzleSolvable1Darr(puzzle_arr, state.puzzleRows, state.puzzleCols) !== goalSolvability);
 
 	const bgPositions = getBackgroundPositions(state.puzzleRows, state.puzzleCols);
 	for (let row = 0; row < state.puzzleRows; row++) {
@@ -578,6 +579,10 @@ const resetPuzzle = () => {
 			tile.style.backgroundPosition = `${bgPositions[tileNum].y}% ${bgPositions[tileNum].x}%`;
 		}
 	}
+
+    if (!Puzzle.isPuzzleSolvable2Darr(state.goalPuzzle.matrix)) {
+        autoFixPuzzle();
+    }
 };
 
 // Resets current puzzle to match a new matrix state
