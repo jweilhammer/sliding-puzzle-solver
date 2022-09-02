@@ -1,12 +1,13 @@
-class Puzzle {
-	static slideDirections = {
-		INITIAL: 0,
-		UP: 1,
-		DOWN: 2,
-		LEFT: 3,
-		RIGHT: 4,
-	};
+// Static var not supported on Safari
+const slideDirections = {
+    INITIAL: 0,
+    UP: 1,
+    DOWN: 2,
+    LEFT: 3,
+    RIGHT: 4,
+};
 
+class Puzzle {
 	constructor(rows, cols, genRandomPuzzle = true, solvable = true) {
 		if (genRandomPuzzle) {
 			this.matrix = Puzzle.generateRandomPuzzle(rows, cols, solvable);
@@ -241,31 +242,31 @@ class Puzzle {
 
 	generateNeighbors(goal_mapping = null) {
 		const neighboringPuzzleStates = [];
-		if (this.canSlideUp() && this.lastSlideDirection != Puzzle.slideDirections["DOWN"]) {
+		if (this.canSlideUp() && this.lastSlideDirection != slideDirections["DOWN"]) {
 			let newPuzzle = Puzzle.fromPuzzle(this);
 			newPuzzle.slideUp();
-			newPuzzle.lastSlideDirection = Puzzle.slideDirections["UP"];
+			newPuzzle.lastSlideDirection = slideDirections["UP"];
 			neighboringPuzzleStates.push(newPuzzle);
 		}
 
-		if (this.canSlideDown() && this.lastSlideDirection != Puzzle.slideDirections["UP"]) {
+		if (this.canSlideDown() && this.lastSlideDirection != slideDirections["UP"]) {
 			let newPuzzle = Puzzle.fromPuzzle(this);
 			newPuzzle.slideDown();
-			newPuzzle.lastSlideDirection = Puzzle.slideDirections["DOWN"];
+			newPuzzle.lastSlideDirection = slideDirections["DOWN"];
 			neighboringPuzzleStates.push(newPuzzle);
 		}
 
-		if (this.canSlideLeft() && this.lastSlideDirection != Puzzle.slideDirections["RIGHT"]) {
+		if (this.canSlideLeft() && this.lastSlideDirection != slideDirections["RIGHT"]) {
 			let newPuzzle = Puzzle.fromPuzzle(this);
 			newPuzzle.slideLeft();
-			newPuzzle.lastSlideDirection = Puzzle.slideDirections["LEFT"];
+			newPuzzle.lastSlideDirection = slideDirections["LEFT"];
 			neighboringPuzzleStates.push(newPuzzle);
 		}
 
-		if (this.canSlideRight() && this.lastSlideDirection != Puzzle.slideDirections["LEFT"]) {
+		if (this.canSlideRight() && this.lastSlideDirection != slideDirections["LEFT"]) {
 			let newPuzzle = Puzzle.fromPuzzle(this);
 			newPuzzle.slideRight();
-			newPuzzle.lastSlideDirection = Puzzle.slideDirections["RIGHT"];
+			newPuzzle.lastSlideDirection = slideDirections["RIGHT"];
 			neighboringPuzzleStates.push(newPuzzle);
 		}
 
@@ -448,4 +449,4 @@ class Puzzle {
 	}
 }
 
-export { Puzzle };
+export { Puzzle, slideDirections };

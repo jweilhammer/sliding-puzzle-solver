@@ -1,4 +1,4 @@
-import { Puzzle } from "./Puzzle.js";
+import { Puzzle, slideDirections } from "./Puzzle.js";
 import { state } from "./State.js";
 import { solvePuzzleStrategically } from "./strategicSolve.js";
 import { solvePuzzleBFS, solvePuzzleAStar, solvePuzzleIDAStar } from "./searchAlgorithms.js";
@@ -55,8 +55,6 @@ const solvePuzzle = async () => {
 
 		// Get inverse of our slide Directions so we can get the key from the value
 		let solutionPuzzle = solution["solutionPuzzle"];
-		const slideDirections = { ...Puzzle.slideDirections };
-		console.log(slideDirections);
 		Object.keys(slideDirections).forEach((key) => {
 			slideDirections[slideDirections[key]] = key;
 		});
