@@ -692,12 +692,13 @@ const randomizePuzzle = async () => {
 	for (let row = 0; row < newRow; row++) {
 		for (let col = 0; col < newCol; col++) {
 			let num = row * newCol + col + 1;
-			num = num === newRow*newCol ? "" : num;
+			num = num === newRow*newCol ? 0 : num;
 			tempMatrix[row][col] = num;
 		}
 	}
 
 	// 10% chance to just shuffle puzzle, will always be solvable
+	let randomizedPuzzle = new Puzzle(newRow, newCol, false);
 	do {
 		// 10% chance to just shuffle puzzle, will always be solvable
 		if (Math.random() < 0.1) {
@@ -742,7 +743,9 @@ const randomizePuzzle = async () => {
 				tempMatrix = rotatedMatrix;
 			}
 		}
-	} while (!Puzzle.isPuzzleSolvable2Darr(tempMatrix));
+
+		randomizedPuzzle.matrix = tempMatrix;
+	} while (!Puzzle.isPuzzleSolvable2Darr(tempMatrix) || state.goalPuzzle.isEqualToPuzzle(randomizedPuzzle));
 
 	if (Math.random() < 0.5) toggleBorders();
 	if (Math.random() < 0.5) toggleNumbers();

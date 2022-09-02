@@ -280,7 +280,6 @@ class Puzzle {
 	}
 
 	isEqualToPuzzle(puzzle) {
-		// TODO: Type checks, size checks, etc
 		for (let row = 0; row < puzzle.matrix.length; row++) {
 			for (let col = 0; col < puzzle.matrix[row].length; col++) {
 				if (puzzle.matrix[row][col] !== this.matrix[row][col]) {
