@@ -14,6 +14,7 @@ const colInput = document.getElementById("colInput");
 const playButton = document.getElementById("playBtn");
 const rowSlider = document.getElementById("rowSlider");
 const colSlider = document.getElementById("colSlider");
+const editGoalBtn = document.getElementById("editGoalBtn");
 const editStartBtn = document.getElementById('editStartBtn');
 const imageInputURL = document.getElementById("imageInputURL");
 const imageUploadInput = document.getElementById("imageUploadInput");
@@ -29,7 +30,6 @@ const outputAreaContainer = document.getElementById("outputAreaContainer");
 // CSS stylesheets in doc that allow for dynamic styling/CSS toggles
 const title = document.getElementById("title");
 const borderCss = document.getElementById("tileBorderCss");
-const editGoalButton = document.getElementById("editGoalBtn");
 const backgroundCss = document.getElementById("tileBackgroundCss");
 const backgroundflipCss = document.getElementById("backgroundflipCss");
 
@@ -62,8 +62,9 @@ const shufflePuzzle = () => {
 	resetClickSourceTile();
 	hideOutputTextAreas();
 
-	if (!state.editingGoalPuzzle)
-		setPlayMode(false);
+	if (!state.editingGoalPuzzle) {
+		enableStartEditMode();
+	}
 
 	// Get all tile Values in 1D array, plus blank tile (0)
 	let tileValue = 1;
@@ -158,10 +159,10 @@ const initializeUiElements = () => {
 	document.getElementById("flipPuzzleHorizontalBtn").addEventListener("click", flipPuzzleHorizontally);
 	document.getElementById("flipImageHorizontalBtn").addEventListener("click", flipBackgroundHorizontally);
 	document.getElementById("editGoalBtn").addEventListener("click", () => {
-		setGoalEditMode(!state.editingGoalPuzzle);
+		enableGoalEditMode();
 	});
-	playButton.addEventListener("click", () => { setPlayMode(true) });
-	editStartBtn.addEventListener("click", () => { setPlayMode(false) });
+	playButton.addEventListener("click", () => { enablePlayMode() });
+	editStartBtn.addEventListener("click", () => { enableStartEditMode() });
 
 
 	// Keep puzzle the same dimensions as our row/col inputs
@@ -227,55 +228,88 @@ const swapGridTiles = (tile1, tile2) => {
 // When play mode set, the user can't edit the puzzle freely
 // This lets them play the puzzle by the normal rules:
 // The blank tile can only be moved by swapping with one its adjacent neighbors
-const setPlayMode = (enable) => {
+const enablePlayMode = () => {
 	// Stop animation if solution is playing out
 	state.solutionAnimating = false;
-	if (enable) {
-		if (state.editingGoalPuzzle) {
-			setGoalEditMode(false);
+	disableGoalEditMode();
+
+	// Convert to Puzzle to make sure it's solveable before letting user play it
+	const startingPuzzle = getPuzzleFromGrid();
+	const goalSolvability = Puzzle.isPuzzleSolvable2Darr(state.goalPuzzle.matrix);
+	const puzzleSolvability = Puzzle.isPuzzleSolvable2Darr(startingPuzzle.matrix);
+	if (puzzleSolvability !== goalSolvability) {
+		let errorMessage = "Puzzle is not solvable with current goal state!\n\nWould you like to auto-fix it?\n\n";
+		errorMessage += "(Auto-fix will swap two adjacent non-blank tiles on the bottom right)";
+
+		let answer = confirm(errorMessage);
+		if (answer) {
+			autoFixPuzzle();
 		}
+	}
 
-		// Convert to Puzzle to make sure it's solveable before letting user play it
-		const startingPuzzle = getPuzzleFromGrid();
-		const goalSolvability = Puzzle.isPuzzleSolvable2Darr(state.goalPuzzle.matrix);
-		const puzzleSolvability = Puzzle.isPuzzleSolvable2Darr(startingPuzzle.matrix);
-		if ( puzzleSolvability !== goalSolvability) {
-			let errorMessage = "Puzzle is not solvable with current goal state!\n\nWould you like to auto-fix it?\n\n";
-			errorMessage += "(Auto-fix will swap two adjacent non-blank tiles on the bottom right)";
+	state.playMode = true;
+	title.style.visibility = null;
+	title.textContent = "Slide Blank to Solve";
+	disableGridTileDragging();
+	playModeSetMovableTiles();
+	hideEditElements();
+	hideQuickEditButtons();
+	hideOutputTextAreas();
+};
 
-			let answer = confirm(errorMessage);
-			if (answer) {
-				autoFixPuzzle();
-			}
-		}
 
-		state.playMode = true;
-		title.textContent = "Slide Blank to Solve";
+const disablePlayMode = () => {
+	title.style.visibility = null;
+	state.playMode = false;
+	resetClickSourceTile()
+	enableGridTileDragging();
+	showEditElements();
+	showQuickEditButtons();
+	hideOutputTextAreas();
+}
+
+const enableStartEditMode = () => {
+	state.solutionAnimating = false;
+
+	disableGoalEditMode();
+	disablePlayMode();
+	title.textContent = "Editing Start";
+}
+
+const enableGoalEditMode = () => {
+	state.solutionAnimating = false;
+	if (!state.editingGoalPuzzle) {
+		disablePlayMode();
+
+
+		state.editingGoalPuzzle = true;
+		state.startingPuzzle = getPuzzleFromGrid();
+		updatePuzzleState(state.goalPuzzle.matrix);
+		title.textContent = "Editing Goal";
 		title.style.visibility = null;
-
-		disableGridTileDragging();
-		playModeSetMovableTiles();
-		hideEditElements();
-		hideQuickEditButtons();
-		hideOutputTextAreas();
-	} else {
-		if (state.editingGoalPuzzle) {
-			setGoalEditMode(false);
-		}
-
-		state.playMode = false;
-		if (!state.editingGoalPuzzle) {
-			title.textContent = "Editing Start";
-		}
-
-		title.style.visibility = null;
-		resetClickSourceTile()
-		enableGridTileDragging();
-		showEditElements();
-		showQuickEditButtons();
-		hideOutputTextAreas();
 	}
 };
+
+// Saves current puzzle as the goal state
+const disableGoalEditMode = () => {
+	state.solutionAnimating = false;
+	if (state.editingGoalPuzzle) {
+		// Save current puzzle as our goal
+		state.editingGoalPuzzle = false;
+		state.goalPuzzle = getPuzzleFromGrid();
+
+		if (state.puzzleRows === state.startingPuzzle.rows && state.puzzleCols === state.startingPuzzle.cols) {
+			updatePuzzleState(state.startingPuzzle.matrix);
+		} else {
+			state.startingPuzzle = null;
+			resetPuzzle();
+		}
+
+		editGoalBtn.textContent = "Edit Goal";
+		title.textContent = "Editing Start";
+		title.style.visibility = null;
+	}
+}
 
 // Hide/show the edit start controls by changing container's display style
 const hideEditElements = () => {
@@ -583,7 +617,11 @@ const showOutputTextAreas = () => {
 // Reset our tile background positions and number overlays/ids for the current dimensions
 const resetPuzzle = () => {
 	state.solutionAnimating = false;
-	setPlayMode(false);
+
+	if (!state.editingGoalPuzzle) {
+		enableStartEditMode();
+	}
+
 	const bgPositions = getBackgroundPositions(state.puzzleRows, state.puzzleCols);
 	for (let row = 0; row < state.puzzleRows; row++) {
 		for (let col = 0; col < state.puzzleCols; col++) {
@@ -625,7 +663,9 @@ const updatePuzzleState = (matrix) => {
 
 // Set state to a random solvable puzzle from [2-25 x 2-25]
 const randomizePuzzle = async () => {
-	setPlayMode(false);
+	if (!state.editingGoalPuzzle) {
+		enableStartEditMode();
+	}
 
 	const newRow = Math.floor(Math.random() * 25) + 2;
 	const newCol = Math.floor(Math.random() * 25) + 2;
@@ -786,38 +826,7 @@ const toggleNumbers = () => {
 	}
 };
 
-const setGoalEditMode = (enable) => {
-	state.solutionAnimating = false;
 
-	if (enable && !state.editingGoalPuzzle) {
-		// Show editing options
-		if (state.playMode) {
-			setPlayMode(false);
-		}
-
-		state.editingGoalPuzzle = true;
-		state.startingPuzzle = getPuzzleFromGrid();
-		updatePuzzleState(state.goalPuzzle.matrix);
-		editGoalButton.textContent = "Confirm";
-		title.textContent = "Editing Goal";
-		title.style.visibility = null;
-	} else if (!enable && state.editingGoalPuzzle) {
-		// Save current puzzle as our goal
-		state.editingGoalPuzzle = false;
-		state.goalPuzzle = getPuzzleFromGrid();
-
-		if (state.puzzleRows === state.startingPuzzle.rows && state.puzzleCols === state.startingPuzzle.cols) {
-			updatePuzzleState(state.startingPuzzle.matrix);
-		} else {
-			state.startingPuzzle = null;
-			resetPuzzle();
-		}
-
-		editGoalButton.textContent = "Edit Goal";
-		title.textContent = "Editing Start";
-		title.style.visibility = null;
-	}
-};
 
 // Swaps the two most bottom right non-blank tiles with each other (left/right)
 // This inverses the solvability of the puzzle to make things solvable or "unsolvable"
@@ -882,9 +891,7 @@ const animateMoveList = async (startingPuzzle, moveList) => {
 const checkPuzzleBeforeAnimating = () => {
 	// Set state back to starting puzzle if looking at goal
 	showQuickEditButtons();
-	if (state.editingGoalPuzzle) {
-		setGoalEditMode(false);
-	}
+	disableGoalEditMode()
 
 	let startingPuzzle = getPuzzleFromGrid();
 	if (Puzzle.isPuzzleSolvable2Darr(startingPuzzle.matrix) !== Puzzle.isPuzzleSolvable2Darr(state.goalPuzzle.matrix)) {
@@ -896,7 +903,8 @@ const checkPuzzleBeforeAnimating = () => {
 			autoFixPuzzle();
 			startingPuzzle = getPuzzleFromGrid();
 		} else {
-			setPlayMode(false);
+			// Let user be able to fix themselves
+			enableStartEditMode();
 			return null;
 		}
 	}

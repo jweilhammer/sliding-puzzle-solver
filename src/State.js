@@ -11,8 +11,9 @@ class State {
         // Solution is currently animating
         state.solutionAnimating = false;
 
-        // Goal puzzle is being edited instead of the starting puzzle
+        // Status of start or goal being edited, only one should be true at a time
         state.editingGoalPuzzle = false;
+        state.editingStartPuzzle = false;
 
         // Only used to reset grid if user edits the goal state
         state.startingPuzzle = null; 
