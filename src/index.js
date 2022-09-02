@@ -4,6 +4,15 @@ import { solvePuzzleStrategically } from "./strategicSolve.js";
 import { solvePuzzleBFS, solvePuzzleAStar, solvePuzzleIDAStar } from "./searchAlgorithms.js";
 import { animateMoveList, checkPuzzleBeforeAnimating, initializeUiElements } from "./uiUtils.js";
 
+
+// When page is finished loading
+document.addEventListener("DOMContentLoaded", () => {
+	// Initialize UI, buttons, css toggles, initial Puzzle state
+	initializeUiElements();
+	document.getElementById("solveBtn").addEventListener("click", solvePuzzle);
+});
+
+
 // Maps dropdown values to our solver functions
 const algorithmMappings = {
 	Strategic: solvePuzzleStrategically,
@@ -12,14 +21,6 @@ const algorithmMappings = {
 	"A*closedSet": solvePuzzleAStar,
 	BFS: solvePuzzleBFS,
 };
-
-// When page is finished loading
-document.addEventListener("DOMContentLoaded", (e) => {
-	// Initialize UI, buttons, css toggles, initial Puzzle state
-	initializeUiElements();
-	document.getElementById("solveBtn").addEventListener("click", solvePuzzle);
-});
-
 
 // Solve puzzle using selected algorithm, output result, and start animation
 const solvePuzzle = async () => {
