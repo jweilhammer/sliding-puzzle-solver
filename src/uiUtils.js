@@ -516,7 +516,12 @@ const updatePuzzleDimensions = (newRow, newCol) => {
 	// Update our CSS grid rows + columns, set to have even size throughout
 	grid.style.gridTemplateRows = `${"1fr ".repeat(newRow)}`;
 	grid.style.gridTemplateColumns = `${"1fr ".repeat(newCol)}`;
-	state.goalPuzzle = new Puzzle(state.puzzleRows, state.puzzleCols, false);
+
+	// Reset goal puzzle if editing the starting puzzle
+	if (!state.editingGoalPuzzle) {
+		state.goalPuzzle = new Puzzle(state.puzzleRows, state.puzzleCols, false);
+	}
+
 	state.grid = newGridMatrix;
 };
 
@@ -662,47 +667,88 @@ const updatePuzzleState = (matrix) => {
 };
 
 // Set state to a random solvable puzzle from [2-25 x 2-25]
+// Make a more visually interesting randomized puzzle by flipping and rotating puzzle
 const randomizePuzzle = async () => {
+	state.solutionAnimating = false;
+	resetClickSourceTile();
 	if (!state.editingGoalPuzzle) {
+		// Always set to default solvable goal when randomizing start
 		enableStartEditMode();
+		state.goalPuzzle = new Puzzle(state.puzzleRows, state.puzzleCols, false);
 	}
 
+
+	// Random puzzle size
 	const newRow = Math.floor(Math.random() * 25) + 2;
 	const newCol = Math.floor(Math.random() * 25) + 2;
 
-	// Update puzzle size if needed
-	if (newRow !== state.puzzleRows || newCol !== state.puzzleCols) {
-		updatePuzzleDimensions(newRow, newCol);
-	} else {
-		resetClickSourceTile();
 
-		// Always set to default solvable goal when randomizing start
-		if (!state.editingGoalPuzzle) state.goalPuzzle = new Puzzle(state.puzzleRows, state.puzzleCols, false);
+
+	// Make a temp matrix with default state for transformation
+	// Manipulate this instead of the actual grid to save time
+	let tempMatrix = Array(newRow)
+		.fill()
+		.map(() => Array(newCol));
+	for (let row = 0; row < newRow; row++) {
+		for (let col = 0; col < newCol; col++) {
+			let num = row * newCol + col + 1;
+			num = num === newRow*newCol ? "" : num;
+			tempMatrix[row][col] = num;
+		}
 	}
 
-	if (Math.random() < 0.5) toggleBorders();
-
-	if (Math.random() < 0.5) toggleNumbers();
-
-	let randomizedPuzzle = null;
+	// 10% chance to just shuffle puzzle, will always be solvable
 	do {
 		// 10% chance to just shuffle puzzle, will always be solvable
 		if (Math.random() < 0.1) {
-			shufflePuzzle();
+			const shufflePuzzle = new Puzzle(tempMatrix.length, tempMatrix[0].length, true);
+			tempMatrix = shufflePuzzle.matrix;
 		} else {
-			// Make a more visually interesting randomized puzzle by flipping and rotating
-			if (Math.random() < 0.5) flipPuzzleHorizontally();
+			// Horizontal flip
+			if (Math.random() < 0.5 ) {
+				for (let row = 0; row < tempMatrix.length; row++) {
+					for (let col = 0; col < tempMatrix[0].length / 2; col++) {
+						const tmp = tempMatrix[row][col];
+						tempMatrix[row][col] = tempMatrix[row][tempMatrix[0].length - 1 - col];
+						tempMatrix[row][tempMatrix[0].length - 1 - col] = tmp;
+					}
+				}
+			}
 
-			if (Math.random() < 0.5) flipPuzzleVertically();
+			// Vertical flip
+			if (Math.random() < 0.5) {
+				for (let row = 0; row < tempMatrix.length / 2; row++) {
+					for (let col = 0; col < tempMatrix[0].length; col++) {
+						const tmp = tempMatrix[row][col];
+						tempMatrix[row][col] = tempMatrix[tempMatrix.length - 1 - row][col];
+						tempMatrix[tempMatrix.length - 1 - row][col] = tmp;
+					}
+				}
+			}
 
-			if (Math.random() < 0.7);
-			rotatePuzzle();
+			// Clockwise rotation
+			if (Math.random() < 0.7) {
+
+				// Make puzzle that is inversed dimensions [col][row]
+				const rotatedMatrix = Array(tempMatrix[0].length)
+				.fill()
+				.map(() => Array(tempMatrix.length));
+				for (let row = 0; row < tempMatrix.length; row++) {
+					for (let col = 0; col < tempMatrix[0].length; col++) {
+						rotatedMatrix[col][tempMatrix.length - 1 - row] = tempMatrix[row][col];
+					}
+				}
+
+				tempMatrix = rotatedMatrix;
+			}
 		}
+	} while (!Puzzle.isPuzzleSolvable2Darr(tempMatrix));
 
-		randomizedPuzzle = getPuzzleFromGrid();
-	} while (!Puzzle.isPuzzleSolvable2Darr(randomizedPuzzle.matrix) || state.goalPuzzle.isEqualToPuzzle(randomizedPuzzle));
-
+	if (Math.random() < 0.5) toggleBorders();
+	if (Math.random() < 0.5) toggleNumbers();
+	updatePuzzleDimensions(tempMatrix.length, tempMatrix[0].length);
 	updateBackgroundImageSize();
+	updatePuzzleState(tempMatrix);
 };
 
 
