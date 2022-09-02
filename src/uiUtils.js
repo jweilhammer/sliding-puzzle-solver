@@ -3,7 +3,13 @@ import { state } from "./State.js";
 
 // Inject assets into HTML via webpack
 import "./style.css";
-import Background from "../images/default.jpg";
+import Background from "../public/default.jpg";
+
+// Include icons
+import Icon180Px from '../public/logo180.png';
+import Icon192Px from '../public/logo192.png';
+import Icon512Px from '../public/logo512.png';
+import IconManifest from '../public/manifest.json';
 
 // Custom inputs
 const rowInput = document.getElementById("rowInput");

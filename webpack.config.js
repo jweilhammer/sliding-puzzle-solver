@@ -13,11 +13,11 @@ module.exports = {
         use: [MiniCssExtractPlugin.loader, "css-loader"],
       },
       {
-        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        test: /\.(png|svg|jpg|jpeg|gif|json)$/i,
         type: 'asset/resource',
         generator: {
             publicPath: '',
-            filename: '[file]',
+            filename: '[file]'
         },
       },
     ],
@@ -36,7 +36,8 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
         title: 'Output Management',
-        template: 'index.html'
+        template: './public/index.html',
+        favicon: './public/favicon.ico'
     }),
   ],
   output: {

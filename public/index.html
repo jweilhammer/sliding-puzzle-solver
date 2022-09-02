@@ -1,20 +1,28 @@
 <!DOCTYPE html>
 <html>
-
-<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi">
-</meta>
-
 <head>
+    <meta charset="utf-8"></meta>
+    <link rel="icon" href="favicon.ico"></link>
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width"></meta>
+    <meta name="theme-color" content="#4100a3"></meta>
+    <meta
+      name="description"
+      content="Sliding puzzle solver that supports any sized puzzle, custom images, and every start and goal state."
+    ></meta>
+    <link rel="apple-touch-icon" href="public/logo180.png"></link>
+    <link rel="manifest" href="public/manifest.json"></link>
+    <title>Sliding Puzzle Solver</title>
     <!-- 
-            For updating css classes dynmically with JS
-            Using to update all grid tiles with attributes that can't be inherited from the container
-        -->
+      For updating css classes dynmically with JS
+      Using to update all grid tiles with attributes that can't be inherited from the container
+    -->
     <style id="tileBackgroundCss"></style>
     <style id="backgroundflipCss"></style>
     <style id="tileBorderCss"></style>
 </head>
 
 <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
     <div class="centered title" id="title">Editing Start</div>
     <div class="centered gridContainer" id="gridContainer">
         <div id="grid" class="grid"></div>
@@ -30,8 +38,6 @@
         <button id="editStartBtn" class="buttons fontButtons buttonsRow2">Edit Start</button>
         <button id="editGoalBtn" class="buttons fontButtons buttonsRow2"">Edit Goal</button>
     </div>
-
-
         <div class=" centered">
             <button id="solveBtn" class="buttons fontButtons buttonsRow3">Solve for me</button>
             <select class="algorithmsDropdown" name="algorithms" id="algorithmsDropdown">
@@ -42,7 +48,6 @@
                 <option value="BFS">BFS</option>
             </select>
     </div>
-
 
     <div id="editInputsContainer" class="editInputsContainer">
         <div>
@@ -151,5 +156,4 @@
         <textarea id="solutionOutput" class="outputArea solutionOutput" readonly></textarea>
     </div>
 </body>
-
 </html>
