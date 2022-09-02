@@ -17,7 +17,7 @@ module.exports = {
         type: 'asset/resource',
         generator: {
             publicPath: '',
-            filename: 'images/[file]',
+            filename: '[file]',
         },
       },
     ],
