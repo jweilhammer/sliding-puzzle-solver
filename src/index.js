@@ -1,10 +1,8 @@
 import { Puzzle } from "./Puzzle.js";
-import { State } from "./State.js";
+import { state } from "./State.js";
 import { solvePuzzleStrategically } from "./strategicSolve.js";
 import { solvePuzzleBFS, solvePuzzleAStar, solvePuzzleIDAStar } from "./searchAlgorithms.js";
 import { animateMoveList, checkPuzzleBeforeAnimating, initializeUiElements } from "./uiUtils.js";
-
-const state = State.get();
 
 // Maps dropdown values to our solver functions
 const algorithmMappings = {
@@ -17,11 +15,6 @@ const algorithmMappings = {
 
 // When page is finished loading
 document.addEventListener("DOMContentLoaded", (e) => {
-
-	// Intialize shared state
-	const sharedState = new State();
-	const state = State.get();
-
 	// Initialize UI, buttons, css toggles, initial Puzzle state
 	initializeUiElements();
 	document.getElementById("solveBtn").addEventListener("click", solvePuzzle);

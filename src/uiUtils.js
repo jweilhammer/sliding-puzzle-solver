@@ -1,12 +1,9 @@
 import { Puzzle } from "./Puzzle.js";
-import { State } from "./State.js";
+import { state } from "./State.js";
 
 // Inject assets into HTML via webpack
 import "./style.css";
 import Background from "../images/default.jpg";
-
-// Shareable state between modules
-const state = State.get();
 
 // Custom inputs
 const rowInput = document.getElementById("rowInput");
