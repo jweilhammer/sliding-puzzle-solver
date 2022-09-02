@@ -75,9 +75,6 @@
         TODO: use canvas instead?
     */
     background-repeat: no-repeat;
-
-    /* Fixes issues when flipping image and background somehow gets 1px smaller */
-    padding: 1px;
 }
 
 .centered {

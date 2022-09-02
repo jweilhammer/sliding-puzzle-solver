@@ -194,7 +194,8 @@ const initializeUiElements = () => {
 
 	// Set intial image and add borders so we can toggle on all grid tiles
 	// Unable to inherit this from the grid-container
-	borderCss.innerHTML = ".grid-item-border { border: 1px solid black; }";
+	borderCss.innerHTML = ".grid-item::before { padding: 1px; }";
+	borderCss.innerHTML += ".grid-item { border: 1px solid black; padding: 1px }";
 	backgroundCss.innerHTML = `.grid-item::before { background-image: url('${Background}'); }`;
 
 	// Make goal puzzle a default goal state with current size
@@ -490,7 +491,7 @@ const updatePuzzleDimensions = (newRow, newCol) => {
 				tile.draggable = true;
 				tile.textContent = tileNum;
 				tile.style.opacity = tileNum ? "1" : "0";
-				tile.className = `grid-item grid-item-border`;
+				tile.className = `grid-item`;
 				tile.style.backgroundPosition = `${bgPositions[tileNum].y}% ${bgPositions[tileNum].x}%`;
 
 				// Insert tile into grid
@@ -847,7 +848,10 @@ const toggleBorders = () => {
 	// Remove border from the dynamic css
 	// Using this to set borders on just the tiles and not the grid itself
 	if (borderCss.innerHTML === "") {
-		borderCss.innerHTML = ".grid-item-border { border: 1px solid black; }";
+		// Fixes issues when flipping image and background somehow gets 1px smaller
+		borderCss.innerHTML = ".grid-item::before { padding: 1px; }";
+		borderCss.innerHTML += ".grid-item { border: 1px solid black; padding: 1px }";
+
 		hideBorderSvg.style.display = null;
 		showBorderSvg.style.display = "none";
 	} else {
