@@ -714,7 +714,9 @@ const randomizePuzzle = async () => {
 		}
 	}
 
-	// 10% chance to just shuffle puzzle, will always be solvable
+	// Use temporary puzzle with default goal state
+	// Don't compare with actual goal state because we may be randomizing the goal state itself
+	let tempGoal = new Puzzle(newRow, newCol, false);
 	let randomizedPuzzle = new Puzzle(newRow, newCol, false);
 	do {
 		// 10% chance to just shuffle puzzle, will always be solvable
@@ -759,15 +761,15 @@ const randomizePuzzle = async () => {
 
 				tempMatrix = rotatedMatrix;
 
-				// Will need to resize goal puzzle after rotating non-square tempmatrix
-				if (state.goalPuzzle.rows !== tempMatrix.length || state.goalPuzzle.cols !== tempMatrix[0].length) {
-					state.goalPuzzle = new Puzzle(tempMatrix.length,  tempMatrix[0].length, false);
+				// Reset temp goal to the new size
+				if (tempMatrix.length !== tempMatrix[0].length) {
+					tempGoal = new Puzzle(tempMatrix.length,  tempMatrix[0].length, false);
 				}
 			}
 		}
 
 		randomizedPuzzle.matrix = tempMatrix;
-	} while (!Puzzle.isPuzzleSolvable2Darr(tempMatrix) || state.goalPuzzle.isEqualToPuzzle(randomizedPuzzle));
+	} while (!Puzzle.isPuzzleSolvable2Darr(tempMatrix) || tempGoal.isEqualToPuzzle(randomizedPuzzle));
 
 	if (Math.random() < 0.5) toggleBorders();
 	if (Math.random() < 0.5) toggleNumbers();
