@@ -140,6 +140,12 @@
     box-shadow: 0 0 8px black;
 }
 
+.buttons:focus{
+    opacity: 0.9;
+    box-shadow: 0 0 8px black;
+}
+
+
 .buttonsRow1 {
     background-color:#EAECEE;
 }

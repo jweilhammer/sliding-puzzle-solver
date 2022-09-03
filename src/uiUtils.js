@@ -194,6 +194,20 @@ const initializeUiElements = () => {
 	});
 
 
+	// Prevent zooming when double tapping buttons on mobile
+	for (const button of document.getElementsByTagName("button")) {
+		button.addEventListener('touchend', function(e) {
+			e.preventDefault();
+			try {
+				this.focus();
+			} catch (e) {
+				console.log(e);
+			} finally {
+				this.click();
+			}
+		});
+	}
+
 	// Initialize visible puzzle grid
 	updatePuzzleDimensions(parseInt(rowInput.value), parseInt(colInput.value));
 	updateBackgroundImageSize();
