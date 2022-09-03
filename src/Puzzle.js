@@ -11,6 +11,14 @@ class Puzzle {
 	constructor(rows, cols, genRandomPuzzle = true, solvable = true) {
 		if (genRandomPuzzle) {
 			this.matrix = Puzzle.generateRandomPuzzle(rows, cols, solvable);
+			this.matrix.forEach((row, rowIndex) => {
+				row.forEach((tile, colIndex) => {
+					if (!tile) {
+						this.blankRow = rowIndex;
+						this.blankCol = colIndex;
+					}
+				})
+			})
 		} else {
 			// Fill matrix with default goal state (in order tiles)
 			this.matrix = Array(rows)

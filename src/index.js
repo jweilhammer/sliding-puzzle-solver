@@ -1,6 +1,6 @@
 import { Puzzle, slideDirections } from "./Puzzle.js";
 import { state } from "./State.js";
-import { solvePuzzleStrategically } from "./strategicSolve.js";
+import { solvePuzzleStrategically } from "./strategicAlgorithm.js";
 import { solvePuzzleBFS, solvePuzzleAStar, solvePuzzleIDAStar } from "./searchAlgorithms.js";
 import { animateMoveList, checkPuzzleBeforeAnimating, initializeUiElements } from "./uiUtils.js";
 

@@ -90,11 +90,6 @@ const solvePuzzleStrategically = (puzzle, goalPuzzle, options=null) => {
 						return false;
 					}
 
-					if (rowIteration > 0) {
-						puzzle.printPuzzle();
-						goalPuzzle.printPuzzle();
-						return false;
-					}
 
 					// We are not on the last two tiles of the row, solve normally and increment across the row
 					if (targetValue !== goalMatrix[puzzle.rowInProgress][puzzle.rightColProgress - 1]) {
@@ -200,11 +195,6 @@ const solvePuzzleStrategically = (puzzle, goalPuzzle, options=null) => {
 						return false;
 					}
 
-					if (colIteration > 0) {
-						puzzle.printPuzzle();
-						goalPuzzle.printPuzzle();
-						return false;
-					}
 
 					// We are not moving the last two tiles of the column, solve normally and increment down the col
 					if (targetValue !== goalMatrix[puzzle.botRowProgress - 1][puzzle.colInProgress]) {
@@ -301,9 +291,6 @@ const solvePuzzleStrategically = (puzzle, goalPuzzle, options=null) => {
 				// The fact puzzle is still not solved means something went wrong
 				// NOTE: Likely not needed, but leaving in just in case
 				if (iterations > 20) {
-					console.log("Something wen't wrong :-(");
-					puzzle.printPuzzle();
-					goalPuzzle.printPuzzle();
 					return false;
 				}
 			}
