@@ -682,11 +682,9 @@ const randomizePuzzle = async () => {
 	}
 
 
-	// Random puzzle size
-	const newRow = Math.floor(Math.random() * 25) + 2;
-	const newCol = Math.floor(Math.random() * 25) + 2;
-
-
+	// Random puzzle size (2-25)
+	const newRow = Math.floor(Math.random() * 24) + 2;
+	const newCol = Math.floor(Math.random() * 24) + 2;
 
 	// Make a temp matrix with default state for transformation
 	// Manipulate this instead of the actual grid to save time
@@ -745,6 +743,11 @@ const randomizePuzzle = async () => {
 				}
 
 				tempMatrix = rotatedMatrix;
+
+				// Will need to resize goal puzzle after rotating non-square tempmatrix
+				if (state.goalPuzzle.rows !== tempMatrix.length || state.goalPuzzle.cols !== tempMatrix[0].length) {
+					state.goalPuzzle = new Puzzle(tempMatrix.length,  tempMatrix[0].length, false);
+				}
 			}
 		}
 
