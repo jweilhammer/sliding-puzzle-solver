@@ -1,8 +1,14 @@
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+// JS, HTML & CSS minification
 const TerserPlugin = require("terser-webpack-plugin");
+
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
+
+// Mobile/PWA offline access
+const WorkboxPlugin = require('workbox-webpack-plugin');
 
 module.exports = {
   entry: './src/index.js',
@@ -38,6 +44,12 @@ module.exports = {
         title: 'Output Management',
         template: './public/index.html',
         favicon: './public/favicon.ico'
+    }),
+    new WorkboxPlugin.GenerateSW({
+      // Default settings, serve from cache first and avoid multiple SWs from running at same time
+      // TODO: Look into cache expiration?
+      clientsClaim: true,
+      skipWaiting: true,
     }),
   ],
   output: {

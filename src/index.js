@@ -7,6 +7,14 @@ import { animateMoveList, checkPuzzleBeforeAnimating, initializeUiElements } fro
 
 // When page is finished loading
 window.addEventListener('load', () => {
+	// Enable offline access for Mobile (PWA)
+	if ('serviceWorker' in navigator) {
+		navigator.serviceWorker.register('./service-worker.js')
+		.catch(registrationError => {
+			console.log('Failed to enable offline access', registrationError);
+		});
+	}
+
 	// Initialize UI, buttons, css toggles, initial Puzzle state
 	initializeUiElements();
 	document.getElementById("solveBtn").addEventListener("click", solvePuzzle);
