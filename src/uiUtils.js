@@ -211,6 +211,7 @@ const initializeUiElements = () => {
 	// Initialize visible puzzle grid
 	updatePuzzleDimensions(parseInt(rowInput.value), parseInt(colInput.value));
 	updateBackgroundImageSize();
+	resetBackgroundPositions();
 
 	// Set intial image and add borders so we can toggle on all grid tiles
 	// Unable to inherit this from the grid-container

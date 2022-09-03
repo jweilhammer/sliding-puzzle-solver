@@ -6,7 +6,7 @@ import { animateMoveList, checkPuzzleBeforeAnimating, initializeUiElements } fro
 
 
 // When page is finished loading
-document.addEventListener("DOMContentLoaded", () => {
+window.addEventListener('load', () => {
 	// Initialize UI, buttons, css toggles, initial Puzzle state
 	initializeUiElements();
 	document.getElementById("solveBtn").addEventListener("click", solvePuzzle);
