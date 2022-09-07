@@ -7,7 +7,26 @@ const state = {
     playMode: false,
 
     // Solution is currently animating
-    solutionAnimating: false,
+    solveAnimation: {
+
+        // Mutex lock with Promise/await to allow only 1 animation at at time
+        // Needed for mobile where you can press multiple buttons at the same time (randomize + solve)
+        lock: {
+            initialize: function () {
+                this.finish = Promise.resolve();
+                this.release = () => {};
+                this.acquire = () => {
+                    // Set our finish promise to resolve when release is called
+                    // Async functions will wait on finish before acquiring the lock
+                    this.finish = new Promise(resolve => this.release = resolve);
+                }
+            }
+        },
+
+        // To keep track of if an animation gets stopped mid-way through (reset, shuffling, etc)
+        // Also acts as a count for the mutex lock (0 or 1), if 1 then async instance can not acquire
+        active: false
+    },
 
     // Status of start or goal being edited, only one should be true at a time
     editingGoalPuzzle: false,
@@ -37,6 +56,9 @@ const state = {
     // Background CSS image state, need to keep track for when updating tile background positions
     backgroundVerticallyFlipped: false,
     backgroundHorizontallyFlipped: false,
-};  
+};
+
+// Initialize animation lock state
+state.solveAnimation.lock.initialize();
 
 export { state };

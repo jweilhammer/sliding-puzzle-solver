@@ -17,7 +17,18 @@ window.addEventListener('load', () => {
 
 	// Initialize UI, buttons, css toggles, initial Puzzle state
 	initializeUiElements();
-	document.getElementById("solveBtn").addEventListener("click", solvePuzzle);
+
+	// Add custom onclick for solve button with animation locking logic
+	document.getElementById("solveBtn").addEventListener("click", async () => {
+		if (state.solveAnimation.active) {
+			return;
+		}
+
+		// Wait for our animation lock to become available
+		// Don't want to start solving while puzzle is moving, or kick off two animations at the same time
+		await state.solveAnimation.lock.finish;
+		solvePuzzle();
+	});
 });
 
 
@@ -31,14 +42,16 @@ const algorithmMappings = {
 };
 
 // Solve puzzle using selected algorithm, output result, and start animation
-const solvePuzzle = async () => {
-	if (state.solutionAnimating) {
+const solvePuzzle = () => {
+	// If multiple instances get are trying to acquire lock at same time, this will stop them
+	// Needed for mobile where you can press multiple buttons at the same time (randomize + solve)
+	if (state.solveAnimation.active) {
 		return;
 	}
 
 	// Lock our state for solving/animating the puzzle solution
-	state.solutionAnimating = true;
-
+	state.solveAnimation.active = true;
+	state.solveAnimation.lock.acquire();
 	const startingPuzzle = checkPuzzleBeforeAnimating();
 	if (!startingPuzzle) {
 		return;
@@ -99,5 +112,5 @@ const solvePuzzle = async () => {
 	solutionOutput.value += solutionMoves.length > 20000 ? "See console for full move list...\n" : "";
 
 	// Animate the solution
-	await animateMoveList(originalPuzzle, solutionMoves);
+	animateMoveList(originalPuzzle, solutionMoves);
 };

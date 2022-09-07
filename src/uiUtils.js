@@ -1,11 +1,11 @@
 import { Puzzle } from "./Puzzle.js";
 import { state } from "./State.js";
 
-// Inject assets into HTML via webpack
+// Inject CSS into HTML via webpack
 import "./style.css";
-import Background from "../public/default.jpg";
 
-// Include icons
+// Output public assets into dist via Webpack
+import Background from "../public/default.jpg";
 import Icon180Px from '../public/logo180.png';
 import Icon192Px from '../public/logo192.png';
 import Icon512Px from '../public/logo512.png';
@@ -59,7 +59,7 @@ const resetClickSourceTile = () => {
 
 // Shuffles visible Puzzle grid to a random solvable state
 const shufflePuzzle = () => {
-	state.solutionAnimating = false;
+	state.solveAnimation.active = false;
 
 	// Unselect any tiles and stop animation before shuffling
 	resetClickSourceTile();
@@ -249,7 +249,7 @@ const swapGridTiles = (tile1, tile2) => {
 // The blank tile can only be moved by swapping with one its adjacent neighbors
 const enablePlayMode = () => {
 	// Stop animation if solution is playing out
-	state.solutionAnimating = false;
+	state.solveAnimation.active = false;
 	disableGoalEditMode();
 
 	// Convert to Puzzle to make sure it's solveable before letting user play it
@@ -288,7 +288,7 @@ const disablePlayMode = () => {
 }
 
 const enableStartEditMode = () => {
-	state.solutionAnimating = false;
+	state.solveAnimation.active = false;
 
 	disableGoalEditMode();
 	disablePlayMode();
@@ -296,7 +296,7 @@ const enableStartEditMode = () => {
 }
 
 const enableGoalEditMode = () => {
-	state.solutionAnimating = false;
+	state.solveAnimation.active = false;
 	if (!state.editingGoalPuzzle) {
 		disablePlayMode();
 
@@ -311,7 +311,6 @@ const enableGoalEditMode = () => {
 
 // Saves current puzzle as the goal state
 const disableGoalEditMode = () => {
-	state.solutionAnimating = false;
 	if (state.editingGoalPuzzle) {
 		// Save current puzzle as our goal
 		state.editingGoalPuzzle = false;
@@ -408,7 +407,7 @@ const playModeSetMovableTiles = () => {
 // Update our puzzle grid with new dimensions
 // Re-uses as many tiles as possible so eventListeners aren't destroyed unnecessarily
 const updatePuzzleDimensions = (newRow, newCol) => {
-	state.solutionAnimating = false;
+	state.solveAnimation.active = false;
 
 	if (isNaN(newRow) || isNaN(newCol)) {
 		return false;
@@ -640,7 +639,7 @@ const showOutputTextAreas = () => {
 
 // Reset our tile background positions and number overlays/ids for the current dimensions
 const resetPuzzle = () => {
-	state.solutionAnimating = false;
+	state.solveAnimation.active = false;
 
 	if (!state.editingGoalPuzzle) {
 		enableStartEditMode();
@@ -669,6 +668,7 @@ const resetPuzzle = () => {
 // Resets current puzzle to match a new matrix state
 // Mostly for switching in between start and goal states
 const updatePuzzleState = (matrix) => {
+	state.solveAnimation.active = false;
 	if (matrix.length !== state.puzzleRows || matrix[0].length !== state.puzzleCols) {
 		resetPuzzle();
 	} else {
@@ -687,8 +687,10 @@ const updatePuzzleState = (matrix) => {
 
 // Set state to a random solvable puzzle from [2-25 x 2-25]
 // Make a more visually interesting randomized puzzle by flipping and rotating puzzle
-const randomizePuzzle = async () => {
-	state.solutionAnimating = false;
+const randomizePuzzle = () => {
+	state.solveAnimation.active = false;
+
+	// Let previous animtation finish
 	resetClickSourceTile();
 	if (!state.editingGoalPuzzle) {
 		// Always set to default solvable goal when randomizing start
@@ -781,7 +783,7 @@ const randomizePuzzle = async () => {
 
 // Flips the puzzle grid tiles horizontally, inverts on x axists
 const flipPuzzleHorizontally = () => {
-	state.solutionAnimating = false;
+	state.solveAnimation.active = false;
 	for (let row = 0; row < state.puzzleRows; row++) {
 		for (let col = 0; col < state.puzzleCols / 2; col++) {
 			swapGridTiles(state.grid[row][col], state.grid[row][state.puzzleCols - 1 - col]);
@@ -791,7 +793,7 @@ const flipPuzzleHorizontally = () => {
 
 // Flips the puzzle grid tiles vertically, inverts on y axists
 const flipPuzzleVertically = () => {
-	state.solutionAnimating = false;
+	state.solveAnimation.active = false;
 	for (let row = 0; row < state.puzzleRows / 2; row++) {
 		for (let col = 0; col < state.puzzleCols; col++) {
 			swapGridTiles(state.grid[row][col], state.grid[state.puzzleRows - 1 - row][col]);
@@ -833,7 +835,7 @@ const resetBackgroundPositions = () => {
 // Rotates the puzzle clockwise
 // IF puzzle is non-square (NxM), then new puzzle will be (MxN)
 const rotatePuzzle = () => {
-	state.solutionAnimating = false;
+	state.solveAnimation.active = false;
 
 	// Get original values
 	let tempMatrix = Array(state.puzzleCols)
@@ -926,7 +928,6 @@ const animateMoveList = async (startingPuzzle, moveList) => {
 	showQuickEditButtons();
 	title.style.visibility = "hidden";
 
-	state.solutionAnimating = true;
 	let blankRow = startingPuzzle.blankRow;
 	let blankCol = startingPuzzle.blankCol;
 
@@ -934,8 +935,10 @@ const animateMoveList = async (startingPuzzle, moveList) => {
 	// Apparently 4ms will run slightly faster than 0 since the min timeout is 4ms by default
 	let moveDelayMs = Math.max(1800 / (state.puzzleRows * state.puzzleCols), 4);
 	for (const move of moveList) {
-		// Only move tiles if our solution is allowed to animate
-		if (!state.solutionAnimating) {
+		
+		// If animation is killed mid-way through (reset, shuffle, etc), stop animating and release lock
+		if (!state.solveAnimation.active) {
+			state.solveAnimation.lock.release();
 			return;
 		}
 
@@ -956,7 +959,9 @@ const animateMoveList = async (startingPuzzle, moveList) => {
 		await new Promise((r) => setTimeout(r, moveDelayMs));
 	}
 
-	state.solutionAnimating = false;
+	// Animation has fully finished, release animation lock
+	state.solveAnimation.active = false;
+	state.solveAnimation.lock.release();
 
 	// Let user click around after finishing solving as we're not really in play or edit mode
 	disableGridTileDragging();
@@ -1017,7 +1022,7 @@ function handleTileDragOver(e) {
 }
 
 function handleTileDragStart(e) {
-	if (state.playMode || state.solutionAnimating) {
+	if (state.playMode || state.solveAnimation.active) {
 		return;
 	}
 
@@ -1047,7 +1052,7 @@ function handleTileDragEnd(e) {
 }
 
 function handleTileDrop(e) {
-	if (state.playMode || state.solutionAnimating) {
+	if (state.playMode || state.solveAnimation.active) {
 		return;
 	}
 
@@ -1086,7 +1091,7 @@ function handleTileTouchAndCLick(e) {
 	// Stop zooming when double clicking tiles on mobile
 	e.preventDefault();
 
-	if (state.solutionAnimating) {
+	if (state.solveAnimation.active) {
 		return;
 	}
 
