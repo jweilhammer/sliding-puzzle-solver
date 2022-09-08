@@ -147,6 +147,7 @@ const getPuzzleFromGrid = () => {
 
 // Adds onclick listeners, sets initial puzzle state, adds initial CSS style toggles
 const initializeUiElements = () => {
+	initializeDropdownAlgorithms();
 
     // Button onclick event listeners
 	document.getElementById("resetBtn").addEventListener("click", resetPuzzle);
@@ -445,9 +446,9 @@ const updatePuzzleDimensions = (newRow, newCol) => {
 	}
 
 	if (newRow * newCol > 9) {
-		toggleStrategicOnlyAlgorithm(true);
+		resetAlgorithmDropdown(true);
 	} else {
-		toggleStrategicOnlyAlgorithm(false);
+		resetAlgorithmDropdown(false);
 	}
 
 	// Set these new rows/cols to our UI state
@@ -543,25 +544,43 @@ const updatePuzzleDimensions = (newRow, newCol) => {
 	state.grid = newGridMatrix;
 };
 
-// Set algorithm dropdown to only have the strategic algorithm
-// This is because all other search algorithms run too long on puzzles greater than 3x3
-// Could try to optimize them further, but no point as strategic is more interesting
-// Best case is IDA* being able to do "most" 4x4s...
-const toggleStrategicOnlyAlgorithm = (strategicOnly) => {
-	// Remove all other algorithms since our puzzle space is too large
-	if (strategicOnly) {
-		for (const child of algorithmDropdown.children) {
-			if (child.value !== "Strategic") {
-				child.style.display = "none";
-			}
-		}
+const searchAlgorithmOptions = [];
+let strategicAlgorithmOption = null;
+const initializeDropdownAlgorithms = () => {
+	const algorithms = {
+		"Strategic": "Strategically",
+		"IDA*": "IDA*",
+		"A*": "A*",
+		"A*closedSet": "A* (closed set)",
+		"BFS": "BFS",
+	}
 
-		// Select strategic algorithm in case selection was on another during resizing
-		algorithmDropdown.value = "Strategic";
-	} else {
-		// Add the other algorithms back in!
-		for (const child of algorithmDropdown.children) {
-			child.style.display = "flex";
+	for (const [value, text] of Object.entries(algorithms)) {
+		console.log("INITIALIZING OPTION", value, text);
+		const option = document.createElement("option");
+		option.value = value;
+		option.textContent = text;
+		algorithmDropdown.append(option);
+
+		if (value === "Strategic") {
+			strategicAlgorithmOption = option;
+		} else {
+			searchAlgorithmOptions.push(option);
+		}
+	}
+}
+
+// Reset algorithm dropdown to either be only strategic, or to include all the algorithms
+const resetAlgorithmDropdown = (strategicOnly) => {
+	// Reset children
+	algorithmDropdown.innerHTML = "";
+	algorithmDropdown.appendChild(strategicAlgorithmOption);
+
+	// Only add other algorithms if our puzzle space isn't too large (greater than 3x3)
+	// Could try to optimize them further, but no point as strategic is more interesting
+	if (!strategicOnly) {
+		for (const option of searchAlgorithmOptions) {
+			algorithmDropdown.appendChild(option);
 		}
 	}
 };
