@@ -8,11 +8,17 @@ import { animateMoveList, checkPuzzleBeforeAnimating, initializeUiElements } fro
 // When page is finished loading
 window.addEventListener('load', () => {
 	// Enable offline access for Mobile (PWA)
+	// Webpack is smart and will remove dev check during production builds :-)
 	if ('serviceWorker' in navigator) {
-		navigator.serviceWorker.register('./service-worker.js')
-		.catch(registrationError => {
-			console.log('Failed to enable offline access', registrationError);
-		});
+		if (process.env.NODE_ENV === 'development') {
+			console.log('In development mode, will not register service worker');
+		} else {
+			navigator.serviceWorker.register('./service-worker.js')
+			.then(console.log('Successfully registered service worker, will cache for offline access'))
+			.catch(registrationError => {
+				console.log('Failed to enable offline access', registrationError);
+			});
+		}
 	}
 
 	// Initialize UI, buttons, css toggles, initial Puzzle state
