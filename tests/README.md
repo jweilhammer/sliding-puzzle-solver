@@ -21,7 +21,7 @@ So there are two groups for the total puzzle states:
 ```
 Traditionally solvable:
 [1,2]
-[3,4]
+[3,0]
 
 Traditionally "unsolvable":
 [2,1]
@@ -31,9 +31,25 @@ Traditionally "unsolvable":
 An interesting note for custom goal states is that from any starting solvable or "unsolvable" state, it is possible to maneuver the puzzle into any other state in that solvability space.  See puzzleTheory.test.js
 
 
+## Running tests
+Run the tests with:
+```
+npm test
+```
+
+To run all tests including 3x3 (which is ~16 billion comparisons for puzzle solvability).  I ran this once on a regular node process that seemed to be much faster than mocha (still took around 12 hours to run with the strategic algorithm). TODO on getting this to a reasonable runtime (use Node instead of mocha, GPU acceleration?)
+```
+npm testFull
+```
+
+To run just a demo of solving random large puzzles with random goal states with the strategic algorithm:
+```
+npm testStrategic
+```
+
 ## TODO
 
-Should add tests for Puzzle class, and UI utils functions
+Should add unit tests for Puzzle class, and UI utils functions
 
 Get specific test cases for all logic in strategic algorithm
 
