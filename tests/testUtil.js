@@ -1,6 +1,5 @@
 import expect from "expect.js";
-import { Puzzle } from "../Puzzle.js";
-import { solvePuzzleStrategically } from "../strategicAlgorithm.js";
+import { Puzzle } from "../src/Puzzle.js";
 
 // Puzzle sizes to run tests on
 // Important distinctions are odd cols and even cols as that changes the solvability rules

@@ -21,9 +21,9 @@
   "scripts": {
     "start": "webpack serve --open --config webpack.config.cjs --mode development",
     "build": "webpack --config webpack.config.cjs --mode production",
-    "test": "mocha './src/tests/*.test.js' --require esm --timeout 0",
-    "testFull": "FULL_TEST_SUITE=true mocha './src/tests/*.test.js' --require esm --timeout 0",
-    "testStrategic": "mocha './src/tests/strategic*.test.cjs' --require esm --timeout 0"
+    "test": "mocha './tests/*.test.js' --require esm --timeout 0",
+    "testFull": "FULL_TEST_SUITE=true mocha './tests/*.test.js' --require esm --timeout 0",
+    "testStrategic": "mocha './tests/strategic*.test.js' --require esm --timeout 0"
   },
   "type": "module",
   "repository": {

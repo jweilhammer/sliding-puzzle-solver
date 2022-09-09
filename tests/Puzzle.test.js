@@ -1,5 +1,5 @@
 import expect from "expect.js";
-import { solvePuzzleStrategically } from "../strategicAlgorithm.js";
+import { solvePuzzleStrategically } from "../src/strategicAlgorithm.js";
 import {
     compareDifferentSolvabilitySpaces,
     getAllPuzzleStates,

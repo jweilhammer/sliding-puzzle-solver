@@ -1,5 +1,5 @@
-import { solvePuzzleStrategically } from "../strategicAlgorithm.js";
-import { solvePuzzleBFS, solvePuzzleAStar, solvePuzzleIDAStar } from "../searchAlgorithms.js";
+import { solvePuzzleStrategically } from "../src/strategicAlgorithm.js";
+import { solvePuzzleBFS, solvePuzzleAStar, solvePuzzleIDAStar } from "../src/searchAlgorithms.js";
 import {
     getAllPuzzleStates,
     compareSameSolvabilitySpace,

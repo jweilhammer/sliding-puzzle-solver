@@ -1,5 +1,5 @@
-import { Puzzle } from "../Puzzle.js";
-import { solvePuzzleStrategically } from "../strategicAlgorithm.js";
+import { Puzzle } from "../src/Puzzle.js";
+import { solvePuzzleStrategically } from "../src/strategicAlgorithm.js";
 import {
     solvePuzzle
 } from "./testUtil.js";
