@@ -1,7 +1,11 @@
 import { Puzzle, slideDirections } from "./Puzzle.js";
 import { state } from "./State.js";
 import { solvePuzzleStrategically } from "./strategicAlgorithm.js";
-import { solvePuzzleBFS, solvePuzzleAStar, solvePuzzleIDAStar } from "./searchAlgorithms.js";
+import {
+	solvePuzzleIDAStar,
+	solvePuzzleAStarClosedSet,
+	solvePuzzleAStar,
+	solvePuzzleBFS } from "./searchAlgorithms.js";
 import { animateMoveList, checkPuzzleBeforeAnimating, initializeUiElements } from "./uiUtils.js";
 
 
@@ -43,7 +47,7 @@ const algorithmMappings = {
 	Strategic: solvePuzzleStrategically,
 	"IDA*": solvePuzzleIDAStar,
 	"A*": solvePuzzleAStar,
-	"A*closedSet": solvePuzzleAStar,
+	"A*closedSet": solvePuzzleAStarClosedSet,
 	BFS: solvePuzzleBFS,
 };
 
@@ -66,14 +70,10 @@ const solvePuzzle = () => {
 	// Get our algorithm
 	const selectedAlgorithm = document.getElementById("algorithmsDropdown").value;
 	const algorithm = algorithmMappings[selectedAlgorithm];
-	let options = null;
-	if (selectedAlgorithm === "A*closedSet") {
-		options = { closedSet: true };
-	}
 
 	// Solve using algorithm
 	const originalPuzzle = Puzzle.fromPuzzle(startingPuzzle);
-	let solution = algorithm(startingPuzzle, state.goalPuzzle, options);
+	let solution = algorithm(startingPuzzle, state.goalPuzzle);
 	let solutionMoves = [];
 	if (solution["solutionMoves"]) {
 

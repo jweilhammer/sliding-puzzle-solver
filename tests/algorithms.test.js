@@ -1,5 +1,5 @@
 import { solvePuzzleStrategically } from "../src/strategicAlgorithm.js";
-import { solvePuzzleBFS, solvePuzzleAStar, solvePuzzleIDAStar } from "../src/searchAlgorithms.js";
+import { solvePuzzleBFS, solvePuzzleAStar, solvePuzzleIDAStar, solvePuzzleAStarClosedSet } from "../src/searchAlgorithms.js";
 import {
     getAllPuzzleStates,
     compareSameSolvabilitySpace,
@@ -18,6 +18,7 @@ getAllPuzzleStates();
 const algorithms = [
     solvePuzzleStrategically,
     solvePuzzleIDAStar,
+    solvePuzzleAStarClosedSet,
     solvePuzzleAStar,
     solvePuzzleBFS,
 ]

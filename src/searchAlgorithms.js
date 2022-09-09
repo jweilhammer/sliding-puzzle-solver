@@ -32,16 +32,11 @@ const solvePuzzleBFS = (puzzle, goalPuzzle, options = null) => {
 	};
 };
 
-// A Star algorithm, with optional flage options: { closedSet: bool }
+// A Star algorithm, without closed set
 // Closed set improves runtime, but increases memory usage
 // NOTE: Closed set is not necessary with admissable heuristic
-const solvePuzzleAStar = (puzzle, goalPuzzle, options = null) => {
+const solvePuzzleAStar = (puzzle, goalPuzzle) => {
 	const startTime = performance.now();
-
-	let closedSet = null;
-	if (options && options.closedSet) {
-		closedSet = {};
-	}
 
     // Un-explored states as an array, insertions treat it as a priority queue
 	const openList = []
@@ -50,15 +45,70 @@ const solvePuzzleAStar = (puzzle, goalPuzzle, options = null) => {
     priorityEnqueue(openList, puzzle, puzzle.manhattanSum)
 	let curPuzzle = puzzle;
 	while (!goalPuzzle.isEqualToPuzzle(curPuzzle)) {
+		const neighboringPuzzleStates = curPuzzle.generateNeighbors(goalMapping);
+		const costToNeighbor = curPuzzle.costFromStart + 1;
+		for (const neighbor of neighboringPuzzleStates) {
 
-		if (closedSet) closedSet[JSON.stringify(curPuzzle.matrix)] = 1;
+			// If on the open list, check if we found a better way
+			const openNeighorIndex = openList.findIndex((element) => element.puzzle.isEqualToPuzzle(neighbor));
+			if (openNeighorIndex !== -1) {
+				const puzzleToMaybeUpdate = openList[openNeighorIndex].puzzle;
+				if (puzzleToMaybeUpdate.costFromStart > costToNeighbor) {
+
+                    // Remove from queue to re-enqueue with new cost
+					openList.splice(openNeighorIndex, 1);
+
+					neighbor.cameFrom = curPuzzle;
+					neighbor.updateManhattanSum(goalMapping);
+					neighbor.costFromStart = costToNeighbor;
+                    priorityEnqueue(openList, neighbor, neighbor.manhattanSum + neighbor.costFromStart)
+				}
+			} else {
+				// Add to open list for further exploration
+				neighbor.cameFrom = curPuzzle;
+				neighbor.updateManhattanSum(goalMapping);
+				neighbor.costFromStart = costToNeighbor;
+                priorityEnqueue(openList, neighbor, neighbor.manhattanSum + neighbor.costFromStart)
+			}
+		}
+
+        // Get front of queue/lowest cost un-explored puzzle state
+		curPuzzle = openList.shift().puzzle;
+	}
+
+	const endTime = performance.now();
+
+	const maxPuzzlesInMemory = openList.length;
+	return {
+		solutionPuzzle: curPuzzle,
+		runtimeMs: endTime - startTime,
+		maxPuzzlesInMemory: maxPuzzlesInMemory,
+	};
+};
+
+// A Star algorithm, with closed set
+// Closed set improves runtime by not exploring previously visiting nodes, but increases memory usage
+const solvePuzzleAStarClosedSet = (puzzle, goalPuzzle) => {
+	const startTime = performance.now();
+
+    // Un-explored states as an array, insertions treat it as a priority queue
+	const openList = []
+	const closedSet = {};
+	const goalMapping = Puzzle.getMatrixMapping(goalPuzzle.matrix);
+	puzzle.updateManhattanSum(goalMapping);
+    priorityEnqueue(openList, puzzle, puzzle.manhattanSum)
+
+	let curPuzzle = puzzle;
+	while (!goalPuzzle.isEqualToPuzzle(curPuzzle)) {
+
+		closedSet[JSON.stringify(curPuzzle.matrix)] = 1;
 
 		const neighboringPuzzleStates = curPuzzle.generateNeighbors(goalMapping);
 		const costToNeighbor = curPuzzle.costFromStart + 1;
 		for (const neighbor of neighboringPuzzleStates) {
 
 			// If on the closed list, don't explore that path again
-			if (closedSet && closedSet[JSON.stringify(neighbor.matrix)]) {
+			if (closedSet[JSON.stringify(neighbor.matrix)]) {
 				continue;
 			}
 
@@ -91,16 +141,14 @@ const solvePuzzleAStar = (puzzle, goalPuzzle, options = null) => {
 
 	const endTime = performance.now();
 
-	const maxPuzzlesInMemory = closedSet
-		? Object.keys(closedSet).length + openList.length
-		: openList.length;
-
+	const maxPuzzlesInMemory = Object.keys(closedSet).length + openList.length;
 	return {
 		solutionPuzzle: curPuzzle,
 		runtimeMs: endTime - startTime,
 		maxPuzzlesInMemory: maxPuzzlesInMemory,
 	};
 };
+
 
 const priorityEnqueue = (openList, puzzle, cost) => {
 	// Make open list a priority queue by inserting elements in order
@@ -117,7 +165,7 @@ const priorityEnqueue = (openList, puzzle, cost) => {
 
 // Will recursively search and prune baths based on cost threshold
 // Restarts at beginning node and explores paths that don't cost more than our highest estimate
-const solvePuzzleIDAStar = (puzzle, goalPuzzle, options = null) => {
+const solvePuzzleIDAStar = (puzzle, goalPuzzle) => {
 	const startTime = performance.now();
 
     // Use empty object to return the solved puzzle easily from max recursive depth
@@ -183,4 +231,4 @@ const iterativeDeepeningSearch = (curPuzzle, costToCurPuzzle, boundingThreshold,
 	return minThreshold;
 };
 
-export { solvePuzzleBFS, solvePuzzleAStar, solvePuzzleIDAStar };
+export { solvePuzzleIDAStar, solvePuzzleAStarClosedSet, solvePuzzleAStar, solvePuzzleBFS };

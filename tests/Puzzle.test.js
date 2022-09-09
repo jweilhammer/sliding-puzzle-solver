@@ -85,8 +85,11 @@ describe("puzzleStates", () => {
             });
         });
 
+        // Harder to use actual search algorithms in here since they will infinite loop
+        // Would need extra logic to cap max iterations and that is annoying and would slow down algorithms too
+        // Strategic should be fine here, this is only theoretical and should never happen
         describe('Solvable to Unsolvable', () => {
-            it(`Strategic should not be able reach any unsolvable state starting from a solvable state`, () => {
+            it(`Strategic should not be able reach any unsolvable state starting from any solvable state`, () => {
                 puzzleSizes.forEach((size) => {
                     const solvableArrs = solvableStates[`${size.rows}x${size.cols}`];
                     const unsolvableArrs = unsolvableStates[`${size.rows}x${size.cols}`];
@@ -101,7 +104,7 @@ describe("puzzleStates", () => {
                 });
             });
         
-            it(`Strategic should not be able reach any solvable state starting from a unsolvable state`, () => {
+            it(`Strategic should not be able reach any solvable state starting from any unsolvable state`, () => {
                 puzzleSizes.forEach((size) => {
                     const solvableArrs = solvableStates[`${size.rows}x${size.cols}`];
                     const unsolvableArrs = unsolvableStates[`${size.rows}x${size.cols}`];
