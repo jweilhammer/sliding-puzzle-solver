@@ -103,8 +103,8 @@ const solvePuzzleAStar = (puzzle, goalPuzzle, options = null) => {
 };
 
 const priorityEnqueue = (openList, puzzle, cost) => {
-    // Make open list a priority queue by inserting elements in order
-    for (var i = 0; i < openList.length; i++) {
+	// Make open list a priority queue by inserting elements in order
+	for (var i = 0; i < openList.length; i++) {
         if (openList[i].cost > cost) {
             openList.splice(i, 0, { puzzle, cost });
             return;
@@ -118,63 +118,39 @@ const priorityEnqueue = (openList, puzzle, cost) => {
 // Will recursively search and prune baths based on cost threshold
 // Restarts at beginning node and explores paths that don't cost more than our highest estimate
 const solvePuzzleIDAStar = (puzzle, goalPuzzle, options = null) => {
-	let specialCustomGoal = false;
-
-	// If the goal state has odd rows and even cols
-	// Seems to be some bug around the heuristic for some custom goal states
-	// Likely some special cases where manahattan isn't admissible for the non-default goal state
-	// In this case, we let it re-explore previous neighbors for the threshold get high enough that it finds the optimal solution
-	// Need to make sure start and goal are both in either "solvable" or "unsolvable" states or this will infinite loop
-	// TODO: Look into this more, or get a better heuristic?
-	if (puzzle.rows % 2 && !(puzzle.cols % 2)) {
-
-		// Get default goal state of starting puzzle with same solvability
-		const defaultGoalPuzzle = new Puzzle(
-			puzzle.rows,
-			puzzle.cols,
-			false,
-			Puzzle.isPuzzleSolvable2Darr(puzzle.matrix)
-		);
-
-		if (!defaultGoalPuzzle.isEqualToPuzzle(goalPuzzle)) {
-			specialCustomGoal = true;
-		}
-	}
-
 	const startTime = performance.now();
 
-	let curPuzzle = puzzle;
-	const goalMapping = Puzzle.getMatrixMapping(goalPuzzle.matrix); 
-	curPuzzle.updateManhattanSum(goalMapping);
-	let threshold = curPuzzle.manhattanSum;
-	const solutionPath = [curPuzzle]; // Stack of Puzzles up to our current state
-	while (!goalPuzzle.isEqualToPuzzle(curPuzzle)) {
+    // Use empty object to return the solved puzzle easily from max recursive depth
+    let solution = { solvedPuzzle: null }
 
+    // Initialize puzzle
+	const goalMapping = Puzzle.getMatrixMapping(goalPuzzle.matrix); 
+	puzzle.updateManhattanSum(goalMapping);
+	let threshold = puzzle.manhattanSum;
+
+    // Explore states till we find solution
+	while (threshold !== 0) {
         // Set the new threshold to the lowest of all the paths explored and restart the search
-		threshold = iterativeDeepeningSearch(solutionPath, 0, threshold, goalMapping, specialCustomGoal);
+		threshold = iterativeDeepeningSearch(puzzle, 0, threshold, goalMapping, solution);
 
         // Explored all states and none led to a better path, infinite looping
 		if (threshold === Infinity) {
 			return false;
 		}
-
-        // Get top of stack
-		curPuzzle = solutionPath[solutionPath.length - 1];
 	}
 
 	const endTime = performance.now();
 
 	return {
-		solutionPuzzle: curPuzzle,
+		solutionPuzzle: solution.solvedPuzzle,
 		runtimeMs: endTime - startTime,
-		maxPuzzlesInMemory: solutionPath.length,
+		maxPuzzlesInMemory: solution.solvedPuzzle.costFromStart,
 	};
 };
 
 // Recursively loop through neighboring paths and prune branches based on bounding threshold
 // Will return the minimum threshold from all neighboring state paths (sum of heuristsics + cost to traverse to neighbor)
-const iterativeDeepeningSearch = (solutionPath, costToCurPuzzle, boundingThreshold, goalMapping, specialCustomGoal) => {
-	let curPuzzle = solutionPath[solutionPath.length - 1]; // Get top of stack
+const iterativeDeepeningSearch = (curPuzzle, costToCurPuzzle, boundingThreshold, goalMapping, solution) => {
 	let costToSolution = costToCurPuzzle + curPuzzle.manhattanSum;
 
     // Don't explore paths if they exceed our threshold
@@ -184,27 +160,24 @@ const iterativeDeepeningSearch = (solutionPath, costToCurPuzzle, boundingThresho
 
     // State is solved
 	if (curPuzzle.manhattanSum === 0) {
+        // Save our solved Puzzle to be retured
+        solution.solvedPuzzle = curPuzzle;
 		return 0;
 	}
 
 	let minThreshold = Infinity;
 	for (const neighbor of curPuzzle.generateNeighbors(goalMapping)) {
-		// If neighbor is already on our solution path, don't re-explore to prevent loops
-		const neighborSolutionIndex = solutionPath.findIndex((puzzle) => puzzle.isEqualToPuzzle(neighbor));
-		if (neighborSolutionIndex === -1 || specialCustomGoal) {
-			neighbor.cameFrom = curPuzzle;
-			solutionPath.push(neighbor);
-			const threshold = iterativeDeepeningSearch(
-				solutionPath,
-				costToCurPuzzle + 1 + neighbor.manhattanSum,
-				boundingThreshold,
-				goalMapping,
-				specialCustomGoal
-			);
-			if (threshold == 0) return threshold;
-			if (threshold < minThreshold) minThreshold = threshold;
-			solutionPath.pop();
-		}
+		neighbor.cameFrom = curPuzzle;
+		const threshold = iterativeDeepeningSearch(
+			neighbor,
+			costToCurPuzzle + 1,
+			boundingThreshold,
+			goalMapping,
+            solution
+		);
+
+		if (threshold == 0) return threshold;
+		if (threshold < minThreshold) minThreshold = threshold;
 	}
 
 	return minThreshold;
