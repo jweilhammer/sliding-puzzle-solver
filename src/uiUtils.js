@@ -556,7 +556,6 @@ const initializeDropdownAlgorithms = () => {
 	}
 
 	for (const [value, text] of Object.entries(algorithms)) {
-		console.log("INITIALIZING OPTION", value, text);
 		const option = document.createElement("option");
 		option.value = value;
 		option.textContent = text;

@@ -18,7 +18,7 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": "/",
+  "start_url": "/sliding-puzzle-solver/",
   "display": "standalone",
   "theme_color": "#4100a3",
   "background_color": "#cfcfcf"

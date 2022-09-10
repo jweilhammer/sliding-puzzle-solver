@@ -18,7 +18,6 @@ window.addEventListener('load', () => {
 			console.log('In development mode, will not register service worker');
 		} else {
 			navigator.serviceWorker.register('./service-worker.js')
-			.then(console.log('Successfully registered service worker, will cache for offline access'))
 			.catch(registrationError => {
 				console.log('Failed to enable offline access', registrationError);
 			});
