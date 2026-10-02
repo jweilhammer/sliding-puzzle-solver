@@ -109,9 +109,24 @@ const solvePuzzle = () => {
 	console.log(algorithm.name, "SOLUTION:", solutionMoves.length - 1, solutionMoves);
 
 	// Output move list to screen
+	// Moves describe the blank, but the list should describe the piece it swaps.
+	// Rows and columns are 1-based because that's what non-programmers will probably expect.
+	const pieceMoves = {
+		UP: { rowDelta: -1, colDelta: 0, pieceDirection: "DOWN" },
+		DOWN: { rowDelta: 1, colDelta: 0, pieceDirection: "UP" },
+		LEFT: { rowDelta: 0, colDelta: -1, pieceDirection: "RIGHT" },
+		RIGHT: { rowDelta: 0, colDelta: 1, pieceDirection: "LEFT" },
+	};
+	let blankRow = originalPuzzle.blankRow;
+	let blankCol = originalPuzzle.blankCol;
 	let moveList = "Move list:\n";
 	for (const [index, move] of solutionMoves.slice(0, 20000).entries()) {
-		moveList += `${index + 1}: ${move}\n`;
+		const { rowDelta, colDelta, pieceDirection } = pieceMoves[move];
+		const pieceRow = blankRow + rowDelta;
+		const pieceCol = blankCol + colDelta;
+		moveList += `${index + 1}: Move piece ${pieceRow + 1}x${pieceCol + 1} ${pieceDirection} to ${blankRow + 1}x${blankCol + 1}\n`;
+		blankRow = pieceRow;
+		blankCol = pieceCol;
 	}
 	solutionOutput.value = moveList;
 	solutionOutput.value += solutionMoves.length > 20000 ? "See console for full move list...\n" : "";

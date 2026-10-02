@@ -259,12 +259,14 @@ body {
     margin-right: 1vw;
 }
 
-.solutionOutput {
+/* Extra class so font-size overrides .outputArea below */
+.outputArea.solutionOutput {
     text-align: left;
     overflow-y: scroll;
     border: solid 1px;
     border-radius: 5px;
-    width: 22%;
+    font-size: 2.5vmin;
+    width: 30%;
     max-width: 30%;
     margin-right: 10%;
 }
